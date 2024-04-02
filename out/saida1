@@ -1,19 +1,19 @@
 ./a.out
-// MAIN -> COMMENT_LINE
-int -> INT
-main -> ID
-( -> OPEN_PARENTHESES
-) -> CLOSE_PARENTHESES
-{ -> OPEN_KEYS
-printf -> PRINTF
-( -> OPEN_PARENTHESES
-"Hello World!\n" -> STRING
-) -> CLOSE_PARENTHESES
-; -> SEMICOLON
-return -> RETURN
-0 -> INT_NUMBER
-; -> SEMICOLON
-} -> CLOSE_KEYS
-/*
+2: // MAIN -> COMMENT_LINE
+3: int -> INT
+3: main -> ID
+3: ( -> OPEN_PARENTHESES
+3: ) -> CLOSE_PARENTHESES
+3: { -> OPEN_KEYS
+4: printf -> PRINTF
+4: ( -> OPEN_PARENTHESES
+4: "Hello World!\n" -> STRING
+4: ) -> CLOSE_PARENTHESES
+4: ; -> SEMICOLON
+5: return -> RETURN
+5: 0 -> INT_NUMBER
+5: ; -> SEMICOLON
+6: } -> CLOSE_KEYS
+9: /*
     Um Hello World simples! XD
 */ -> COMMENT_FULL

@@ -1,8 +1,13 @@
+%option noyywrap
+%option yylineno
+
 %{
     #include <stdio.h>
-%}
 
-%option noyywrap
+    void process_token(const char* tk){
+        printf("%d: %s -> %s\n", yylineno, yytext, tk);
+    }
+%}
 
 INT_NUMBER      [0-9]+
 REAL_NUMBER     [0-9]+"."[0-9]+
@@ -16,77 +21,79 @@ IGNORE          [ \t\n]+
 %%
 
 {IGNORE}            {  }
-{COMMENT_LINE}      { printf("%s -> COMMENT_LINE\n", yytext); }
-{COMMENT_FULL}      { printf("%s -> COMMENT_FULL\n", yytext); }
+{COMMENT_LINE}      {  }
+{COMMENT_FULL}      {  }
 
 
-"++"                { printf("%s -> INCREMENT\n", yytext); }
-"--"                { printf("%s -> DECREMENT\n", yytext); } 
-"+"                 { printf("%s -> PLUS\n", yytext); }
-"-"                 { printf("%s -> MINUS\n", yytext); }
-"*"                 { printf("%s -> TIMES\n", yytext); }
-"/"                 { printf("%s -> OVER\n", yytext); }   
+"++"                { process_token("INCREMENT"); }
+"--"                { process_token("DECREMENT"); } 
+"+"                 { process_token("PLUS"); }
+"-"                 { process_token("MINUS"); }
+"*"                 { process_token("TIMES"); }
+"/"                 { process_token("OVER"); }   
 
-">"                 { printf("%s -> GREATER_THAN\n", yytext); }
-"<"                 { printf("%s -> LESS_THAN\n", yytext); }
-">="                { printf("%s -> GREATER_THAN_OR_EQUAL\n", yytext); }
-"<="                { printf("%s -> LESS_THAN_OR_EQUAL\n", yytext); }
-"=="                { printf("%s -> EQUALS\n", yytext); }
-"!="                { printf("%s -> NOT_EQUALS\n", yytext); }
+">"                 { process_token("GREATER_THAN"); }
+"<"                 { process_token("LESS_THAN"); }
+">="                { process_token("GREATER_THAN_OR_EQUAL"); }
+"<="                { process_token("LESS_THAN_OR_EQUAL"); }
+"=="                { process_token("EQUALS"); }
+"!="                { process_token("NOT_EQUALS"); }
 
-"="                 { printf("%s -> ASSIGNMENT\n", yytext); }
+"+="                { process_token("ADD_ASSIGN"); }
+"-="                { process_token("SUB_ASSIGN"); }
+"*="                { process_token("MUL_ASSIGN"); }
+"/="                { process_token("DIV_ASSIGN"); }
+"%="                { process_token("MOD_ASSIGN"); }
 
-"&&"                { printf("%s -> LOGICAL_AND\n", yytext); }
-"&"                 { printf("%s -> ADRESS\n", yytext); }    
-"||"                { printf("%s -> LOGICAL_OR\n", yytext); }
-"!"                 { printf("%s -> LOGICAL_NOT\n", yytext); }
+"="                 { process_token("ASSIGNMENT"); }
 
-"("                 { printf("%s -> OPEN_PARENTHESES\n", yytext); }
-")"                 { printf("%s -> CLOSE_PARENTHESES\n", yytext); }
-"["                 { printf("%s -> OPEN_BRACKET\n", yytext); }
-"]"                 { printf("%s -> CLOSE_BRACKET\n", yytext); }
-"{"                 { printf("%s -> OPEN_KEYS\n", yytext); }
-"}"                 { printf("%s -> CLOSE_KEYS\n", yytext); }
+"&&"                { process_token("LOGICAL_AND"); }
+"&"                 { process_token("ADDRESS"); }
+"||"                { process_token("LOGICAL_OR"); }
+"!"                 { process_token("LOGICAL_NOT"); }
 
-"."                 { printf("%s -> DOT\n", yytext); }
-";"                 { printf("%s -> SEMICOLON\n", yytext); }
-","                 { printf("%s -> COMMA\n", yytext); }
+"("                 { process_token("OPEN_PARENTHESES"); }
+")"                 { process_token("CLOSE_PARENTHESES"); }
+"["                 { process_token("OPEN_BRACKET"); }
+"]"                 { process_token("CLOSE_BRACKET"); }
+"{"                 { process_token("OPEN_KEYS"); }
+"}"                 { process_token("CLOSE_KEYS"); }
 
-auto                { printf("%s -> AUTO\n", yytext); }
-break               { printf("%s -> BREAK\n", yytext); }
-char                { printf("%s -> CHAR\n", yytext); }
-const               { printf("%s -> CONST\n", yytext); }
-continue            { printf("%s -> CONTINUE\n", yytext); }
-double              { printf("%s -> DOUBLE\n", yytext); }
-else                { printf("%s -> ELSE\n", yytext); }
-enum                { printf("%s -> ENUM\n", yytext); }
-extern              { printf("%s -> EXTERN\n", yytext); }
-float               { printf("%s -> FLOAT\n", yytext); }
-while               { printf("%s -> WHILE\n", yytext); }
-if                  { printf("%s -> IF\n", yytext); }
-int                 { printf("%s -> INT\n", yytext); }
-long                { printf("%s -> LONG\n", yytext); }
-register            { printf("%s -> REGISTER\n", yytext); }
-return              { printf("%s -> RETURN\n", yytext); }
-short               { printf("%s -> SHORT\n", yytext); }
-signed              { printf("%s -> SIGNED\n", yytext); }
-sizeof              { printf("%s -> SIZEOF\n", yytext); }
-static              { printf("%s -> STATIC\n", yytext); }
-struct              { printf("%s -> STRUCT\n", yytext); }
-switch              { printf("%s -> SWITCH\n", yytext); }
-typedef             { printf("%s -> TYPEDEF\n", yytext); }
-union               { printf("%s -> UNION\n", yytext); }
-unsigned            { printf("%s -> UNSIGNED\n", yytext); }
-void                { printf("%s -> VOID\n", yytext); }
-volatile            { printf("%s -> VOLATILE\n", yytext); }
+"."                 { process_token("DOT"); }
+";"                 { process_token("SEMICOLON"); }
+","                 { process_token("COMMA"); }
 
-printf              { printf("%s -> PRINTF\n", yytext); }
-scanf               { printf("%s -> SCANF\n", yytext); }
+auto                { process_token("AUTO"); }
+break               { process_token("BREAK"); }
+char                { process_token("CHAR"); }
+const               { process_token("CONST"); }
+continue            { process_token("CONTINUE"); }
+double              { process_token("DOUBLE"); }
+else                { process_token("ELSE"); }
+enum                { process_token("ENUM"); }
+extern              { process_token("EXTERN"); }
+float               { process_token("FLOAT"); }
+while               { process_token("WHILE"); }
+if                  { process_token("IF"); }
+int                 { process_token("INT"); }
+long                { process_token("LONG"); }
+register            { process_token("REGISTER"); }
+return              { process_token("RETURN"); }
+short               { process_token("SHORT"); }
+signed              { process_token("SIGNED"); }
+sizeof              { process_token("SIZEOF"); }
+static              { process_token("STATIC"); }
+struct              { process_token("STRUCT"); }
+typedef             { process_token("TYPEDEF"); }
+union               { process_token("UNION"); }
+unsigned            { process_token("UNSIGNED"); }
+void                { process_token("VOID"); }
+volatile            { process_token("VOLATILE"); }
 
-{STRING}        { printf("%s -> STRING\n", yytext); }
-{ID}            { printf("%s -> ID\n", yytext); }
-{INT_NUMBER}    { printf("%s -> INT_NUMBER\n", yytext); }
-{REAL_NUMBER}   { printf("%s -> REAL_NUMBER\n", yytext); }
+{STRING}        { process_token("STRING"); }
+{ID}            { process_token("ID"); }
+{INT_NUMBER}    { process_token("INT_NUMBER"); }
+{REAL_NUMBER}   { process_token("REAL_NUMBER"); }
 
 .                { printf("LEXICAL ERROR (%d): Unknown symbol %s\n", yylineno, yytext);
                 exit(EXIT_FAILURE); }

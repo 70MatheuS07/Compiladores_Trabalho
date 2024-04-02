@@ -1,0 +1,19 @@
+./a.out
+// MAIN -> COMMENT_LINE
+int -> INT
+main -> ID
+( -> OPEN_PARENTHESES
+) -> CLOSE_PARENTHESES
+{ -> OPEN_KEYS
+printf -> PRINTF
+( -> OPEN_PARENTHESES
+"Hello World!\n" -> STRING
+) -> CLOSE_PARENTHESES
+; -> SEMICOLON
+return -> RETURN
+0 -> INT_NUMBER
+; -> SEMICOLON
+} -> CLOSE_KEYS
+/*
+    Um Hello World simples! XD
+*/ -> COMMENT_FULL

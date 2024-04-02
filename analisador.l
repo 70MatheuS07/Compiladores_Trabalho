@@ -16,8 +16,8 @@ IGNORE          [ \t\n]+
 %%
 
 {IGNORE}            {  }
-{COMMENT_LINE}                          { printf("%s -> COMMENT_LINE\n", yytext); }
-{COMMENT_FULL}                          { printf("%s -> COMMENT_FULL\n", yytext); }
+{COMMENT_LINE}      { printf("%s -> COMMENT_LINE\n", yytext); }
+{COMMENT_FULL}      { printf("%s -> COMMENT_FULL\n", yytext); }
 
 
 "++"                { printf("%s -> INCREMENT\n", yytext); }
@@ -43,6 +43,8 @@ IGNORE          [ \t\n]+
 
 "("                 { printf("%s -> OPEN_PARENTHESES\n", yytext); }
 ")"                 { printf("%s -> CLOSE_PARENTHESES\n", yytext); }
+"["                 { printf("%s -> OPEN_BRACKET\n", yytext); }
+"]"                 { printf("%s -> CLOSE_BRACKET\n", yytext); }
 "{"                 { printf("%s -> OPEN_KEYS\n", yytext); }
 "}"                 { printf("%s -> CLOSE_KEYS\n", yytext); }
 
@@ -50,33 +52,36 @@ IGNORE          [ \t\n]+
 ";"                 { printf("%s -> SEMICOLON\n", yytext); }
 ","                 { printf("%s -> COMMA\n", yytext); }
 
-auto            { printf("%s -> AUTO\n", yytext); }
-break           { printf("%s -> BREAK\n", yytext); }
-char            { printf("%s -> CHAR\n", yytext); }
-const           { printf("%s -> CONST\n", yytext); }
-continue        { printf("%s -> CONTINUE\n", yytext); }
-double          { printf("%s -> DOUBLE\n", yytext); }
-else            { printf("%s -> ELSE\n", yytext); }
-enum            { printf("%s -> ENUM\n", yytext); }
-extern          { printf("%s -> EXTERN\n", yytext); }
-float           { printf("%s -> FLOAT\n", yytext); }
-for             { printf("%s -> FOR\n", yytext); }
-if              { printf("%s -> IF\n", yytext); }
-int             { printf("%s -> INT\n", yytext); }
-long            { printf("%s -> LONG\n", yytext); }
-register        { printf("%s -> REGISTER\n", yytext); }
-return          { printf("%s -> RETURN\n", yytext); }
-short           { printf("%s -> SHORT\n", yytext); }
-signed          { printf("%s -> SIGNED\n", yytext); }
-sizeof          { printf("%s -> SIZEOF\n", yytext); }
-static          { printf("%s -> STATIC\n", yytext); }
-struct          { printf("%s -> STRUCT\n", yytext); }
-switch          { printf("%s -> SWITCH\n", yytext); }
-typedef         { printf("%s -> TYPEDEF\n", yytext); }
-union           { printf("%s -> UNION\n", yytext); }
-unsigned        { printf("%s -> UNSIGNED\n", yytext); }
-void            { printf("%s -> VOID\n", yytext); }
-volatile        { printf("%s -> VOLATILE\n", yytext); }
+auto                { printf("%s -> AUTO\n", yytext); }
+break               { printf("%s -> BREAK\n", yytext); }
+char                { printf("%s -> CHAR\n", yytext); }
+const               { printf("%s -> CONST\n", yytext); }
+continue            { printf("%s -> CONTINUE\n", yytext); }
+double              { printf("%s -> DOUBLE\n", yytext); }
+else                { printf("%s -> ELSE\n", yytext); }
+enum                { printf("%s -> ENUM\n", yytext); }
+extern              { printf("%s -> EXTERN\n", yytext); }
+float               { printf("%s -> FLOAT\n", yytext); }
+while               { printf("%s -> WHILE\n", yytext); }
+if                  { printf("%s -> IF\n", yytext); }
+int                 { printf("%s -> INT\n", yytext); }
+long                { printf("%s -> LONG\n", yytext); }
+register            { printf("%s -> REGISTER\n", yytext); }
+return              { printf("%s -> RETURN\n", yytext); }
+short               { printf("%s -> SHORT\n", yytext); }
+signed              { printf("%s -> SIGNED\n", yytext); }
+sizeof              { printf("%s -> SIZEOF\n", yytext); }
+static              { printf("%s -> STATIC\n", yytext); }
+struct              { printf("%s -> STRUCT\n", yytext); }
+switch              { printf("%s -> SWITCH\n", yytext); }
+typedef             { printf("%s -> TYPEDEF\n", yytext); }
+union               { printf("%s -> UNION\n", yytext); }
+unsigned            { printf("%s -> UNSIGNED\n", yytext); }
+void                { printf("%s -> VOID\n", yytext); }
+volatile            { printf("%s -> VOLATILE\n", yytext); }
+
+printf              { printf("%s -> PRINTF\n", yytext); }
+scanf               { printf("%s -> SCANF\n", yytext); }
 
 {STRING}        { printf("%s -> STRING\n", yytext); }
 {ID}            { printf("%s -> ID\n", yytext); }

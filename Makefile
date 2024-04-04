@@ -12,4 +12,4 @@ run: a.out
 	./a.out
 
 clean:
-	@rm -f analisador.c analisador
+	@rm -f lex.yy.c a.out

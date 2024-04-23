@@ -3,6 +3,7 @@
 %option nounput
 %option noinput
 %{
+    #include "parser.h"
     #include <stdio.h>
 
     void process_token(const char* tk){
@@ -100,8 +101,3 @@ volatile            { return VOLATILE; }
                 exit(EXIT_FAILURE); }
 
 %%
-
-int main(){
-    yylex();
-    return 0;
-}

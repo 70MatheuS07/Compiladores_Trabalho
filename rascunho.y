@@ -24,20 +24,14 @@ void yyerror(const char *s);
 
 %start start
 
-%left PLUS MINUS
-%left TIMES OVER
-%nonassoc LESS_THAN EQUALS GREATER_THAN
-%right ASSIGNMENT
-
 %%
 
 start: INT ID OPEN_PARENTHESES CLOSE_PARENTHESES OPEN_KEYS content CLOSE_KEYS ;
 
 content:
-    var_decl content
-    | posfix_op content
-    | var_decl
+    var_decl
     | posfix_op
+    | content
     | return
     ;
 
@@ -47,8 +41,8 @@ var_decl:
     ;
 
 posfix_op:
-    ID INCREMENT SEMICOLON
-    | ID DECREMENT SEMICOLON
+    ID INCREMENT
+    | ID DECREMENT
     ;
 
 type:
@@ -77,8 +71,8 @@ expr NOT_EQUALS expr
     ;
 
 return:
-    RETURN INT_NUMBER SEMICOLON
-    | RETURN SEMICOLON
+    RETURN INT
+    | RETURN
     ;
 
 %%

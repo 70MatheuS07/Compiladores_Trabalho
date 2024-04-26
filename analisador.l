@@ -1,7 +1,9 @@
+%option outfile="scanner.c"
 %option noyywrap
-%option yylineno
-
+%option nounput
+%option noinput
 %{
+    #include "parser.h"
     #include <stdio.h>
 
     void process_token(const char* tk){
@@ -25,82 +27,77 @@ IGNORE          [ \t\n]+
 {COMMENT_FULL}      {  }
 
 
-"++"                { process_token("INCREMENT"); }
-"--"                { process_token("DECREMENT"); } 
-"+"                 { process_token("PLUS"); }
-"-"                 { process_token("MINUS"); }
-"*"                 { process_token("TIMES"); }
-"/"                 { process_token("OVER"); }   
+"++"                { return INCREMENT; }
+"--"                { return DECREMENT; } 
+"+"                 { return PLUS; }
+"-"                 { return MINUS; }
+"*"                 { return TIMES; }
+"/"                 { return OVER; }   
 
-">"                 { process_token("GREATER_THAN"); }
-"<"                 { process_token("LESS_THAN"); }
-">="                { process_token("GREATER_THAN_OR_EQUAL"); }
-"<="                { process_token("LESS_THAN_OR_EQUAL"); }
-"=="                { process_token("EQUALS"); }
-"!="                { process_token("NOT_EQUALS"); }
+">"                 { return GREATER_THAN; }
+"<"                 { return LESS_THAN; }
+">="                { return GREATER_THAN_OR_EQUAL; }
+"<="                { return LESS_THAN_OR_EQUAL; }
+"=="                { return EQUALS; }
+"!="                { return NOT_EQUALS; }
 
-"+="                { process_token("ADD_ASSIGN"); }
-"-="                { process_token("SUB_ASSIGN"); }
-"*="                { process_token("MUL_ASSIGN"); }
-"/="                { process_token("DIV_ASSIGN"); }
-"%="                { process_token("MOD_ASSIGN"); }
+"+="                { return ADD_ASSIGN; }
+"-="                { return SUB_ASSIGN; }
+"*="                { return MUL_ASSIGN; }
+"/="                { return DIV_ASSIGN; }
+"%="                { return MOD_ASSIGN; }
 
-"="                 { process_token("ASSIGNMENT"); }
+"="                 { return ASSIGNMENT; }
 
-"&&"                { process_token("LOGICAL_AND"); }
-"&"                 { process_token("ADDRESS"); }
-"||"                { process_token("LOGICAL_OR"); }
-"!"                 { process_token("LOGICAL_NOT"); }
+"&&"                { return LOGICAL_AND; }
+"&"                 { return ADDRESS; }
+"||"                { return LOGICAL_OR; }
+"!"                 { return LOGICAL_NOT; }
 
-"("                 { process_token("OPEN_PARENTHESES"); }
-")"                 { process_token("CLOSE_PARENTHESES"); }
-"["                 { process_token("OPEN_BRACKET"); }
-"]"                 { process_token("CLOSE_BRACKET"); }
-"{"                 { process_token("OPEN_KEYS"); }
-"}"                 { process_token("CLOSE_KEYS"); }
+"("                 { return OPEN_PARENTHESES; }
+")"                 { return CLOSE_PARENTHESES; }
+"["                 { return OPEN_BRACKET; }
+"]"                 { return CLOSE_BRACKET; }
+"{"                 { return OPEN_KEYS; }
+"}"                 { return CLOSE_KEYS; }
 
-"."                 { process_token("DOT"); }
-";"                 { process_token("SEMICOLON"); }
-","                 { process_token("COMMA"); }
+"."                 { return DOT; }
+";"                 { return SEMICOLON; }
+","                 { return COMMA; }
 
-auto                { process_token("AUTO"); }
-break               { process_token("BREAK"); }
-char                { process_token("CHAR"); }
-const               { process_token("CONST"); }
-continue            { process_token("CONTINUE"); }
-double              { process_token("DOUBLE"); }
-else                { process_token("ELSE"); }
-enum                { process_token("ENUM"); }
-extern              { process_token("EXTERN"); }
-float               { process_token("FLOAT"); }
-while               { process_token("WHILE"); }
-if                  { process_token("IF"); }
-int                 { process_token("INT"); }
-long                { process_token("LONG"); }
-register            { process_token("REGISTER"); }
-return              { process_token("RETURN"); }
-short               { process_token("SHORT"); }
-signed              { process_token("SIGNED"); }
-sizeof              { process_token("SIZEOF"); }
-static              { process_token("STATIC"); }
-struct              { process_token("STRUCT"); }
-typedef             { process_token("TYPEDEF"); }
-union               { process_token("UNION"); }
-unsigned            { process_token("UNSIGNED"); }
-void                { process_token("VOID"); }
-volatile            { process_token("VOLATILE"); }
+auto                { return AUTO; }
+break               { return BREAK; }
+char                { return CHAR; }
+const               { return CONST; }
+continue            { return CONTINUE; }
+double              { return DOUBLE; }
+else                { return ELSE; }
+enum                { return ENUM; }
+extern              { return EXTERN; }
+float               { return FLOAT; }
+while               { return WHILE; }
+if                  { return IF; }
+int                 { return INT; }
+long                { return LONG; }
+register            { return REGISTER; }
+return              { return RETURN; }
+short               { return SHORT; }
+signed              { return SIGNED; }
+sizeof              { return SIZEOF; }
+static              { return STATIC; }
+struct              { return STRUCT; }
+typedef             { return TYPEDEF; }
+union               { return UNION; }
+unsigned            { return UNSIGNED; }
+void                { return VOID; }
+volatile            { return VOLATILE; }
 
-{STRING}        { process_token("STRING"); }
-{ID}            { process_token("ID"); }
-{INT_NUMBER}    { process_token("INT_NUMBER"); }
-{REAL_NUMBER}   { process_token("REAL_NUMBER"); }
+{STRING}        { return STRING; }
+{ID}            { return ID; }
+{INT_NUMBER}    { return INT_NUMBER; }
+{REAL_NUMBER}   { return REAL_NUMBER; }
 
 .                { printf("LEXICAL ERROR (%d): Unknown symbol %s\n", yylineno, yytext);
                 exit(EXIT_FAILURE); }
 
 %%
-
-int main(){
-    yylex();
-    return 0;
-}

@@ -27,21 +27,64 @@ void yyerror(const char *s);
 %nonassoc LESS_THAN EQUALS GREATER_THAN
 %right ASSIGNMENT
 
+%start initial
+
 %%
 
-statement
-	: expression_statement
-	| iteration_statement
-	| jump_statement
+initial
+	: pre_program program
 	;
 
-declaration_specifiers
-	: storage_class_specifier
-	| storage_class_specifier declaration_specifiers
-	| type_specifier
-	| type_specifier declaration_specifiers
-	| type_qualifier
-	| type_qualifier declaration_specifiers
+pre_program
+	: struct_declaration
+	| struct_declaration pre_program
+	| typedef_struct_declaration
+	| typedef_struct_declaration pre_program
+	;
+
+struct_declaration
+	: STRUCT ID OPEN_KEYS struct_declaration_list CLOSE_KEYS SEMICOLON
+	;
+
+typedef_struct_declaration
+	: TYPEDEF STRUCT ID OPEN_KEYS struct_declaration_list CLOSE_KEYS ID SEMICOLON
+	;
+
+program
+	: INT ID OPEN_PARENTHESES CLOSE_PARENTHESES OPEN_KEYS content CLOSE_KEYS
+	;
+
+content
+	: ID ID SEMICOLON
+	| ID ID SEMICOLON content
+	| type_specifier ID SEMICOLON
+	| type_specifier ID SEMICOLON content
+	| type_specifier string SEMICOLON
+	| type_specifier string SEMICOLON content
+	| ID DOT ID ASSIGNMENT initializer SEMICOLON
+	| ID DOT ID ASSIGNMENT initializer SEMICOLON content
+	| ID DOT string ASSIGNMENT initializer SEMICOLON
+	| ID DOT string ASSIGNMENT initializer SEMICOLON content
+	| RETURN INT_NUMBER SEMICOLON
+	;
+
+string
+	: ID OPEN_BRACKET INT_NUMBER CLOSE_BRACKET
+	| ID OPEN_BRACKET CLOSE_BRACKET
+	| ID OPEN_BRACKET ID CLOSE_BRACKET
+	;
+
+initializer
+	: INT_NUMBER
+	| REAL_NUMBER
+	| STRING
+	;
+
+struct_declaration_list
+	: type_specifier ID SEMICOLON
+	| type_specifier ID SEMICOLON struct_declaration_list
+	| type_specifier string SEMICOLON
+	| type_specifier string SEMICOLON struct_declaration_list
 	;
 
 unary_operator
@@ -81,39 +124,35 @@ type_specifier
 	| UNSIGNED
 	;
 
-struct_or_union
-	: STRUCT
-	| UNION
-	;
-
 type_qualifier
 	: CONST
 	| VOLATILE
 	;
 
 jump_statement
-    :
-	| CONTINUE SEMICOLON
+    : CONTINUE SEMICOLON
 	| BREAK SEMICOLON
 	| RETURN SEMICOLON
 	| RETURN expression SEMICOLON
 	;
 
-iteration_statement
-	: WHILE OPEN_PARENTHESES expression CLOSE_PARENTHESES statement
-	;
-
 expression
-    :
-    | STRING
+    : STRING
     | INT
     ;
 
 expression_statement
-	: ';'
-	| expression ';'
+	: SEMICOLON
+	| expression SEMICOLON
 	;
 
-declaration
-	: declaration_specifiers ';'
-	;
+%%
+
+int main(void) {
+    if (yyparse() == 0) {
+        printf("PARSE SUCCESSFUL!\n");
+    } else {
+        printf("PARSE FAILED!\n");
+    }
+    return 0;
+}

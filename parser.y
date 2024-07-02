@@ -40,6 +40,7 @@ pre_program
 	| struct_declaration pre_program
 	| typedef_struct_declaration
 	| typedef_struct_declaration pre_program
+	| %empty
 	;
 
 struct_declaration
@@ -61,6 +62,8 @@ content
 	| type_specifier ID SEMICOLON content
 	| type_specifier string SEMICOLON
 	| type_specifier string SEMICOLON content
+	| type_specifier ID ASSIGNMENT initializer SEMICOLON
+	| type_specifier ID ASSIGNMENT initializer SEMICOLON content
 	| ID DOT ID ASSIGNMENT initializer SEMICOLON
 	| ID DOT ID ASSIGNMENT initializer SEMICOLON content
 	| ID DOT string ASSIGNMENT initializer SEMICOLON

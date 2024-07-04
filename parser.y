@@ -27,126 +27,104 @@ void yyerror(const char *s);
 %nonassoc LESS_THAN EQUALS GREATER_THAN
 %right ASSIGNMENT
 
-%start initial
+%start translation_unit
 
 %%
 
-initial
-	: pre_program program
+translation_unit
+	: external_declaration
+	| translation_unit external_declaration
 	;
 
-pre_program
-	: struct_declaration
-	| struct_declaration pre_program
-	| typedef_struct_declaration
-	| typedef_struct_declaration pre_program
-	| %empty
+external_declaration
+	: function_definition
+	| declaration
 	;
 
-struct_declaration
-	: STRUCT ID OPEN_KEYS struct_declaration_list CLOSE_KEYS SEMICOLON
+function_definition
+	: declaration_specifiers declarator declaration_list compound_statement
+	| declaration_specifiers declarator compound_statement
 	;
 
-typedef_struct_declaration
-	: TYPEDEF STRUCT ID OPEN_KEYS struct_declaration_list CLOSE_KEYS ID SEMICOLON
+declaration_list
+	: declaration
+	| declaration_list declaration
 	;
 
-program
-	: INT ID OPEN_PARENTHESES CLOSE_PARENTHESES OPEN_KEYS content CLOSE_KEYS
+declaration
+	: declaration_specifiers ';'
+	| declaration_specifiers init_declarator_list ';'
 	;
 
-content
-	: ID ID SEMICOLON
-	| ID ID SEMICOLON content
-	| type_specifier ID SEMICOLON
-	| type_specifier ID SEMICOLON content
-	| type_specifier string SEMICOLON
-	| type_specifier string SEMICOLON content
-	| type_specifier ID ASSIGNMENT initializer SEMICOLON
-	| type_specifier ID ASSIGNMENT initializer SEMICOLON content
-	| ID DOT ID ASSIGNMENT initializer SEMICOLON
-	| ID DOT ID ASSIGNMENT initializer SEMICOLON content
-	| ID DOT string ASSIGNMENT initializer SEMICOLON
-	| ID DOT string ASSIGNMENT initializer SEMICOLON content
-	| RETURN INT_NUMBER SEMICOLON
+declaration_specifiers
+	: storage_class_specifier
+	| storage_class_specifier declaration_specifiers
+	| type_specifier
+	| type_specifier declaration_specifiers
+	| type_qualifier
+	| type_qualifier declaration_specifiers
 	;
 
-string
-	: ID OPEN_BRACKET INT_NUMBER CLOSE_BRACKET
-	| ID OPEN_BRACKET CLOSE_BRACKET
-	| ID OPEN_BRACKET ID CLOSE_BRACKET
+declarator
+	: pointer direct_declarator
+	| direct_declarator
 	;
 
-initializer
-	: INT_NUMBER
-	| REAL_NUMBER
-	| STRING
+
+direct_declarator
+	: ID
+	| '(' declarator ')'
+	| direct_declarator '[' type_qualifier_list assignment_expression ']'
+	| direct_declarator '[' type_qualifier_list ']'
+	| direct_declarator '[' assignment_expression ']'
+	| direct_declarator '[' STATIC type_qualifier_list assignment_expression ']'
+	| direct_declarator '[' type_qualifier_list STATIC assignment_expression ']'
+	| direct_declarator '[' type_qualifier_list '*' ']'
+	| direct_declarator '[' '*' ']'
+	| direct_declarator '[' ']'
+	| direct_declarator '(' parameter_type_list ')'
+	| direct_declarator '(' identifier_list ')'
+	| direct_declarator '(' ')'
 	;
 
-struct_declaration_list
-	: type_specifier ID SEMICOLON
-	| type_specifier ID SEMICOLON struct_declaration_list
-	| type_specifier string SEMICOLON
-	| type_specifier string SEMICOLON struct_declaration_list
+pointer
+	: '*'
+	| '*' type_qualifier_list
+	| '*' pointer
+	| '*' type_qualifier_list pointer
 	;
 
-unary_operator
-	: ADDRESS
-	| TIMES
-	| PLUS
-	| MINUS
-	| LOGICAL_NOT
-	;
-
-assignment_operator
-	: ASSIGNMENT
-	| MUL_ASSIGN
-	| DIV_ASSIGN
-	| MOD_ASSIGN
-	| ADD_ASSIGN
-	| SUB_ASSIGN
-	;
-
-storage_class_specifier
-	: TYPEDEF
-	| EXTERN
-	| STATIC
-	| AUTO
-	| REGISTER
-	;
-
-type_specifier
-	: VOID
-	| CHAR
-	| SHORT
-	| INT
-	| LONG
-	| FLOAT
-	| DOUBLE
-	| SIGNED
-	| UNSIGNED
-	;
-
-type_qualifier
+type_qualifier_list
 	: CONST
+	| type_qualifier_list CONST
 	| VOLATILE
+	| type_qualifier_list VOLATILE
 	;
 
-jump_statement
-    : CONTINUE SEMICOLON
-	| BREAK SEMICOLON
-	| RETURN SEMICOLON
-	| RETURN expression SEMICOLON
+assignment_expression
+	: conditional_expression
+	| unary_expression assignment_operator assignment_expression
 	;
 
-expression
-    : STRING
-    | INT
-    ;
+parameter_type_list
+	: parameter_list
+	| parameter_list ',' ELLIPSIS
+	;
 
-expression_statement
-	: SEMICOLON
-	| expression SEMICOLON
+parameter_list
+	: parameter_declaration
+	| parameter_list ',' parameter_declaration
+	;
+
+parameter_declaration
+	: declaration_specifiers declarator
+	| declaration_specifiers abstract_declarator
+	| declaration_specifiers
+	;
+
+identifier_list
+	: ID
+	| identifier_list ',' ID
 	;
 
 %%

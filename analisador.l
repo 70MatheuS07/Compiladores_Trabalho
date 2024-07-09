@@ -13,7 +13,6 @@
 
 INT_NUMBER      [0-9]+
 REAL_NUMBER     [0-9]+"."[0-9]+
-LETTER          [a-zA-Z]
 ID              [a-zA-Z_][a-zA-Z0-9_]*
 STRING          \"[^"]*\"
 COMMENT_FULL    \/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\/
@@ -32,7 +31,8 @@ IGNORE          [ \t\n]+
 "+"                 { return PLUS; }
 "-"                 { return MINUS; }
 "*"                 { return TIMES; }
-"/"                 { return OVER; }   
+"/"                 { return OVER; }
+"%"                 { return PERCENT; }
 
 ">"                 { return GREATER_THAN; }
 "<"                 { return LESS_THAN; }
@@ -65,32 +65,16 @@ IGNORE          [ \t\n]+
 ";"                 { return SEMICOLON; }
 ","                 { return COMMA; }
 
-auto                { return AUTO; }
-break               { return BREAK; }
 char                { return CHAR; }
-const               { return CONST; }
 continue            { return CONTINUE; }
 double              { return DOUBLE; }
 else                { return ELSE; }
-enum                { return ENUM; }
-extern              { return EXTERN; }
 float               { return FLOAT; }
 while               { return WHILE; }
 if                  { return IF; }
 int                 { return INT; }
-long                { return LONG; }
-register            { return REGISTER; }
 return              { return RETURN; }
-short               { return SHORT; }
-signed              { return SIGNED; }
-sizeof              { return SIZEOF; }
-static              { return STATIC; }
-struct              { return STRUCT; }
-typedef             { return TYPEDEF; }
-union               { return UNION; }
-unsigned            { return UNSIGNED; }
 void                { return VOID; }
-volatile            { return VOLATILE; }
 
 {STRING}        { return STRING; }
 {ID}            { return ID; }

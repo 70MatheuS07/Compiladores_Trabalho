@@ -1,22 +1,11 @@
-int RetornaDiferenca(int x, int y){
-    if(x>y) return 1;
-    else if(x<y) return -1;
-    return 0;
-}
-
 int main ()
 {
-    int x = 2;
-    int y = 2;
-    
-    if(RetornaDiferenca(x,y) == 0)
-    {
-        printf("X igual Y");
-    }
-    else
-    {
-        printf("X diferente Y");
-    }
+    int vet[2];
+
+    vet[0] = 10;
+    vet[1] = 20;
+
+    printf("%d > %d\n", vet[1], vet[0]);
 
     return 0;
 }

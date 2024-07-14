@@ -100,12 +100,8 @@ logical_or_expression
 	| logical_or_expression LOGICAL_OR logical_or_expression
 	;
 
-conditional_expression
-	: logical_or_expression
-	;
-
 assignment_expression
-	: conditional_expression
+	: logical_or_expression
 	| unary_expression assignment_operator assignment_expression
 	;
 
@@ -124,7 +120,7 @@ expression
 	;
 
 constant_expression
-	: conditional_expression
+	: logical_or_expression
 	;
 
 declaration

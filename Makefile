@@ -9,7 +9,7 @@ flex: analisador.l
 	flex analisador.l
 
 gcc: analisador.c parser.c
-	gcc -Wall analisador.c parser.c -ly
+	gcc -Wall analisador.c parser.c -lfl
 
 clean:
 	@rm -f *.o *.output analisador.c parser.h parser.c a.out

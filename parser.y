@@ -5,10 +5,13 @@
 %{
 
 #include <stdio.h>
+#include <stdlib.h>
+#include "parser.h"
 
 
 int yylex(void);
 void yyerror(const char *s);
+extern int yylineno;
 %}
 
 %token INCREMENT DECREMENT PLUS MINUS TIMES OVER PERCENT
@@ -355,4 +358,9 @@ int main(void) {
         printf("PARSE FAILED!\n");
     }
     return 0;
+}
+
+void yyerror (char const *s) {
+    printf("SYNTAX ERROR (%d): %s\n", yylineno, s);
+    exit(EXIT_FAILURE);
 }

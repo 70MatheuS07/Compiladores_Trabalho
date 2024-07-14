@@ -2,13 +2,10 @@
 %option noyywrap
 %option nounput
 %option noinput
+%option yylineno
 %{
     #include "parser.h"
-    #include <stdio.h>
 
-    void process_token(const char* tk){
-        printf("%d: %s -> %s\n", yylineno, yytext, tk);
-    }
 %}
 
 INT_NUMBER      [0-9]+

@@ -163,8 +163,27 @@ extern FILE *yyin, *yyout;
 #define EOB_ACT_END_OF_FILE 1
 #define EOB_ACT_LAST_MATCH 2
     
-    #define YY_LESS_LINENO(n)
-    #define YY_LINENO_REWIND_TO(ptr)
+    /* Note: We specifically omit the test for yy_rule_can_match_eol because it requires
+     *       access to the local variable yy_act. Since yyless() is a macro, it would break
+     *       existing scanners that call yyless() from OUTSIDE yylex.
+     *       One obvious solution it to make yy_act a global. I tried that, and saw
+     *       a 5% performance hit in a non-yylineno scanner, because yy_act is
+     *       normally declared as a register variable-- so it is not worth it.
+     */
+    #define  YY_LESS_LINENO(n) \
+            do { \
+                int yyl;\
+                for ( yyl = n; yyl < yyleng; ++yyl )\
+                    if ( yytext[yyl] == '\n' )\
+                        --yylineno;\
+            }while(0)
+    #define YY_LINENO_REWIND_TO(dst) \
+            do {\
+                const char *p;\
+                for ( p = yy_cp-1; p >= (dst); --p)\
+                    if ( *p == '\n' )\
+                        --yylineno;\
+            }while(0)
     
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
@@ -501,6 +520,13 @@ static const flex_int16_t yy_chk[188] =
       104,  104,  104,  104,  104,  104,  104
     } ;
 
+/* Table of booleans, true if rule could match eol. */
+static const flex_int32_t yy_rule_can_match_eol[52] =
+    {   0,
+1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,     };
+
 static yy_state_type yy_last_accepting_state;
 static char *yy_last_accepting_cpos;
 
@@ -517,15 +543,11 @@ int yy_flex_debug = 0;
 char *yytext;
 #line 1 "analisador.l"
 #define YY_NO_INPUT 1
-#line 6 "analisador.l"
+#line 7 "analisador.l"
     #include "parser.h"
-    #include <stdio.h>
 
-    void process_token(const char* tk){
-        printf("%d: %s -> %s\n", yylineno, yytext, tk);
-    }
-#line 528 "scanner.c"
-#line 529 "scanner.c"
+#line 550 "scanner.c"
+#line 551 "scanner.c"
 
 #define INITIAL 0
 
@@ -740,10 +762,10 @@ YY_DECL
 		}
 
 	{
-#line 22 "analisador.l"
+#line 19 "analisador.l"
 
 
-#line 747 "scanner.c"
+#line 769 "scanner.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -789,6 +811,16 @@ yy_find_action:
 
 		YY_DO_BEFORE_ACTION;
 
+		if ( yy_act != YY_END_OF_BUFFER && yy_rule_can_match_eol[yy_act] )
+			{
+			int yyl;
+			for ( yyl = 0; yyl < yyleng; ++yyl )
+				if ( yytext[yyl] == '\n' )
+					
+    yylineno++;
+;
+			}
+
 do_action:	/* This label is used only to access EOF actions. */
 
 		switch ( yy_act )
@@ -803,263 +835,263 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 24 "analisador.l"
+#line 21 "analisador.l"
 {  }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 25 "analisador.l"
+#line 22 "analisador.l"
 {  }
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 26 "analisador.l"
+#line 23 "analisador.l"
 {  }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 29 "analisador.l"
+#line 26 "analisador.l"
 { return INCREMENT; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 30 "analisador.l"
+#line 27 "analisador.l"
 { return DECREMENT; } 
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 31 "analisador.l"
+#line 28 "analisador.l"
 { return PLUS; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 32 "analisador.l"
+#line 29 "analisador.l"
 { return MINUS; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 33 "analisador.l"
+#line 30 "analisador.l"
 { return TIMES; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 34 "analisador.l"
+#line 31 "analisador.l"
 { return OVER; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 35 "analisador.l"
+#line 32 "analisador.l"
 { return PERCENT; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 37 "analisador.l"
+#line 34 "analisador.l"
 { return GREATER_THAN; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 38 "analisador.l"
+#line 35 "analisador.l"
 { return LESS_THAN; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 39 "analisador.l"
+#line 36 "analisador.l"
 { return GREATER_THAN_OR_EQUAL; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 40 "analisador.l"
+#line 37 "analisador.l"
 { return LESS_THAN_OR_EQUAL; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 41 "analisador.l"
+#line 38 "analisador.l"
 { return EQUALS; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 42 "analisador.l"
+#line 39 "analisador.l"
 { return NOT_EQUALS; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 44 "analisador.l"
+#line 41 "analisador.l"
 { return ADD_ASSIGN; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 45 "analisador.l"
+#line 42 "analisador.l"
 { return SUB_ASSIGN; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 46 "analisador.l"
+#line 43 "analisador.l"
 { return MUL_ASSIGN; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 47 "analisador.l"
+#line 44 "analisador.l"
 { return DIV_ASSIGN; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 48 "analisador.l"
+#line 45 "analisador.l"
 { return MOD_ASSIGN; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 50 "analisador.l"
+#line 47 "analisador.l"
 { return ASSIGNMENT; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 52 "analisador.l"
+#line 49 "analisador.l"
 { return LOGICAL_AND; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 53 "analisador.l"
+#line 50 "analisador.l"
 { return ADDRESS; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 54 "analisador.l"
+#line 51 "analisador.l"
 { return LOGICAL_OR; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 55 "analisador.l"
+#line 52 "analisador.l"
 { return LOGICAL_NOT; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 57 "analisador.l"
+#line 54 "analisador.l"
 { return OPEN_PARENTHESES; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 58 "analisador.l"
+#line 55 "analisador.l"
 { return CLOSE_PARENTHESES; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 59 "analisador.l"
+#line 56 "analisador.l"
 { return OPEN_BRACKET; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 60 "analisador.l"
+#line 57 "analisador.l"
 { return CLOSE_BRACKET; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 61 "analisador.l"
+#line 58 "analisador.l"
 { return OPEN_KEYS; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 62 "analisador.l"
+#line 59 "analisador.l"
 { return CLOSE_KEYS; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 64 "analisador.l"
+#line 61 "analisador.l"
 { return DOT; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 65 "analisador.l"
+#line 62 "analisador.l"
 { return SEMICOLON; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 66 "analisador.l"
+#line 63 "analisador.l"
 { return COMMA; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 68 "analisador.l"
+#line 65 "analisador.l"
 { return CHAR; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 69 "analisador.l"
+#line 66 "analisador.l"
 { return CONTINUE; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 70 "analisador.l"
+#line 67 "analisador.l"
 { return DOUBLE; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 71 "analisador.l"
+#line 68 "analisador.l"
 { return ELSE; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 72 "analisador.l"
+#line 69 "analisador.l"
 { return FLOAT; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 73 "analisador.l"
+#line 70 "analisador.l"
 { return WHILE; }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 74 "analisador.l"
+#line 71 "analisador.l"
 { return IF; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 75 "analisador.l"
+#line 72 "analisador.l"
 { return INT; }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 76 "analisador.l"
+#line 73 "analisador.l"
 { return RETURN; }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 77 "analisador.l"
+#line 74 "analisador.l"
 { return VOID; }
 	YY_BREAK
 case 46:
 /* rule 46 can match eol */
 YY_RULE_SETUP
-#line 79 "analisador.l"
+#line 76 "analisador.l"
 { return STRING; }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 80 "analisador.l"
+#line 77 "analisador.l"
 { return ID; }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 81 "analisador.l"
+#line 78 "analisador.l"
 { return INT_NUMBER; }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 82 "analisador.l"
+#line 79 "analisador.l"
 { return REAL_NUMBER; }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 84 "analisador.l"
+#line 81 "analisador.l"
 { printf("LEXICAL ERROR (%d): Unknown symbol %s\n", yylineno, yytext);
                 exit(EXIT_FAILURE); }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 87 "analisador.l"
+#line 84 "analisador.l"
 ECHO;
 	YY_BREAK
-#line 1063 "scanner.c"
+#line 1095 "scanner.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1466,6 +1498,11 @@ static int yy_get_next_buffer (void)
 	c = *(unsigned char *) (yy_c_buf_p);	/* cast for 8-bit char's */
 	*(yy_c_buf_p) = '\0';	/* preserve yytext */
 	(yy_hold_char) = *++(yy_c_buf_p);
+
+	if ( c == '\n' )
+		
+    yylineno++;
+;
 
 	return c;
 }
@@ -1933,6 +1970,9 @@ static int yy_init_globals (void)
      * This function is called from yylex_destroy(), so don't allocate here.
      */
 
+    /* We do not touch yylineno unless the option is enabled. */
+    yylineno =  1;
+    
     (yy_buffer_stack) = NULL;
     (yy_buffer_stack_top) = 0;
     (yy_buffer_stack_max) = 0;
@@ -2027,5 +2067,5 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 87 "analisador.l"
+#line 84 "analisador.l"
 

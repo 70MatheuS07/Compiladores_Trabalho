@@ -251,10 +251,13 @@ designator
 
 statement
 	: compound_statement
-	| expression_statement
+	| SEMICOLON
+	| expression SEMICOLON
 	| selection_statement
-	| iteration_statement
-	| jump_statement
+	| WHILE OPEN_PARENTHESES expression CLOSE_PARENTHESES statement
+	| CONTINUE SEMICOLON
+	| RETURN SEMICOLON
+	| RETURN expression SEMICOLON
 	;
 
 compound_statement
@@ -263,33 +266,15 @@ compound_statement
 	;
 
 block_item_list
-	: block_item
-	| block_item_list block_item
-	;
-
-block_item
 	: declaration
 	| statement
-	;
-
-expression_statement
-	: SEMICOLON
-	| expression SEMICOLON
+	| block_item_list declaration
+	| block_item_list statement
 	;
 
 selection_statement
 	: IF OPEN_PARENTHESES expression CLOSE_PARENTHESES statement
 	| IF OPEN_PARENTHESES expression CLOSE_PARENTHESES statement ELSE statement
-	;
-
-iteration_statement
-	: WHILE OPEN_PARENTHESES expression CLOSE_PARENTHESES statement
-	;
-
-jump_statement
-	: CONTINUE SEMICOLON
-	| RETURN SEMICOLON
-	| RETURN expression SEMICOLON
 	;
 
 translation_unit

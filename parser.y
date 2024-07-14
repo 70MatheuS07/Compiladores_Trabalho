@@ -26,11 +26,12 @@ extern int yylineno;
 %token STRING ID INT_NUMBER REAL_NUMBER
 
 %left PLUS MINUS
-%right ASSIGNMENT
+
+%right ASSIGNMENT ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN
 
 %left LOGICAL_AND LOGICAL_OR ADDRESS
 %left PERCENT OVER TIMES
-%nonassoc EQUALS NOT_EQUALS
+%nonassoc EQUALS NOT_EQUALS 
 %nonassoc GREATER_THAN_OR_EQUAL LESS_THAN_OR_EQUAL GREATER_THAN LESS_THAN
 
 %start translation_unit
@@ -51,8 +52,8 @@ postfix_expression
 	| postfix_expression OPEN_PARENTHESES CLOSE_PARENTHESES
 	| postfix_expression OPEN_PARENTHESES argument_expression_list CLOSE_PARENTHESES
 	| postfix_expression DOT ID
-	| postfix_expression INCREMENT
-	| postfix_expression DECREMENT
+	| ID INCREMENT
+	| ID DECREMENT
 	| OPEN_PARENTHESES type_name CLOSE_PARENTHESES OPEN_KEYS initializer_list CLOSE_KEYS
 	| OPEN_PARENTHESES type_name CLOSE_PARENTHESES OPEN_KEYS initializer_list COMMA CLOSE_KEYS
 	;
@@ -64,8 +65,8 @@ argument_expression_list
 
 unary_expression
 	: postfix_expression
-	| INCREMENT unary_expression
-	| DECREMENT unary_expression
+	| INCREMENT ID
+	| DECREMENT ID
 	| unary_operator cast_expression
 	;
 
@@ -119,10 +120,6 @@ expression
 	| expression COMMA assignment_expression
 	;
 
-constant_expression
-	: logical_or_expression
-	;
-
 declaration
 	: declaration_specifiers SEMICOLON
 	| declaration_specifiers init_declarator_list SEMICOLON
@@ -167,7 +164,7 @@ direct_declarator
 	| direct_declarator OPEN_BRACKET assignment_expression CLOSE_BRACKET
 	| direct_declarator OPEN_BRACKET TIMES CLOSE_BRACKET
 	| direct_declarator OPEN_BRACKET CLOSE_BRACKET
-	| direct_declarator OPEN_PARENTHESES parameter_type_list CLOSE_PARENTHESES
+	| direct_declarator OPEN_PARENTHESES parameter_list CLOSE_PARENTHESES
 	| direct_declarator OPEN_PARENTHESES identifier_list CLOSE_PARENTHESES
 	| direct_declarator OPEN_PARENTHESES CLOSE_PARENTHESES
 	;
@@ -175,10 +172,6 @@ direct_declarator
 pointer
 	: TIMES
 	| TIMES pointer
-	;
-
-parameter_type_list
-	: parameter_list
 	;
 
 parameter_list
@@ -217,9 +210,9 @@ direct_abstract_declarator
 	| OPEN_BRACKET TIMES CLOSE_BRACKET
 	| direct_abstract_declarator OPEN_BRACKET TIMES CLOSE_BRACKET
 	| OPEN_PARENTHESES CLOSE_PARENTHESES
-	| OPEN_PARENTHESES parameter_type_list CLOSE_PARENTHESES
+	| OPEN_PARENTHESES parameter_list CLOSE_PARENTHESES
 	| direct_abstract_declarator OPEN_PARENTHESES CLOSE_PARENTHESES
-	| direct_abstract_declarator OPEN_PARENTHESES parameter_type_list CLOSE_PARENTHESES
+	| direct_abstract_declarator OPEN_PARENTHESES parameter_list CLOSE_PARENTHESES
 	;
 
 initializer
@@ -245,7 +238,7 @@ designator_list
 	;
 
 designator
-	: OPEN_BRACKET constant_expression CLOSE_BRACKET
+	: OPEN_BRACKET logical_or_expression CLOSE_BRACKET
 	| DOT ID
 	;
 

@@ -23,9 +23,12 @@ void yyerror(const char *s);
 %token STRING ID INT_NUMBER REAL_NUMBER
 
 %left PLUS MINUS
-%left TIMES OVER
-%nonassoc LESS_THAN EQUALS GREATER_THAN
 %right ASSIGNMENT
+
+%left LOGICAL_AND LOGICAL_OR ADDRESS
+%left PERCENT OVER TIMES
+%nonassoc EQUALS NOT_EQUALS
+%nonassoc GREATER_THAN_OR_EQUAL LESS_THAN_OR_EQUAL GREATER_THAN LESS_THAN
 
 %start translation_unit
 
@@ -76,58 +79,22 @@ cast_expression
 	| OPEN_PARENTHESES type_name CLOSE_PARENTHESES cast_expression
 	;
 
-multiplicative_expression
-	: cast_expression
-	| multiplicative_expression TIMES cast_expression
-	| multiplicative_expression OVER cast_expression
-	| multiplicative_expression PERCENT cast_expression
-	;
-
-additive_expression
-	: multiplicative_expression
-	| additive_expression PLUS multiplicative_expression
-	| additive_expression MINUS multiplicative_expression
-	;
-
-shift_expression
-	: additive_expression
-	;
-
-relational_expression
-	: shift_expression
-	| relational_expression LESS_THAN shift_expression
-	| relational_expression GREATER_THAN shift_expression
-	| relational_expression LESS_THAN_OR_EQUAL shift_expression
-	| relational_expression GREATER_THAN_OR_EQUAL shift_expression
-	;
-
-equality_expression
-	: relational_expression
-	| equality_expression EQUALS relational_expression
-	| equality_expression NOT_EQUALS relational_expression
-	;
-
-and_expression
-	: equality_expression
-	| and_expression ADDRESS equality_expression
-	;
-
-exclusive_or_expression
-	: and_expression
-	;
-
-inclusive_or_expression
-	: exclusive_or_expression
-	;
-
-logical_and_expression
-	: inclusive_or_expression
-	| logical_and_expression LOGICAL_AND inclusive_or_expression
-	;
-
 logical_or_expression
-	: logical_and_expression
-	| logical_or_expression LOGICAL_OR logical_and_expression
+	: cast_expression
+	| logical_or_expression TIMES cast_expression
+	| logical_or_expression OVER cast_expression
+	| logical_or_expression PERCENT cast_expression
+	| logical_or_expression PLUS logical_or_expression
+	| logical_or_expression MINUS logical_or_expression
+	| logical_or_expression LESS_THAN logical_or_expression
+	| logical_or_expression GREATER_THAN logical_or_expression
+	| logical_or_expression LESS_THAN_OR_EQUAL logical_or_expression
+	| logical_or_expression GREATER_THAN_OR_EQUAL logical_or_expression
+	| logical_or_expression EQUALS logical_or_expression
+	| logical_or_expression NOT_EQUALS logical_or_expression
+	| logical_or_expression ADDRESS logical_or_expression
+	| logical_or_expression LOGICAL_AND logical_or_expression
+	| logical_or_expression LOGICAL_OR logical_or_expression
 	;
 
 conditional_expression

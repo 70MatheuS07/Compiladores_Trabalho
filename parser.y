@@ -33,7 +33,8 @@ extern int yylineno;
 %left PERCENT OVER TIMES
 %nonassoc EQUALS NOT_EQUALS 
 %nonassoc GREATER_THAN_OR_EQUAL LESS_THAN_OR_EQUAL GREATER_THAN LESS_THAN
-
+%precedence CLOSE_PARENTHESES
+%precedence ELSE
 %start translation_unit
 
 

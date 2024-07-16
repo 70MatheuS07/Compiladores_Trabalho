@@ -19,21 +19,24 @@ extern int yylineno;
 %token ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN
 %token ASSIGNMENT LOGICAL_AND ADDRESS LOGICAL_OR LOGICAL_NOT
 %token OPEN_PARENTHESES CLOSE_PARENTHESES OPEN_BRACKET CLOSE_BRACKET OPEN_KEYS CLOSE_KEYS
-%token DOT SEMICOLON COMMA
+%token SEMICOLON COMMA
 %token CHAR CONTINUE DOUBLE ELSE FLOAT
 %token WHILE IF INT RETURN
 %token VOID
 %token STRING ID INT_NUMBER REAL_NUMBER
 
 %left PLUS MINUS
-%right ASSIGNMENT
+
+%right ASSIGNMENT ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN
 
 %left LOGICAL_AND LOGICAL_OR ADDRESS
 %left PERCENT OVER TIMES
-%nonassoc EQUALS NOT_EQUALS
+%nonassoc EQUALS NOT_EQUALS 
 %nonassoc GREATER_THAN_OR_EQUAL LESS_THAN_OR_EQUAL GREATER_THAN LESS_THAN
-
+%precedence CLOSE_PARENTHESES
+%precedence ELSE
 %start translation_unit
+
 
 %%
 
@@ -50,9 +53,8 @@ postfix_expression
 	| postfix_expression OPEN_BRACKET expression CLOSE_BRACKET
 	| postfix_expression OPEN_PARENTHESES CLOSE_PARENTHESES
 	| postfix_expression OPEN_PARENTHESES argument_expression_list CLOSE_PARENTHESES
-	| postfix_expression DOT ID
-	| postfix_expression INCREMENT
-	| postfix_expression DECREMENT
+	| ID INCREMENT
+	| ID DECREMENT
 	| OPEN_PARENTHESES type_name CLOSE_PARENTHESES OPEN_KEYS initializer_list CLOSE_KEYS
 	| OPEN_PARENTHESES type_name CLOSE_PARENTHESES OPEN_KEYS initializer_list COMMA CLOSE_KEYS
 	;
@@ -64,16 +66,15 @@ argument_expression_list
 
 unary_expression
 	: postfix_expression
-	| INCREMENT unary_expression
-	| DECREMENT unary_expression
+	| INCREMENT ID
+	| DECREMENT ID
 	| unary_operator cast_expression
 	;
 
 unary_operator
-	: ADDRESS
-	| TIMES
-	| PLUS
+	: PLUS
 	| MINUS
+	| ADDRESS
 	| LOGICAL_NOT
 	;
 
@@ -82,26 +83,26 @@ cast_expression
 	| OPEN_PARENTHESES type_name CLOSE_PARENTHESES cast_expression
 	;
 
-logical_or_expression
+binary_expression
 	: cast_expression
-	| logical_or_expression TIMES cast_expression
-	| logical_or_expression OVER cast_expression
-	| logical_or_expression PERCENT cast_expression
-	| logical_or_expression PLUS logical_or_expression
-	| logical_or_expression MINUS logical_or_expression
-	| logical_or_expression LESS_THAN logical_or_expression
-	| logical_or_expression GREATER_THAN logical_or_expression
-	| logical_or_expression LESS_THAN_OR_EQUAL logical_or_expression
-	| logical_or_expression GREATER_THAN_OR_EQUAL logical_or_expression
-	| logical_or_expression EQUALS logical_or_expression
-	| logical_or_expression NOT_EQUALS logical_or_expression
-	| logical_or_expression ADDRESS logical_or_expression
-	| logical_or_expression LOGICAL_AND logical_or_expression
-	| logical_or_expression LOGICAL_OR logical_or_expression
+	| binary_expression TIMES cast_expression
+	| binary_expression OVER cast_expression
+	| binary_expression PERCENT cast_expression
+	| binary_expression PLUS binary_expression
+	| binary_expression MINUS binary_expression
+	| binary_expression LESS_THAN binary_expression
+	| binary_expression GREATER_THAN binary_expression
+	| binary_expression LESS_THAN_OR_EQUAL binary_expression
+	| binary_expression GREATER_THAN_OR_EQUAL binary_expression
+	| binary_expression EQUALS binary_expression
+	| binary_expression NOT_EQUALS binary_expression
+	| binary_expression ADDRESS binary_expression
+	| binary_expression LOGICAL_AND binary_expression
+	| binary_expression LOGICAL_OR binary_expression
 	;
 
 assignment_expression
-	: logical_or_expression
+	: binary_expression
 	| unary_expression assignment_operator assignment_expression
 	;
 
@@ -117,10 +118,6 @@ assignment_operator
 expression
 	: assignment_expression
 	| expression COMMA assignment_expression
-	;
-
-constant_expression
-	: logical_or_expression
 	;
 
 declaration
@@ -139,8 +136,8 @@ init_declarator_list
 	;
 
 init_declarator
-	: declarator
-	| declarator ASSIGNMENT initializer
+	: direct_declarator
+	| direct_declarator ASSIGNMENT initializer
 	;
 
 type_specifier
@@ -156,29 +153,14 @@ specifier_qualifier_list
 	| type_specifier
 	;
 
-declarator
-	: pointer direct_declarator
-	| direct_declarator
-	;
-
 direct_declarator
 	: ID
-	| OPEN_PARENTHESES declarator CLOSE_PARENTHESES
+	| OPEN_PARENTHESES direct_declarator CLOSE_PARENTHESES
 	| direct_declarator OPEN_BRACKET assignment_expression CLOSE_BRACKET
-	| direct_declarator OPEN_BRACKET TIMES CLOSE_BRACKET
 	| direct_declarator OPEN_BRACKET CLOSE_BRACKET
-	| direct_declarator OPEN_PARENTHESES parameter_type_list CLOSE_PARENTHESES
+	| direct_declarator OPEN_PARENTHESES parameter_list CLOSE_PARENTHESES
 	| direct_declarator OPEN_PARENTHESES identifier_list CLOSE_PARENTHESES
 	| direct_declarator OPEN_PARENTHESES CLOSE_PARENTHESES
-	;
-
-pointer
-	: TIMES
-	| TIMES pointer
-	;
-
-parameter_type_list
-	: parameter_list
 	;
 
 parameter_list
@@ -187,8 +169,8 @@ parameter_list
 	;
 
 parameter_declaration
-	: declaration_specifiers declarator
-	| declaration_specifiers abstract_declarator
+	: declaration_specifiers direct_declarator
+	| declaration_specifiers direct_abstract_declarator
 	| declaration_specifiers
 	;
 
@@ -199,27 +181,19 @@ identifier_list
 
 type_name
 	: specifier_qualifier_list
-	| specifier_qualifier_list abstract_declarator
-	;
-
-abstract_declarator
-	: pointer
-	| direct_abstract_declarator
-	| pointer direct_abstract_declarator
+	| specifier_qualifier_list direct_abstract_declarator
 	;
 
 direct_abstract_declarator
-	: OPEN_PARENTHESES abstract_declarator CLOSE_PARENTHESES
+	: OPEN_PARENTHESES direct_abstract_declarator CLOSE_PARENTHESES
 	| OPEN_BRACKET CLOSE_BRACKET
 	| OPEN_BRACKET assignment_expression CLOSE_BRACKET
 	| direct_abstract_declarator OPEN_BRACKET CLOSE_BRACKET
 	| direct_abstract_declarator OPEN_BRACKET assignment_expression CLOSE_BRACKET
-	| OPEN_BRACKET TIMES CLOSE_BRACKET
-	| direct_abstract_declarator OPEN_BRACKET TIMES CLOSE_BRACKET
 	| OPEN_PARENTHESES CLOSE_PARENTHESES
-	| OPEN_PARENTHESES parameter_type_list CLOSE_PARENTHESES
+	| OPEN_PARENTHESES parameter_list CLOSE_PARENTHESES
 	| direct_abstract_declarator OPEN_PARENTHESES CLOSE_PARENTHESES
-	| direct_abstract_declarator OPEN_PARENTHESES parameter_type_list CLOSE_PARENTHESES
+	| direct_abstract_declarator OPEN_PARENTHESES parameter_list CLOSE_PARENTHESES
 	;
 
 initializer
@@ -245,8 +219,7 @@ designator_list
 	;
 
 designator
-	: OPEN_BRACKET constant_expression CLOSE_BRACKET
-	| DOT ID
+	: OPEN_BRACKET binary_expression CLOSE_BRACKET
 	;
 
 statement
@@ -288,8 +261,8 @@ external_declaration
 	;
 
 function_definition
-	: declaration_specifiers declarator declaration_list compound_statement
-	| declaration_specifiers declarator compound_statement
+	: declaration_specifiers direct_declarator declaration_list compound_statement
+	| declaration_specifiers direct_declarator compound_statement
 	;
 
 declaration_list

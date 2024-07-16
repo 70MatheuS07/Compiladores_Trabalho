@@ -58,7 +58,7 @@ IGNORE          [ \t\n]+
 "{"                 { return OPEN_KEYS; }
 "}"                 { return CLOSE_KEYS; }
 
-"."                 { return DOT; }
+
 ";"                 { return SEMICOLON; }
 ","                 { return COMMA; }
 

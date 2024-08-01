@@ -4,11 +4,13 @@
 %option noinput
 %option yylineno
 %{
+    #include <string.h>
+    #include <stdlib.h>
     #include "types.h"
     #include "parser.h"
     #include "tables.h"
     extern StrTable *st;
-
+    extern char * VarSave;
 
 %}
 
@@ -77,8 +79,8 @@ int                 { return INT; }
 return              { return RETURN; }
 void                { return VOID; }
 
-{STRING}        {printf("%s",yytext);add_string( st, yytext); return STRING; }
-{ID}            { return ID; }
+{STRING}        { add_string( st, yytext); return STRING; }
+{ID}            { strcpy(VarSave, yytext); return ID; }
 {INT_NUMBER}    { return INT_NUMBER; }
 {REAL_NUMBER}   { return REAL_NUMBER; }
 

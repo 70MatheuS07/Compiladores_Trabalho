@@ -2,7 +2,7 @@
 #include "types.h"
 
 static const char *TYPE_STRING[] = {
-    "char"
+    "char",
     "int",
     "float",
     "double"

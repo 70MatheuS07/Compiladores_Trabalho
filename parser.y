@@ -19,6 +19,8 @@ void new_var();
 
 extern int yylineno;
 extern char *yytext;
+char *VarSave;
+
 
 StrTable *st;
 VarTable *vt;
@@ -52,7 +54,7 @@ Type last_decl_type;
 %%
 
 primary_expression
-	: ID 
+	: ID {check_var();} 
 	| INT_NUMBER 
 	| REAL_NUMBER
 	| STRING
@@ -64,8 +66,8 @@ postfix_expression
 	| postfix_expression OPEN_BRACKET expression CLOSE_BRACKET
 	| postfix_expression OPEN_PARENTHESES CLOSE_PARENTHESES
 	| postfix_expression OPEN_PARENTHESES argument_expression_list CLOSE_PARENTHESES
-	| ID  INCREMENT
-	| ID  DECREMENT
+	| ID {check_var();} INCREMENT 
+	| ID {check_var();} DECREMENT 
 	| OPEN_PARENTHESES type_name CLOSE_PARENTHESES OPEN_KEYS initializer_list CLOSE_KEYS
 	| OPEN_PARENTHESES type_name CLOSE_PARENTHESES OPEN_KEYS initializer_list COMMA CLOSE_KEYS
 	;
@@ -77,8 +79,8 @@ argument_expression_list
 
 unary_expression
 	: postfix_expression
-	| INCREMENT ID
-	| DECREMENT ID
+	|INCREMENT ID {check_var();} 
+	|DECREMENT ID {check_var();} 
 	| unary_operator cast_expression
 	;
 
@@ -153,10 +155,10 @@ init_declarator
 
 type_specifier
 	: VOID
-	| CHAR		{last_decl_type = CHAR_TYPE;}
-	| INT		{last_decl_type = INT_TYPE;}
-	| FLOAT		{last_decl_type = FLOAT_TYPE;}
-	| DOUBLE 	{last_decl_type = DOUBLE_TYPE;}
+	| CHAR		{last_decl_type = CHAR_TYPE;}{printf("char");}
+	| INT		{last_decl_type = INT_TYPE;}{printf("int");}
+	| FLOAT		{last_decl_type = FLOAT_TYPE;}{printf("float");}
+	| DOUBLE 	{last_decl_type = DOUBLE_TYPE;}{printf("double");}
 	;
 
 specifier_qualifier_list
@@ -286,6 +288,7 @@ declaration_list
 int main(void) {
 	st = create_str_table();
     vt = create_var_table();
+	VarSave= malloc(sizeof(char)*128);
     if (yyparse() == 0) {
         printf("PARSE SUCCESSFUL!\n");
     } else {
@@ -297,6 +300,7 @@ int main(void) {
 
     free_str_table(st);
     free_var_table(vt);
+	free(VarSave);
     yylex_destroy();  
     return 0;
 }
@@ -307,10 +311,10 @@ void yyerror (char const *s) {
 }
 
 void check_var() {
-    int idx = lookup_var(vt, yytext);
+    int idx = lookup_var(vt, VarSave);
     if (idx == -1) {
         printf("SEMANTIC ERROR (%d): variable '%s' was not declared.\n",
-                yylineno, yytext);
+                yylineno, VarSave);
         exit(EXIT_FAILURE);
     }
 }

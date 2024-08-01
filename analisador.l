@@ -4,7 +4,11 @@
 %option noinput
 %option yylineno
 %{
+    #include "types.h"
     #include "parser.h"
+    #include "tables.h"
+    extern StrTable *st;
+
 
 %}
 
@@ -73,7 +77,7 @@ int                 { return INT; }
 return              { return RETURN; }
 void                { return VOID; }
 
-{STRING}        { return STRING; }
+{STRING}        {printf("%s",yytext);add_string( st, yytext); return STRING; }
 {ID}            { return ID; }
 {INT_NUMBER}    { return INT_NUMBER; }
 {REAL_NUMBER}   { return REAL_NUMBER; }

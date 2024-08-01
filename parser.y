@@ -7,11 +7,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "parser.h"
-
+#include "types.h"
+#include "tables.h"
 
 int yylex(void);
 void yyerror(const char *s);
+
+int yylex_destroy(void);
+void check_var();
+void new_var();
+
 extern int yylineno;
+extern char *yytext;
+
+StrTable *st;
+VarTable *vt;
+Type last_decl_type;
 %}
 
 %token INCREMENT DECREMENT PLUS MINUS TIMES OVER PERCENT
@@ -41,7 +52,7 @@ extern int yylineno;
 %%
 
 primary_expression
-	: ID
+	: ID 
 	| INT_NUMBER 
 	| REAL_NUMBER
 	| STRING
@@ -53,8 +64,8 @@ postfix_expression
 	| postfix_expression OPEN_BRACKET expression CLOSE_BRACKET
 	| postfix_expression OPEN_PARENTHESES CLOSE_PARENTHESES
 	| postfix_expression OPEN_PARENTHESES argument_expression_list CLOSE_PARENTHESES
-	| ID INCREMENT
-	| ID DECREMENT
+	| ID  INCREMENT
+	| ID  DECREMENT
 	| OPEN_PARENTHESES type_name CLOSE_PARENTHESES OPEN_KEYS initializer_list CLOSE_KEYS
 	| OPEN_PARENTHESES type_name CLOSE_PARENTHESES OPEN_KEYS initializer_list COMMA CLOSE_KEYS
 	;
@@ -142,10 +153,10 @@ init_declarator
 
 type_specifier
 	: VOID
-	| CHAR
-	| INT
-	| FLOAT
-	| DOUBLE
+	| CHAR		{last_decl_type = CHAR_TYPE;}
+	| INT		{last_decl_type = INT_TYPE;}
+	| FLOAT		{last_decl_type = FLOAT_TYPE;}
+	| DOUBLE 	{last_decl_type = DOUBLE_TYPE;}
 	;
 
 specifier_qualifier_list
@@ -154,7 +165,7 @@ specifier_qualifier_list
 	;
 
 direct_declarator
-	: ID
+	: ID { new_var(); }
 	| OPEN_PARENTHESES direct_declarator CLOSE_PARENTHESES
 	| direct_declarator OPEN_BRACKET assignment_expression CLOSE_BRACKET
 	| direct_declarator OPEN_BRACKET CLOSE_BRACKET
@@ -175,8 +186,8 @@ parameter_declaration
 	;
 
 identifier_list
-	: ID
-	| identifier_list COMMA ID
+	: ID { new_var(); }
+	| identifier_list COMMA ID { new_var(); }
 	;
 
 type_name
@@ -273,15 +284,43 @@ declaration_list
 %%
 
 int main(void) {
+	st = create_str_table();
+    vt = create_var_table();
     if (yyparse() == 0) {
         printf("PARSE SUCCESSFUL!\n");
     } else {
         printf("PARSE FAILED!\n");
     }
+	printf("\n\n");
+    print_str_table(st); printf("\n\n");
+    print_var_table(vt); printf("\n\n");
+
+    free_str_table(st);
+    free_var_table(vt);
+    yylex_destroy();  
     return 0;
 }
 
 void yyerror (char const *s) {
     printf("SYNTAX ERROR (%d): %s\n", yylineno, s);
     exit(EXIT_FAILURE);
+}
+
+void check_var() {
+    int idx = lookup_var(vt, yytext);
+    if (idx == -1) {
+        printf("SEMANTIC ERROR (%d): variable '%s' was not declared.\n",
+                yylineno, yytext);
+        exit(EXIT_FAILURE);
+    }
+}
+
+void new_var() {
+    int idx = lookup_var(vt, yytext);
+    if (idx != -1) {
+        printf("SEMANTIC ERROR (%d): variable '%s' already declared at line %d.\n",
+                yylineno, yytext, get_line(vt, idx));
+        exit(EXIT_FAILURE);
+    }
+    add_var(vt, yytext, yylineno, last_decl_type);
 }

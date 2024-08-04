@@ -11,7 +11,6 @@
     #include "tables.h"
     extern StrTable *st;
     extern char * VarSave;
-
 %}
 
 INT_NUMBER      [0-9]+

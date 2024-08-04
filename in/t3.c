@@ -2,8 +2,8 @@ int main ()
 {
     int x = 1;
     int y = 1;
-
-    y += x;
+    x++;
+    int novo= y + x;
     y -= x;
     y /= x;
     y *= x;

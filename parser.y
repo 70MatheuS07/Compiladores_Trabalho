@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "parser.h"
 #include "types.h"
 #include "tables.h"
@@ -16,14 +17,18 @@ void yyerror(const char *s);
 int yylex_destroy(void);
 void check_var();
 void new_var();
+void new_fun();
+void check_fun();
 
 extern int yylineno;
 extern char *yytext;
 char *VarSave;
+char last_func_decl[128];
 
-
+int isFunction =0;
 StrTable *st;
 VarTable *vt;
+FuncTable *ft;
 Type last_decl_type;
 %}
 
@@ -46,248 +51,201 @@ Type last_decl_type;
 %left PERCENT OVER TIMES
 %nonassoc EQUALS NOT_EQUALS 
 %nonassoc GREATER_THAN_OR_EQUAL LESS_THAN_OR_EQUAL GREATER_THAN LESS_THAN
+
 %precedence CLOSE_PARENTHESES
 %precedence ELSE
-%start translation_unit
+%start program
+
 
 
 %%
 
-primary_expression
-	: ID {check_var();} 
-	| INT_NUMBER 
-	| REAL_NUMBER
-	| STRING
-	| OPEN_PARENTHESES expression CLOSE_PARENTHESES
-	;
+program
+    : global_declarations
+    ;
 
-postfix_expression
-	: primary_expression
-	| postfix_expression OPEN_BRACKET expression CLOSE_BRACKET
-	| postfix_expression OPEN_PARENTHESES CLOSE_PARENTHESES
-	| postfix_expression OPEN_PARENTHESES argument_expression_list CLOSE_PARENTHESES
-	| ID {check_var();} INCREMENT 
-	| ID {check_var();} DECREMENT 
-	| OPEN_PARENTHESES type_name CLOSE_PARENTHESES OPEN_KEYS initializer_list CLOSE_KEYS
-	| OPEN_PARENTHESES type_name CLOSE_PARENTHESES OPEN_KEYS initializer_list COMMA CLOSE_KEYS
-	;
+global_declarations
+    : global_declarations global_declaration
+    | /* empty */
+    ;
 
-argument_expression_list
-	: assignment_expression
-	| argument_expression_list COMMA assignment_expression
-	;
+global_declaration
+    : function_declaration
+    | variable_declaration
+    ;
 
-unary_expression
-	: postfix_expression
-	|INCREMENT ID {check_var();} 
-	|DECREMENT ID {check_var();} 
-	| unary_operator cast_expression
-	;
-
-unary_operator
-	: PLUS
-	| MINUS
-	| ADDRESS
-	| LOGICAL_NOT
-	;
-
-cast_expression
-	: unary_expression
-	| OPEN_PARENTHESES type_name CLOSE_PARENTHESES cast_expression
-	;
-
-binary_expression
-	: cast_expression
-	| binary_expression TIMES cast_expression
-	| binary_expression OVER cast_expression
-	| binary_expression PERCENT cast_expression
-	| binary_expression PLUS binary_expression
-	| binary_expression MINUS binary_expression
-	| binary_expression LESS_THAN binary_expression
-	| binary_expression GREATER_THAN binary_expression
-	| binary_expression LESS_THAN_OR_EQUAL binary_expression
-	| binary_expression GREATER_THAN_OR_EQUAL binary_expression
-	| binary_expression EQUALS binary_expression
-	| binary_expression NOT_EQUALS binary_expression
-	| binary_expression ADDRESS binary_expression
-	| binary_expression LOGICAL_AND binary_expression
-	| binary_expression LOGICAL_OR binary_expression
-	;
-
-assignment_expression
-	: binary_expression
-	| unary_expression assignment_operator assignment_expression
-	;
-
-assignment_operator
-	: ASSIGNMENT
-	| MUL_ASSIGN
-	| DIV_ASSIGN
-	| MOD_ASSIGN
-	| ADD_ASSIGN
-	| SUB_ASSIGN
-	;
-
-expression
-	: assignment_expression
-	| expression COMMA assignment_expression
-	;
-
-declaration
-	: declaration_specifiers SEMICOLON
-	| declaration_specifiers init_declarator_list SEMICOLON
-	;
-
-declaration_specifiers
-	: type_specifier
-	| type_specifier declaration_specifiers
-	;
-
-init_declarator_list
-	: init_declarator
-	| init_declarator_list COMMA init_declarator
-	;
-
-init_declarator
-	: direct_declarator
-	| direct_declarator ASSIGNMENT initializer
-	;
-
-type_specifier
-	: VOID
-	| CHAR		{last_decl_type = CHAR_TYPE;}{printf("char");}
-	| INT		{last_decl_type = INT_TYPE;}{printf("int");}
-	| FLOAT		{last_decl_type = FLOAT_TYPE;}{printf("float");}
-	| DOUBLE 	{last_decl_type = DOUBLE_TYPE;}{printf("double");}
-	;
-
-specifier_qualifier_list
-	: type_specifier specifier_qualifier_list
-	| type_specifier
-	;
-
-direct_declarator
-	: ID { new_var(); }
-	| OPEN_PARENTHESES direct_declarator CLOSE_PARENTHESES
-	| direct_declarator OPEN_BRACKET assignment_expression CLOSE_BRACKET
-	| direct_declarator OPEN_BRACKET CLOSE_BRACKET
-	| direct_declarator OPEN_PARENTHESES parameter_list CLOSE_PARENTHESES
-	| direct_declarator OPEN_PARENTHESES identifier_list CLOSE_PARENTHESES
-	| direct_declarator OPEN_PARENTHESES CLOSE_PARENTHESES
-	;
+function_declaration
+    : type_specifier ID {strcpy(last_func_decl,VarSave);new_fun();} OPEN_PARENTHESES parameter_list CLOSE_PARENTHESES compound_statement 
+    ;
 
 parameter_list
-	: parameter_declaration
-	| parameter_list COMMA parameter_declaration
-	;
+    : parameter_list COMMA parameter
+    | parameter
+    | /* empty */
+    ;
 
-parameter_declaration
-	: declaration_specifiers direct_declarator
-	| declaration_specifiers direct_abstract_declarator
-	| declaration_specifiers
-	;
+parameter
+    : type_specifier ID {new_var();}
+    ;
 
-identifier_list
-	: ID { new_var(); }
-	| identifier_list COMMA ID { new_var(); }
-	;
+variable_declaration
+    : type_specifier init_declarator_list SEMICOLON
+    ;
 
-type_name
-	: specifier_qualifier_list
-	| specifier_qualifier_list direct_abstract_declarator
-	;
+init_declarator_list
+    : init_declarator
+    | init_declarator_list COMMA init_declarator
+    ;	
 
-direct_abstract_declarator
-	: OPEN_PARENTHESES direct_abstract_declarator CLOSE_PARENTHESES
-	| OPEN_BRACKET CLOSE_BRACKET
-	| OPEN_BRACKET assignment_expression CLOSE_BRACKET
-	| direct_abstract_declarator OPEN_BRACKET CLOSE_BRACKET
-	| direct_abstract_declarator OPEN_BRACKET assignment_expression CLOSE_BRACKET
-	| OPEN_PARENTHESES CLOSE_PARENTHESES
-	| OPEN_PARENTHESES parameter_list CLOSE_PARENTHESES
-	| direct_abstract_declarator OPEN_PARENTHESES CLOSE_PARENTHESES
-	| direct_abstract_declarator OPEN_PARENTHESES parameter_list CLOSE_PARENTHESES
-	;
+init_declarator
+    : ID {new_var();}
+    | ID {new_var();}ASSIGNMENT expression 
+    | ID {new_var();}OPEN_BRACKET INT_NUMBER CLOSE_BRACKET array_initialization 
+    ;
 
-initializer
-	: assignment_expression
-	| OPEN_KEYS initializer_list CLOSE_KEYS
-	| OPEN_KEYS initializer_list COMMA CLOSE_KEYS
-	;
+array_initialization
+    : ASSIGNMENT OPEN_KEYS initializer_list CLOSE_KEYS
+	| /* empty */
+    ;
 
 initializer_list
-	: initializer
-	| designation initializer
-	| initializer_list COMMA initializer
-	| initializer_list COMMA designation initializer
-	;
+    : initializer
+    | initializer_list COMMA initializer
+    ;
 
-designation
-	: designator_list ASSIGNMENT
-	;
+initializer
+    : expression
+    | array_initialization
+    ;
+type_specifier
+    : INT
+    | DOUBLE
+    | FLOAT
+    | CHAR
+    | VOID
+    ;
 
-designator_list
-	: designator
-	| designator_list designator
-	;
-
-designator
-	: OPEN_BRACKET binary_expression CLOSE_BRACKET
-	;
-
-statement
-	: compound_statement
-	| SEMICOLON
-	| expression SEMICOLON
-	| selection_statement
-	| WHILE OPEN_PARENTHESES expression CLOSE_PARENTHESES statement
-	| CONTINUE SEMICOLON
-	| RETURN SEMICOLON
-	| RETURN expression SEMICOLON
-	;
 
 compound_statement
-	: OPEN_KEYS CLOSE_KEYS
-	| OPEN_KEYS block_item_list CLOSE_KEYS
-	;
+    : OPEN_KEYS statement_list CLOSE_KEYS
+    ;
 
-block_item_list
-	: declaration
-	| statement
-	| block_item_list declaration
-	| block_item_list statement
-	;
+statement_list
+    : statement_list statement
+    | /* empty */
+    ;
+
+statement
+    : expression_statement
+    | compound_statement
+    | selection_statement
+    | iteration_statement
+    | return_statement
+    | variable_declaration
+    | CONTINUE SEMICOLON
+    ;
+
+expression_statement
+    : expression SEMICOLON
+    | SEMICOLON
+    ;
 
 selection_statement
-	: IF OPEN_PARENTHESES expression CLOSE_PARENTHESES statement
-	| IF OPEN_PARENTHESES expression CLOSE_PARENTHESES statement ELSE statement
-	;
+    : IF OPEN_PARENTHESES expression CLOSE_PARENTHESES statement
+    | IF OPEN_PARENTHESES expression CLOSE_PARENTHESES statement ELSE statement
+    ;
 
-translation_unit
-	: external_declaration
-	| translation_unit external_declaration
-	;
+iteration_statement
+    : WHILE OPEN_PARENTHESES expression CLOSE_PARENTHESES statement
+    ;
 
-external_declaration
-	: function_definition
-	| declaration
-	;
+return_statement
+    : RETURN expression SEMICOLON
+    | RETURN SEMICOLON
+    ;
 
-function_definition
-	: declaration_specifiers direct_declarator declaration_list compound_statement
-	| declaration_specifiers direct_declarator compound_statement
-	;
+expression
+    : assignment_expression
+    ;
 
-declaration_list
-	: declaration
-	| declaration_list declaration
-	;
+assignment_expression
+    : ID {check_var();} assignment_operator expression
+    | binary_expression
+    ;
+
+assignment_operator
+    : ASSIGNMENT
+    | ADD_ASSIGN
+    | SUB_ASSIGN
+    | MUL_ASSIGN
+    | DIV_ASSIGN
+    | MOD_ASSIGN
+    ;
+
+binary_expression
+    : binary_expression PLUS binary_expression
+    | binary_expression MINUS binary_expression
+    | binary_expression TIMES binary_expression
+    | binary_expression OVER binary_expression
+    | binary_expression PERCENT binary_expression
+    | binary_expression LESS_THAN binary_expression
+    | binary_expression GREATER_THAN binary_expression
+    | binary_expression LESS_THAN_OR_EQUAL binary_expression
+    | binary_expression GREATER_THAN_OR_EQUAL binary_expression
+    | binary_expression EQUALS binary_expression
+    | binary_expression NOT_EQUALS binary_expression
+    | binary_expression LOGICAL_AND binary_expression
+    | binary_expression LOGICAL_OR binary_expression
+    | cast_expression
+    ;
+
+unary_operator
+    : PLUS
+    | MINUS
+    | ADDRESS
+    | LOGICAL_NOT
+    ;
+
+unary_expression
+    : postfix_expression
+    | unary_operator cast_expression
+    | INCREMENT ID {check_var();}
+    | DECREMENT ID {check_var();}
+    ;
+
+cast_expression
+    : unary_expression
+    | OPEN_PARENTHESES type_specifier CLOSE_PARENTHESES cast_expression
+    ;
+
+postfix_expression
+    : primary_expression
+	| ID {check_fun();}OPEN_PARENTHESES argument_expression_list CLOSE_PARENTHESES
+    | ID {check_var();}OPEN_BRACKET expression CLOSE_BRACKET
+    | ID {check_var();}INCREMENT
+    | ID {check_var();}DECREMENT
+    ;
+
+
+argument_expression_list
+    : assignment_expression
+    | argument_expression_list COMMA assignment_expression
+	| /* empty */
+    ;
+
+primary_expression
+    : ID {check_var();}
+    | INT_NUMBER
+    | REAL_NUMBER
+    | OPEN_PARENTHESES expression CLOSE_PARENTHESES
+    | STRING
+    ;
 
 %%
 
 int main(void) {
 	st = create_str_table();
-    vt = create_var_table();
+    ft= create_func_table();
 	VarSave= malloc(sizeof(char)*128);
     if (yyparse() == 0) {
         printf("PARSE SUCCESSFUL!\n");
@@ -296,10 +254,10 @@ int main(void) {
     }
 	printf("\n\n");
     print_str_table(st); printf("\n\n");
-    print_var_table(vt); printf("\n\n");
+    print_table(ft); printf("\n\n");
 
     free_str_table(st);
-    free_var_table(vt);
+    free_table(ft);
 	free(VarSave);
     yylex_destroy();  
     return 0;
@@ -311,7 +269,7 @@ void yyerror (char const *s) {
 }
 
 void check_var() {
-    int idx = lookup_var(vt, VarSave);
+    int idx = lookup_var_in_func(ft,VarSave, last_func_decl);
     if (idx == -1) {
         printf("SEMANTIC ERROR (%d): variable '%s' was not declared.\n",
                 yylineno, VarSave);
@@ -320,11 +278,34 @@ void check_var() {
 }
 
 void new_var() {
-    int idx = lookup_var(vt, yytext);
+    int idx = lookup_var_in_func(ft,VarSave, last_func_decl);
+	if(isFunction==0){
     if (idx != -1) {
         printf("SEMANTIC ERROR (%d): variable '%s' already declared at line %d.\n",
                 yylineno, yytext, get_line(vt, idx));
         exit(EXIT_FAILURE);
     }
-    add_var(vt, yytext, yylineno, last_decl_type);
+    add_var_in_func(ft, VarSave, last_func_decl, yylineno, last_decl_type);
+	}
+}
+
+void new_fun(){
+	int idx = lookup_func(ft, last_func_decl);
+    if (idx != -1) {
+        printf("SEMANTIC ERROR (%d): Function '%s' already declared at line %d.\n",
+                yylineno, last_func_decl, get_line_func(ft, idx));
+        exit(EXIT_FAILURE);
+    }
+	printf("HAHAHAHAHHAHAHAHAHA");
+    add_func(ft, last_func_decl, yylineno, last_decl_type);
+	isFunction=0;
+}
+
+void check_fun(){
+	int idx = lookup_func(ft, VarSave);
+    if (idx == -1) {
+        printf("SEMANTIC ERROR (%d): Function '%s' was not declared.\n",
+                yylineno, VarSave);
+        exit(EXIT_FAILURE);
+    }
 }

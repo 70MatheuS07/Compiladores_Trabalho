@@ -68,5 +68,38 @@ void print_var_table(VarTable* vt);
 // Clears the allocated structure.
 void free_var_table(VarTable* vt);
 
+// Function Table
+// ----------------------------------------------------------------------------
+
+struct func_table;
+typedef struct func_table FuncTable;
+
+
+FuncTable *create_func_table();
+int lookup_func(FuncTable *ft, char *s);
+
+int lookup_var_in_func(FuncTable *ft, char *s, char *func);
+
+int add_func(FuncTable *ft, char *s, int line, Type rtntype);
+
+int add_var_in_func(FuncTable *ft, char *s, char*func,int line, Type type);
+
+char *get_name_func(FuncTable *ft, int i);
+
+int get_line_func(FuncTable *ft, int i);
+
+Type get_typertn(FuncTable *ft, int i);
+/*
+char *get_namevar_in_func(FuncTable *ft, int i);
+
+int get_linevar_in_func(FuncTable *ft, int i);
+
+Type get_typevar_in_func(FuncTable *ft, int i);
+*/
+void print_table(FuncTable *ft);
+
+void free_table(FuncTable *ft);
+
 #endif // TABLES_H
+
 

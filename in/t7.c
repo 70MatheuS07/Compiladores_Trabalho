@@ -7,10 +7,10 @@ int main() {
     while (i < 3) {
         j = 0;
         while (j < 4) {
-            printf("%d ", a[i][j]);
+            //printf("%d ", a[i][j]);
             j++;
         }
-        printf("\n");
+        //printf("\n");
         i++;
     }
 

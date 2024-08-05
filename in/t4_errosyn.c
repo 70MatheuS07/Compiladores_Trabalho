@@ -1,14 +1,17 @@
-int main(){
-    int i= 10, j=5;
-    if(i==j){
+int main()
+{
+    int i = 10, j = 5;
+    if (i == j)
+    {
         printf("igual");
-        
     }
-    else{
-    printf("diferente");
+    else
+    {
+        // printf("diferente");
     }
-    //ELSE sem IF
-    else{
-        printf("erro");
+    // ELSE sem IF
+    else
+    {
+        // printf("erro");
     }
 }

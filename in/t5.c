@@ -5,11 +5,11 @@ int main() {
 
     resultado = (x == y);
 
-    printf("x == y: %d\n", resultado);
+    //printf("x == y: %d\n", resultado);
 
     resultado = !(x == y);
 
-    printf("!(x == y): %d\n", resultado);
+    //printf("!(x == y): %d\n", resultado);
 
     return 0;
 }

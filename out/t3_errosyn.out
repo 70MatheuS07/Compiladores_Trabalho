@@ -1,1 +1,1 @@
-SYNTAX ERROR (16): syntax error, unexpected CLOSE_KEYS
+SYNTAX ERROR (17): syntax error, unexpected CLOSE_KEYS, expecting ASSIGNMENT or OPEN_BRACKET or SEMICOLON or COMMA

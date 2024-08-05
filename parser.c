@@ -90,13 +90,12 @@ extern char *yytext;
 char *VarSave;
 char last_func_decl[128];
 
-int isFunction =0;
 StrTable *st;
 VarTable *vt;
 FuncTable *ft;
 Type last_decl_type;
 
-#line 100 "parser.c"
+#line 99 "parser.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -548,16 +547,16 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    64,    64,    68,    69,    73,    74,    78,    78,    82,
-      83,    84,    88,    92,    96,    97,   101,   102,   102,   103,
-     103,   107,   108,   112,   113,   117,   118,   121,   122,   123,
-     124,   125,   130,   134,   135,   139,   140,   141,   142,   143,
-     144,   145,   149,   150,   154,   155,   159,   163,   164,   168,
-     172,   172,   173,   177,   178,   179,   180,   181,   182,   186,
-     187,   188,   189,   190,   191,   192,   193,   194,   195,   196,
-     197,   198,   199,   203,   204,   205,   206,   210,   211,   212,
-     213,   217,   218,   222,   223,   223,   224,   224,   225,   225,
-     226,   226,   231,   232,   233,   237,   238,   239,   240,   241
+       0,    63,    63,    67,    68,    72,    73,    77,    77,    81,
+      82,    83,    87,    91,    95,    96,   100,   101,   101,   102,
+     102,   106,   107,   111,   112,   116,   117,   120,   121,   122,
+     123,   124,   129,   133,   134,   138,   139,   140,   141,   142,
+     143,   144,   148,   149,   153,   154,   158,   162,   163,   167,
+     171,   171,   172,   176,   177,   178,   179,   180,   181,   185,
+     186,   187,   188,   189,   190,   191,   192,   193,   194,   195,
+     196,   197,   198,   202,   203,   204,   205,   209,   210,   211,
+     212,   216,   217,   221,   222,   222,   223,   223,   224,   224,
+     225,   225,   230,   231,   232,   236,   237,   238,   239,   240
 };
 #endif
 
@@ -1744,85 +1743,115 @@ yyreduce:
     switch (yyn)
       {
   case 7:
-#line 78 "parser.y"
+#line 77 "parser.y"
                         {strcpy(last_func_decl,VarSave);new_fun();}
-#line 1750 "parser.c"
+#line 1749 "parser.c"
     break;
 
   case 12:
-#line 88 "parser.y"
+#line 87 "parser.y"
                         {new_var();}
-#line 1756 "parser.c"
+#line 1755 "parser.c"
     break;
 
   case 16:
-#line 101 "parser.y"
+#line 100 "parser.y"
          {new_var();}
-#line 1762 "parser.c"
+#line 1761 "parser.c"
     break;
 
   case 17:
-#line 102 "parser.y"
+#line 101 "parser.y"
          {new_var();}
-#line 1768 "parser.c"
+#line 1767 "parser.c"
     break;
 
   case 19:
-#line 103 "parser.y"
+#line 102 "parser.y"
          {new_var();}
-#line 1774 "parser.c"
+#line 1773 "parser.c"
+    break;
+
+  case 27:
+#line 120 "parser.y"
+          { last_decl_type = INT_TYPE; }
+#line 1779 "parser.c"
+    break;
+
+  case 28:
+#line 121 "parser.y"
+             { last_decl_type = DOUBLE_TYPE; }
+#line 1785 "parser.c"
+    break;
+
+  case 29:
+#line 122 "parser.y"
+            { last_decl_type = FLOAT_TYPE; }
+#line 1791 "parser.c"
+    break;
+
+  case 30:
+#line 123 "parser.y"
+           { last_decl_type = CHAR_TYPE; }
+#line 1797 "parser.c"
+    break;
+
+  case 31:
+#line 124 "parser.y"
+           { last_decl_type = VOID_TYPE; }
+#line 1803 "parser.c"
     break;
 
   case 50:
-#line 172 "parser.y"
+#line 171 "parser.y"
          {check_var();}
-#line 1780 "parser.c"
+#line 1809 "parser.c"
     break;
 
   case 79:
-#line 212 "parser.y"
+#line 211 "parser.y"
                    {check_var();}
-#line 1786 "parser.c"
+#line 1815 "parser.c"
     break;
 
   case 80:
-#line 213 "parser.y"
+#line 212 "parser.y"
                    {check_var();}
-#line 1792 "parser.c"
+#line 1821 "parser.c"
     break;
 
   case 84:
-#line 223 "parser.y"
+#line 222 "parser.y"
              {check_fun();}
-#line 1798 "parser.c"
+#line 1827 "parser.c"
     break;
 
   case 86:
-#line 224 "parser.y"
+#line 223 "parser.y"
          {check_var();}
-#line 1804 "parser.c"
+#line 1833 "parser.c"
     break;
 
   case 88:
-#line 225 "parser.y"
+#line 224 "parser.y"
          {check_var();}
-#line 1810 "parser.c"
+#line 1839 "parser.c"
     break;
 
   case 90:
-#line 226 "parser.y"
+#line 225 "parser.y"
          {check_var();}
-#line 1816 "parser.c"
+#line 1845 "parser.c"
     break;
 
   case 95:
-#line 237 "parser.y"
+#line 236 "parser.y"
          {check_var();}
-#line 1822 "parser.c"
+#line 1851 "parser.c"
     break;
 
 
-#line 1826 "parser.c"
+#line 1855 "parser.c"
 
         default: break;
       }
@@ -2066,7 +2095,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 244 "parser.y"
+#line 243 "parser.y"
 
 
 int main(void) {
@@ -2085,7 +2114,8 @@ int main(void) {
     free_str_table(st);
     free_table(ft);
 	free(VarSave);
-    yylex_destroy();  
+    yylex_destroy();
+	printf("fgydsfg8yfgsd8f") ;
     return 0;
 }
 
@@ -2105,14 +2135,12 @@ void check_var() {
 
 void new_var() {
     int idx = lookup_var_in_func(ft,VarSave, last_func_decl);
-	if(isFunction==0){
     if (idx != -1) {
         printf("SEMANTIC ERROR (%d): variable '%s' already declared at line %d.\n",
-                yylineno, yytext, get_line(vt, idx));
+                yylineno, VarSave, get_linevar_in_func(ft,last_func_decl, idx));
         exit(EXIT_FAILURE);
     }
     add_var_in_func(ft, VarSave, last_func_decl, yylineno, last_decl_type);
-	}
 }
 
 void new_fun(){
@@ -2122,9 +2150,7 @@ void new_fun(){
                 yylineno, last_func_decl, get_line_func(ft, idx));
         exit(EXIT_FAILURE);
     }
-	printf("HAHAHAHAHHAHAHAHAHA");
     add_func(ft, last_func_decl, yylineno, last_decl_type);
-	isFunction=0;
 }
 
 void check_fun(){

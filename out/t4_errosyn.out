@@ -1,1 +1,1 @@
-SYNTAX ERROR (11): syntax error, unexpected ELSE
+SEMANTIC ERROR (6): Function 'printf' was not declared.

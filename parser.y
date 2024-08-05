@@ -25,7 +25,6 @@ extern char *yytext;
 char *VarSave;
 char last_func_decl[128];
 
-int isFunction =0;
 StrTable *st;
 VarTable *vt;
 FuncTable *ft;
@@ -118,11 +117,11 @@ initializer
     | array_initialization
     ;
 type_specifier
-    : INT
-    | DOUBLE
-    | FLOAT
-    | CHAR
-    | VOID
+    : INT { last_decl_type = INT_TYPE; }
+    | DOUBLE { last_decl_type = DOUBLE_TYPE; }
+    | FLOAT { last_decl_type = FLOAT_TYPE; }
+    | CHAR { last_decl_type = CHAR_TYPE; }
+    | VOID { last_decl_type = VOID_TYPE; }
     ;
 
 
@@ -259,7 +258,8 @@ int main(void) {
     free_str_table(st);
     free_table(ft);
 	free(VarSave);
-    yylex_destroy();  
+    yylex_destroy();
+	printf("fgydsfg8yfgsd8f") ;
     return 0;
 }
 
@@ -279,14 +279,12 @@ void check_var() {
 
 void new_var() {
     int idx = lookup_var_in_func(ft,VarSave, last_func_decl);
-	if(isFunction==0){
     if (idx != -1) {
         printf("SEMANTIC ERROR (%d): variable '%s' already declared at line %d.\n",
-                yylineno, yytext, get_line(vt, idx));
+                yylineno, VarSave, get_linevar_in_func(ft,last_func_decl, idx));
         exit(EXIT_FAILURE);
     }
     add_var_in_func(ft, VarSave, last_func_decl, yylineno, last_decl_type);
-	}
 }
 
 void new_fun(){
@@ -296,9 +294,7 @@ void new_fun(){
                 yylineno, last_func_decl, get_line_func(ft, idx));
         exit(EXIT_FAILURE);
     }
-	printf("HAHAHAHAHHAHAHAHAHA");
     add_func(ft, last_func_decl, yylineno, last_decl_type);
-	isFunction=0;
 }
 
 void check_fun(){

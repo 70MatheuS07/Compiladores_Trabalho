@@ -1,1 +1,1 @@
-SYNTAX ERROR (9): syntax error, unexpected OPEN_KEYS
+SYNTAX ERROR (9): syntax error, unexpected OPEN_PARENTHESES, expecting ASSIGNMENT or OPEN_BRACKET or SEMICOLON or COMMA

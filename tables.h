@@ -89,10 +89,11 @@ char *get_name_func(FuncTable *ft, int i);
 int get_line_func(FuncTable *ft, int i);
 
 Type get_typertn(FuncTable *ft, int i);
+
+int get_linevar_in_func(FuncTable *ft,char*func, int i);
 /*
 char *get_namevar_in_func(FuncTable *ft, int i);
 
-int get_linevar_in_func(FuncTable *ft, int i);
 
 Type get_typevar_in_func(FuncTable *ft, int i);
 */

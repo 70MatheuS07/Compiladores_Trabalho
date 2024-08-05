@@ -11,7 +11,8 @@ int main ()
     
     if(RetornaDiferenca(x,y) == 0)
     {
-        printf("X igual Y")
+        int a
+
         //esquecendo ";"
     }
     else

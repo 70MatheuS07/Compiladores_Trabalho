@@ -132,6 +132,7 @@ void print_var_table(VarTable *vt)
 
 void free_var_table(VarTable *vt)
 {
+     printf("qqqqqqqq") ;
     free(vt);
 }
 
@@ -221,16 +222,23 @@ Type get_typertn(FuncTable *ft, int i)
 {
     return ft->t[i].Rtntype;
 }
+
+int get_linevar_in_func(FuncTable *ft,char*func, int i)
+{
+    int lookup = lookup_func(ft, func);
+    int rtn;
+    if (lookup != -1)
+    {
+        rtn=get_line(ft->t[i].Var_Table, i);
+    }
+    return rtn;
+}
 /*
 char *get_namevar_in_func(FuncTable *ft, int i)
 {
     return get_name(ft->Var_Table, i);
 }
 
-int get_linevar_in_func(FuncTable *ft, int i)
-{
-    return get_line(ft->Var_Table, i);
-}
 
 Type get_typevar_in_func(FuncTable *ft, int i)
 {
@@ -254,6 +262,7 @@ void free_table(FuncTable *ft)
 {
     for (int i=0; i < ft->size; i++)
     {
+
         free_var_table(ft->t[i].Var_Table);
     }
     free(ft);

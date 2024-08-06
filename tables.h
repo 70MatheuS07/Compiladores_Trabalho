@@ -91,6 +91,8 @@ int get_line_func(FuncTable *ft, int i);
 Type get_typertn(FuncTable *ft, int i);
 
 int get_linevar_in_func(FuncTable *ft,char*func, int i);
+
+void SomaQtdParam(char*func, FuncTable*ft);
 /*
 char *get_namevar_in_func(FuncTable *ft, int i);
 

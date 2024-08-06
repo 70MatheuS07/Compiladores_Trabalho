@@ -24,7 +24,7 @@ extern int yylineno;
 extern char *yytext;
 char *VarSave;
 char last_func_decl[128];
-
+int QtdParam;
 StrTable *st;
 VarTable *vt;
 FuncTable *ft;
@@ -79,7 +79,7 @@ function_declaration
 
 parameter_list
     : parameter_list COMMA parameter
-    | parameter
+    | parameter {SomaQtdParam(last_func_decl, ft);}
     | /* empty */
     ;
 
@@ -227,8 +227,8 @@ postfix_expression
 
 
 argument_expression_list
-    : assignment_expression
-    | argument_expression_list COMMA assignment_expression
+    : assignment_expression 
+    | argument_expression_list COMMA assignment_expression {printf("AAAA %s ", VarSave);}
 	| /* empty */
     ;
 

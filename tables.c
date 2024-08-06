@@ -147,6 +147,7 @@ typedef struct
     int line;
     Type Rtntype;
     VarTable *Var_Table;
+    int QtdParam;
 } EntryFunc;
 
 struct func_table
@@ -159,6 +160,7 @@ FuncTable *create_func_table()
 {
     FuncTable *ft = malloc(sizeof *ft);
     ft->size = 0;
+    ft->t->QtdParam=0;
     return ft;
 }
 
@@ -255,6 +257,16 @@ void print_table(FuncTable *ft)
         print_var_table(ft->t[i].Var_Table);
         printf("\n\n");
     }
+}
+
+void SomaQtdParam(char*func, FuncTable*ft){
+    int lookup = lookup_func(ft, func);
+    ft->t[lookup].QtdParam++;
+
+}
+
+int VerificaQtdParam(char*func, FuncTable*ft){
+return 1;
 }
 
 void free_table(FuncTable *ft)

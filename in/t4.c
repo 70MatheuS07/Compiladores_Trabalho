@@ -5,10 +5,10 @@ int main ()
     char coletado = "";
 
     while(coletado == "c" && x == 7){
-        scanf("%c%d", &coletado, &x);
+        //scanf("%c%d", &coletado, &x);
 
         if(coletado != "c" || x != 7){
-            printf("tente novamente\n");
+            //printf("tente novamente\n");
         }
     }
 

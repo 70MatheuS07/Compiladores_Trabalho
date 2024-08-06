@@ -1,3 +1,6 @@
+int printf(){
+
+}
 int main ()
 {
     int x=1;

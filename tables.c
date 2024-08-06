@@ -132,7 +132,6 @@ void print_var_table(VarTable *vt)
 
 void free_var_table(VarTable *vt)
 {
-     printf("qqqqqqqq") ;
     free(vt);
 }
 

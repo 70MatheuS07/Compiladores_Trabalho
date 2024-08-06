@@ -1,1 +1,27 @@
 PARSE SUCCESSFUL!
+
+
+Strings table:
+Entry 0 -- "X igual Y"
+Entry 1 -- "X diferente Y"
+
+
+Table:
+Entry 0 -- name: RetornaDiferenca, line: 1, Rtntype: int
+Variables table:
+Entry 0 -- name: x, line: 1, type: int
+Entry 1 -- name: y, line: 1, type: int
+
+
+Entry 1 -- name: printf, line: 6, Rtntype: int
+Variables table:
+
+
+Entry 2 -- name: main, line: 9, Rtntype: int
+Variables table:
+Entry 0 -- name: x, line: 11, type: int
+Entry 1 -- name: y, line: 12, type: int
+
+
+
+

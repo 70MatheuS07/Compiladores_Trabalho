@@ -1,1 +1,25 @@
 PARSE SUCCESSFUL!
+
+
+Strings table:
+Entry 0 -- "Maior que"
+Entry 1 -- "Menor que"
+Entry 2 -- "Maior igual"
+Entry 3 -- "Menor igual"
+Entry 4 -- "Igual"
+Entry 5 -- "Diferente"
+
+
+Table:
+Entry 0 -- name: printf, line: 1, Rtntype: int
+Variables table:
+
+
+Entry 1 -- name: main, line: 4, Rtntype: int
+Variables table:
+Entry 0 -- name: x, line: 6, type: int
+Entry 1 -- name: y, line: 7, type: int
+
+
+
+

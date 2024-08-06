@@ -1,3 +1,7 @@
+int printf(){
+
+}
+
 int main ()
 {
     int x = 1;
@@ -9,11 +13,9 @@ int main ()
     if(x <= y) printf("Menor igual");
     if(x == y) printf("Igual");
 
-    !@;
+    @;
 
-    // else(x != y)
-    else printf("Diferente");
-    
+
 
     return 0;
 }

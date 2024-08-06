@@ -1,1 +1,20 @@
 PARSE SUCCESSFUL!
+
+
+Strings table:
+
+
+Table:
+Entry 0 -- name: main, line: 1, Rtntype: int
+Variables table:
+Entry 0 -- name: x, line: 3, type: int
+Entry 1 -- name: y, line: 4, type: int
+Entry 2 -- name: n, line: 5, type: char
+Entry 3 -- name: soma, line: 8, type: int
+Entry 4 -- name: sub, line: 9, type: int
+Entry 5 -- name: mult, line: 10, type: int
+Entry 6 -- name: div, line: 11, type: int
+
+
+
+

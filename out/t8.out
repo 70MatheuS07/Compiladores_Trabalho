@@ -1,0 +1,30 @@
+PARSE SUCCESSFUL!
+
+
+Strings table:
+Entry 0 -- "Hello, World!\n"
+Entry 1 -- "The sum is: %d\n"
+
+
+Table:
+Entry 0 -- name: printf, line: 2, Rtntype: void
+Variables table:
+
+
+Entry 1 -- name: greet, line: 6, Rtntype: void
+Variables table:
+
+
+Entry 2 -- name: add, line: 11, Rtntype: int
+Variables table:
+Entry 0 -- name: a, line: 11, type: int
+Entry 1 -- name: b, line: 11, type: int
+
+
+Entry 3 -- name: main, line: 15, Rtntype: int
+Variables table:
+Entry 0 -- name: result, line: 20, type: int
+
+
+
+

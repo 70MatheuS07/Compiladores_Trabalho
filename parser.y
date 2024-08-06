@@ -259,7 +259,6 @@ int main(void) {
     free_table(ft);
 	free(VarSave);
     yylex_destroy();
-	printf("fgydsfg8yfgsd8f") ;
     return 0;
 }
 

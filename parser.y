@@ -19,12 +19,14 @@ void check_var();
 void new_var();
 void new_fun();
 void check_fun();
+void check_params();
 
 extern int yylineno;
 extern char *yytext;
 char *VarSave;
 char last_func_decl[128];
-int QtdParam;
+char last_func_call[128];
+int QtdParam=0;
 StrTable *st;
 VarTable *vt;
 FuncTable *ft;
@@ -78,7 +80,7 @@ function_declaration
     ;
 
 parameter_list
-    : parameter_list COMMA parameter
+    : parameter_list COMMA parameter {SomaQtdParam(last_func_decl, ft);}
     | parameter {SomaQtdParam(last_func_decl, ft);}
     | /* empty */
     ;
@@ -219,7 +221,7 @@ cast_expression
 
 postfix_expression
     : primary_expression
-	| ID {check_fun();}OPEN_PARENTHESES argument_expression_list CLOSE_PARENTHESES
+	| ID {check_fun();strcpy(last_func_call,VarSave);}OPEN_PARENTHESES argument_expression_list CLOSE_PARENTHESES{check_params();QtdParam=0;}
     | ID {check_var();}OPEN_BRACKET expression CLOSE_BRACKET
     | ID {check_var();}INCREMENT
     | ID {check_var();}DECREMENT
@@ -227,9 +229,9 @@ postfix_expression
 
 
 argument_expression_list
-    : assignment_expression 
-    | argument_expression_list COMMA assignment_expression {printf("AAAA %s ", VarSave);}
-	| /* empty */
+    : assignment_expression {QtdParam=1;}
+    | argument_expression_list COMMA assignment_expression{QtdParam++;}
+	| /* empty */{QtdParam=0;}
     ;
 
 primary_expression
@@ -301,6 +303,16 @@ void check_fun(){
     if (idx == -1) {
         printf("SEMANTIC ERROR (%d): Function '%s' was not declared.\n",
                 yylineno, VarSave);
+        exit(EXIT_FAILURE);
+    }
+    
+}
+
+void check_params(){
+    int idx = lookup_func(ft, last_func_call);
+    if(!VerificaQtdParam(last_func_call, ft,  QtdParam)){
+        printf("SEMANTIC ERROR (%d): Function '%s' was declared with %d params in (%d), but the function call has (%d) params\n",
+                yylineno, last_func_call, get_qtdparams(ft, idx), get_line_func(ft, idx), QtdParam);
         exit(EXIT_FAILURE);
     }
 }

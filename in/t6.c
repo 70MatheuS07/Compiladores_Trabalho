@@ -13,11 +13,11 @@ int main ()
     
     if(RetornaDiferenca(x,y) == 0)
     {
-        printf("X igual Y");
+        printf();
     }
     else
     {
-        printf("X diferente Y");
+        //printf("X diferente Y");
     }
 
     return 0;

@@ -4,7 +4,7 @@ void printf(){
 }
 // Função sem argumentos
 void greet() {
-    printf("Hello, World!\n");
+    //printf("Hello, World!\n");
 }
 
 // Função com argumentos
@@ -18,7 +18,7 @@ int main() {
     
     // Chamada de função com argumentos
     int result = add(10, 20);
-    printf("The sum is: %d\n", result);
+    //printf("The sum is: %d\n", result);
     
     return 0;
 }

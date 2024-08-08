@@ -224,6 +224,9 @@ Type get_typertn(FuncTable *ft, int i)
     return ft->t[i].Rtntype;
 }
 
+int get_qtdparams(FuncTable *ft, int i){
+    return ft->t[i].QtdParam;
+}
 int get_linevar_in_func(FuncTable *ft,char*func, int i)
 {
     int lookup = lookup_func(ft, func);
@@ -265,8 +268,13 @@ void SomaQtdParam(char*func, FuncTable*ft){
 
 }
 
-int VerificaQtdParam(char*func, FuncTable*ft){
-return 1;
+int VerificaQtdParam(char*func, FuncTable*ft, int qtd){
+    int lookup = lookup_func(ft, func);
+    if(ft->t[lookup].QtdParam==qtd){
+        return 1;
+    }
+    return 0;
+    ;
 }
 
 void free_table(FuncTable *ft)

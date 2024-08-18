@@ -45,7 +45,7 @@ VarTable* create_var_table();
 // Adds a fresh var to the table.
 // No check is made by this function, so make sure to call 'lookup_var' first.
 // Returns the index where the variable was inserted.
-int add_var(VarTable* vt, char* s, int line, Type type);
+int add_var(VarTable *vt, char *s, int line, Type type, int size);
 
 // Returns the index where the given variable is stored or -1 otherwise.
 int lookup_var(VarTable* vt, char* s);
@@ -82,7 +82,7 @@ int lookup_var_in_func(FuncTable *ft, char *s, char *func);
 
 int add_func(FuncTable *ft, char *s, int line, Type rtntype);
 
-int add_var_in_func(FuncTable *ft, char *s, char*func,int line, Type type);
+int add_var_in_func(FuncTable *ft, char *s, char*func,int line, Type type, int size);
 
 char *get_name_func(FuncTable *ft, int i);
 

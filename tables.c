@@ -68,6 +68,7 @@ typedef struct
     char name[VARIABLE_MAX_SIZE];
     int line;
     Type type;
+    int ArraySize;
 } Entry;
 
 struct var_table
@@ -95,11 +96,12 @@ int lookup_var(VarTable *vt, char *s)
     return -1;
 }
 
-int add_var(VarTable *vt, char *s, int line, Type type)
+int add_var(VarTable *vt, char *s, int line, Type type, int size)
 {
     strcpy(vt->t[vt->size].name, s);
     vt->t[vt->size].line = line;
     vt->t[vt->size].type = type;
+    vt->t[vt->size].ArraySize = size;
     int idx_added = vt->size;
     vt->size++;
     return idx_added;
@@ -120,13 +122,17 @@ Type get_type(VarTable *vt, int i)
     return vt->t[i].type;
 }
 
+int get_size(VarTable *vt, int i){
+    return vt->t[i].ArraySize;
+}
+
 void print_var_table(VarTable *vt)
 {
     printf("Variables table:\n");
     for (int i = 0; i < vt->size; i++)
     {
-        printf("Entry %d -- name: %s, line: %d, type: %s\n", i,
-               get_name(vt, i), get_line(vt, i), get_text(get_type(vt, i)));
+        printf("Entry %d -- name: %s, line: %d, type: %s, ArraySize: %d\n", i,
+               get_name(vt, i), get_line(vt, i), get_text(get_type(vt, i)), get_size(vt, i));
     }
 }
 
@@ -198,13 +204,13 @@ int add_func(FuncTable *ft, char *s, int line, Type rtntype)
     return idx_added;
 }
 
-int add_var_in_func(FuncTable *ft, char *s, char*func,int line, Type type)
+int add_var_in_func(FuncTable *ft, char *s, char*func,int line, Type type, int size)
 {
     int i = lookup_func(ft, func);
     int rtn=-1;
     if (i != -1)
     {
-        rtn=add_var(ft->t[i].Var_Table, s, line, type);
+        rtn=add_var(ft->t[i].Var_Table, s, line, type, size);
     }
     return rtn;
 }

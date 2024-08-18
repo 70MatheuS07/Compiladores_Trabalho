@@ -26,6 +26,7 @@ extern char *yytext;
 char *VarSave;
 char last_func_decl[128];
 char last_func_call[128];
+int ArraySize=0;
 int QtdParam=0;
 StrTable *st;
 VarTable *vt;
@@ -96,12 +97,12 @@ variable_declaration
 init_declarator_list
     : init_declarator
     | init_declarator_list COMMA init_declarator
-    ;	
+    ;
 
 init_declarator
     : ID {new_var();}
-    | ID {new_var();}ASSIGNMENT expression 
-    | ID {new_var();}OPEN_BRACKET INT_NUMBER CLOSE_BRACKET array_initialization 
+    | ID {new_var();}ASSIGNMENT expression
+    | ID OPEN_BRACKET INT_NUMBER{ArraySize=atoi(yytext);new_var();} CLOSE_BRACKET array_initialization 
     ;
 
 array_initialization
@@ -285,8 +286,11 @@ void new_var() {
                 yylineno, VarSave, get_linevar_in_func(ft,last_func_decl, idx));
         exit(EXIT_FAILURE);
     }
-    add_var_in_func(ft, VarSave, last_func_decl, yylineno, last_decl_type);
+    add_var_in_func(ft, VarSave, last_func_decl, yylineno, last_decl_type, ArraySize);
+    ArraySize=0;
 }
+
+
 
 void new_fun(){
 	int idx = lookup_func(ft, last_func_decl);

@@ -261,8 +261,8 @@ void print_table(FuncTable *ft)
     printf("Table:\n");
     for (int i = 0; i < ft->size; i++)
     {
-        printf("Entry %d -- name: %s, line: %d, Rtntype: %s\n", i,
-               get_name_func(ft, i), get_line_func(ft, i), get_text(get_typertn(ft, i)));
+        printf("Entry %d -- name: %s, line: %d, Rtntype: %s, Parameters: %d\n", i,
+               get_name_func(ft, i), get_line_func(ft, i), get_text(get_typertn(ft, i)), get_qtdparams(ft, i));
         print_var_table(ft->t[i].Var_Table);
         printf("\n\n");
     }

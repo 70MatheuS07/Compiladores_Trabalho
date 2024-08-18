@@ -315,7 +315,7 @@ void check_fun(){
 void check_params(){
     int idx = lookup_func(ft, last_func_call);
     if(!VerificaQtdParam(last_func_call, ft,  QtdParam)){
-        printf("SEMANTIC ERROR (%d): Function '%s' was declared with %d params in (%d), but the function call has (%d) params\n",
+        printf("SEMANTIC ERROR (%d): Function '%s' was declared with %d params in (%d), but the function call has %d params\n",
                 yylineno, last_func_call, get_qtdparams(ft, idx), get_line_func(ft, idx), QtdParam);
         exit(EXIT_FAILURE);
     }

@@ -6,7 +6,6 @@ typedef enum {
     CHAR_TYPE,
     INT_TYPE,
     FLOAT_TYPE,
-    DOUBLE_TYPE,
     VOID_TYPE,
     BOOL_TYPE,
     NO_TYPE,

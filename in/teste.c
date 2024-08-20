@@ -3,6 +3,6 @@ int main(){
     i++;
     float f;
     char c;
-    double d;
-    d=d;
+
+    c=c;
 }

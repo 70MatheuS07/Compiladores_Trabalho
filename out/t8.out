@@ -2,28 +2,26 @@ PARSE SUCCESSFUL!
 
 
 Strings table:
-Entry 0 -- "Hello, World!\n"
-Entry 1 -- "The sum is: %d\n"
 
 
 Table:
-Entry 0 -- name: printf, line: 2, Rtntype: void
+Entry 0 -- name: printf, line: 2, Rtntype: void, Parameters: 0
 Variables table:
 
 
-Entry 1 -- name: greet, line: 6, Rtntype: void
+Entry 1 -- name: greet, line: 6, Rtntype: void, Parameters: 0
 Variables table:
 
 
-Entry 2 -- name: add, line: 11, Rtntype: int
+Entry 2 -- name: add, line: 11, Rtntype: int, Parameters: 2
 Variables table:
-Entry 0 -- name: a, line: 11, type: int
-Entry 1 -- name: b, line: 11, type: int
+Entry 0 -- name: a, line: 11, type: int, ArraySize: 0
+Entry 1 -- name: b, line: 11, type: int, ArraySize: 0
 
 
-Entry 3 -- name: main, line: 15, Rtntype: int
+Entry 3 -- name: main, line: 15, Rtntype: int, Parameters: 0
 Variables table:
-Entry 0 -- name: result, line: 20, type: int
+Entry 0 -- name: result, line: 20, type: int, ArraySize: 0
 
 
 

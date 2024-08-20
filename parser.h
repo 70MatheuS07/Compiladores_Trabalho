@@ -87,19 +87,18 @@ extern int yydebug;
     COMMA = 288,                   /* COMMA  */
     CHAR = 289,                    /* CHAR  */
     CONTINUE = 290,                /* CONTINUE  */
-    DOUBLE = 291,                  /* DOUBLE  */
-    ELSE = 292,                    /* ELSE  */
-    FLOAT = 293,                   /* FLOAT  */
-    WHILE = 294,                   /* WHILE  */
-    IF = 295,                      /* IF  */
-    INT = 296,                     /* INT  */
-    RETURN = 297,                  /* RETURN  */
-    VOID = 298,                    /* VOID  */
-    STRING = 299,                  /* STRING  */
-    ID = 300,                      /* ID  */
-    INT_NUMBER = 301,              /* INT_NUMBER  */
-    REAL_NUMBER = 302,             /* REAL_NUMBER  */
-    CHAR_ASCII = 303               /* CHAR_ASCII  */
+    ELSE = 291,                    /* ELSE  */
+    FLOAT = 292,                   /* FLOAT  */
+    WHILE = 293,                   /* WHILE  */
+    IF = 294,                      /* IF  */
+    INT = 295,                     /* INT  */
+    RETURN = 296,                  /* RETURN  */
+    VOID = 297,                    /* VOID  */
+    STRING = 298,                  /* STRING  */
+    ID = 299,                      /* ID  */
+    INT_NUMBER = 300,              /* INT_NUMBER  */
+    REAL_NUMBER = 301,             /* REAL_NUMBER  */
+    CHAR_ASCII = 302               /* CHAR_ASCII  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif

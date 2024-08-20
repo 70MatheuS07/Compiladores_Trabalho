@@ -11,14 +11,15 @@ Entry 5 -- "Diferente"
 
 
 Table:
-Entry 0 -- name: printf, line: 1, Rtntype: int
+Entry 0 -- name: printf, line: 1, Rtntype: int, Parameters: 1
 Variables table:
+Entry 0 -- name: vet, line: 1, type: int, ArraySize: 0
 
 
-Entry 1 -- name: main, line: 4, Rtntype: int
+Entry 1 -- name: main, line: 4, Rtntype: int, Parameters: 0
 Variables table:
-Entry 0 -- name: x, line: 6, type: int
-Entry 1 -- name: y, line: 7, type: int
+Entry 0 -- name: x, line: 6, type: int, ArraySize: 0
+Entry 1 -- name: y, line: 7, type: int, ArraySize: 0
 
 
 

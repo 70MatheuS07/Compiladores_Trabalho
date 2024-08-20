@@ -176,7 +176,7 @@ expression
     ;
 
 assignment_expression
-    : ID {$1=check_var();} assignment_operator expression {printf("AAA%s %s\n", get_text($1),get_text($4)); check_assign($1, $4 ); }
+    : ID {$1=check_var();} assignment_operator expression { check_assign($1, $4 ); }
     | binary_expression
     ;
 
@@ -347,7 +347,7 @@ void type_warning(const char* op, Type t1, Type t2) {
 Type unify_bin_op(Type l, Type r,
                   const char* op, Type (*unify)(Type,Type)) {
     Type unif = unify(l, r);
-    printf("%s\n",get_text(unif));
+    
     if (unif == NO_TYPE) {
         type_error(op, l, r);
     }
@@ -356,11 +356,10 @@ Type unify_bin_op(Type l, Type r,
 
 void check_assign(Type l, Type r) {
     if (l == CHAR_TYPE && !(r == CHAR_TYPE ||r== INT_TYPE)) type_error("=", l, r);
-    if (l == INT_TYPE  && (r == FLOAT_TYPE ||r== DOUBLE_TYPE)) type_warning("=", l, r);
+    if (l == INT_TYPE  && (r == FLOAT_TYPE )) type_warning("=", l, r);
     else if (l == INT_TYPE  && !(r==INT_TYPE|| r==CHAR_TYPE)) type_error("=", l, r);
-    if (l == FLOAT_TYPE && (r==DOUBLE_TYPE))  type_warning("=", l, r);
-    else if (l == FLOAT_TYPE && !(r==FLOAT_TYPE||r==INT_TYPE|| r==CHAR_TYPE))  type_error("=", l, r);
-    if (l == DOUBLE_TYPE && !(r==DOUBLE_TYPE||r == INT_TYPE || r == FLOAT_TYPE|| r == CHAR_TYPE)) type_error("=", l, r);
+    if (l == FLOAT_TYPE && !(r==FLOAT_TYPE||r==INT_TYPE|| r==CHAR_TYPE))  type_error("=", l, r);
+    
 }
 
 

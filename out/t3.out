@@ -5,11 +5,11 @@ Strings table:
 
 
 Table:
-Entry 0 -- name: main, line: 1, Rtntype: int
+Entry 0 -- name: main, line: 1, Rtntype: int, Parameters: 0
 Variables table:
-Entry 0 -- name: x, line: 3, type: int
-Entry 1 -- name: y, line: 4, type: int
-Entry 2 -- name: novo, line: 6, type: int
+Entry 0 -- name: x, line: 3, type: int, ArraySize: 0
+Entry 1 -- name: y, line: 4, type: int, ArraySize: 0
+Entry 2 -- name: novo, line: 6, type: int, ArraySize: 0
 
 
 

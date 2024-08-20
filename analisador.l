@@ -70,7 +70,6 @@ IGNORE          [ \t\n]+
 
 char                { return CHAR; }
 continue            { return CONTINUE; }
-double              { return DOUBLE; }
 else                { return ELSE; }
 float               { return FLOAT; }
 while               { return WHILE; }

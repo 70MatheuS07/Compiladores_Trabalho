@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.5.1.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -31,8 +31,9 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-/* Undocumented macros, especially those whose name start with YY_,
-   are private implementation details.  Do not rely on them.  */
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
 
 #ifndef YY_YY_PARSER_H_INCLUDED
 # define YY_YY_PARSER_H_INCLUDED
@@ -44,58 +45,63 @@
 extern int yydebug;
 #endif
 
-/* Token type.  */
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    INCREMENT = 258,
-    DECREMENT = 259,
-    PLUS = 260,
-    MINUS = 261,
-    TIMES = 262,
-    OVER = 263,
-    PERCENT = 264,
-    GREATER_THAN = 265,
-    LESS_THAN = 266,
-    GREATER_THAN_OR_EQUAL = 267,
-    LESS_THAN_OR_EQUAL = 268,
-    EQUALS = 269,
-    NOT_EQUALS = 270,
-    ADD_ASSIGN = 271,
-    SUB_ASSIGN = 272,
-    MUL_ASSIGN = 273,
-    DIV_ASSIGN = 274,
-    MOD_ASSIGN = 275,
-    ASSIGNMENT = 276,
-    LOGICAL_AND = 277,
-    ADDRESS = 278,
-    LOGICAL_OR = 279,
-    LOGICAL_NOT = 280,
-    OPEN_PARENTHESES = 281,
-    CLOSE_PARENTHESES = 282,
-    OPEN_BRACKET = 283,
-    CLOSE_BRACKET = 284,
-    OPEN_KEYS = 285,
-    CLOSE_KEYS = 286,
-    SEMICOLON = 287,
-    COMMA = 288,
-    CHAR = 289,
-    CONTINUE = 290,
-    DOUBLE = 291,
-    ELSE = 292,
-    FLOAT = 293,
-    WHILE = 294,
-    IF = 295,
-    INT = 296,
-    RETURN = 297,
-    VOID = 298,
-    STRING = 299,
-    ID = 300,
-    INT_NUMBER = 301,
-    REAL_NUMBER = 302,
-    CHAR_ASCII = 303
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    INCREMENT = 258,               /* INCREMENT  */
+    DECREMENT = 259,               /* DECREMENT  */
+    PLUS = 260,                    /* PLUS  */
+    MINUS = 261,                   /* MINUS  */
+    TIMES = 262,                   /* TIMES  */
+    OVER = 263,                    /* OVER  */
+    PERCENT = 264,                 /* PERCENT  */
+    GREATER_THAN = 265,            /* GREATER_THAN  */
+    LESS_THAN = 266,               /* LESS_THAN  */
+    GREATER_THAN_OR_EQUAL = 267,   /* GREATER_THAN_OR_EQUAL  */
+    LESS_THAN_OR_EQUAL = 268,      /* LESS_THAN_OR_EQUAL  */
+    EQUALS = 269,                  /* EQUALS  */
+    NOT_EQUALS = 270,              /* NOT_EQUALS  */
+    ADD_ASSIGN = 271,              /* ADD_ASSIGN  */
+    SUB_ASSIGN = 272,              /* SUB_ASSIGN  */
+    MUL_ASSIGN = 273,              /* MUL_ASSIGN  */
+    DIV_ASSIGN = 274,              /* DIV_ASSIGN  */
+    MOD_ASSIGN = 275,              /* MOD_ASSIGN  */
+    ASSIGNMENT = 276,              /* ASSIGNMENT  */
+    LOGICAL_AND = 277,             /* LOGICAL_AND  */
+    ADDRESS = 278,                 /* ADDRESS  */
+    LOGICAL_OR = 279,              /* LOGICAL_OR  */
+    LOGICAL_NOT = 280,             /* LOGICAL_NOT  */
+    OPEN_PARENTHESES = 281,        /* OPEN_PARENTHESES  */
+    CLOSE_PARENTHESES = 282,       /* CLOSE_PARENTHESES  */
+    OPEN_BRACKET = 283,            /* OPEN_BRACKET  */
+    CLOSE_BRACKET = 284,           /* CLOSE_BRACKET  */
+    OPEN_KEYS = 285,               /* OPEN_KEYS  */
+    CLOSE_KEYS = 286,              /* CLOSE_KEYS  */
+    SEMICOLON = 287,               /* SEMICOLON  */
+    COMMA = 288,                   /* COMMA  */
+    CHAR = 289,                    /* CHAR  */
+    CONTINUE = 290,                /* CONTINUE  */
+    DOUBLE = 291,                  /* DOUBLE  */
+    ELSE = 292,                    /* ELSE  */
+    FLOAT = 293,                   /* FLOAT  */
+    WHILE = 294,                   /* WHILE  */
+    IF = 295,                      /* IF  */
+    INT = 296,                     /* INT  */
+    RETURN = 297,                  /* RETURN  */
+    VOID = 298,                    /* VOID  */
+    STRING = 299,                  /* STRING  */
+    ID = 300,                      /* ID  */
+    INT_NUMBER = 301,              /* INT_NUMBER  */
+    REAL_NUMBER = 302,             /* REAL_NUMBER  */
+    CHAR_ASCII = 303               /* CHAR_ASCII  */
   };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
 
 /* Value type.  */
@@ -108,6 +114,8 @@ typedef Type YYSTYPE;
 
 extern YYSTYPE yylval;
 
+
 int yyparse (void);
+
 
 #endif /* !YY_YY_PARSER_H_INCLUDED  */

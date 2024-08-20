@@ -1,7 +1,8 @@
 int main(){
     int i;
+    i++;
     float f;
     char c;
     double d;
-    i=d;
+    d=d;
 }

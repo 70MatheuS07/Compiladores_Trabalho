@@ -46,7 +46,7 @@ Type last_decl_type;
 %token ASSIGNMENT LOGICAL_AND ADDRESS LOGICAL_OR LOGICAL_NOT
 %token OPEN_PARENTHESES CLOSE_PARENTHESES OPEN_BRACKET CLOSE_BRACKET OPEN_KEYS CLOSE_KEYS
 %token SEMICOLON COMMA
-%token CHAR CONTINUE DOUBLE ELSE FLOAT
+%token CHAR CONTINUE  ELSE FLOAT
 %token WHILE IF INT RETURN
 %token VOID
 %token STRING ID INT_NUMBER REAL_NUMBER CHAR_ASCII
@@ -127,7 +127,6 @@ initializer
     ;
 type_specifier
     : INT { last_decl_type = INT_TYPE; }
-    | DOUBLE { last_decl_type = DOUBLE_TYPE; }
     | FLOAT { last_decl_type = FLOAT_TYPE; }
     | CHAR { last_decl_type = CHAR_TYPE; }
     | VOID { last_decl_type = VOID_TYPE; }
@@ -177,7 +176,7 @@ expression
     ;
 
 assignment_expression
-    : ID {check_var();} assignment_operator expression { check_assign($1, $4 ); }
+    : ID {$1=check_var();} assignment_operator expression {printf("AAA%s %s\n", get_text($1),get_text($4)); check_assign($1, $4 ); }
     | binary_expression
     ;
 

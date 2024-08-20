@@ -15,6 +15,7 @@
 
 INT_NUMBER      [0-9]+
 REAL_NUMBER     [0-9]+"."[0-9]+
+CHAR            \'[^']\'
 ID              [a-zA-Z_][a-zA-Z0-9_]*
 STRING          \"[^"]*\"
 COMMENT_FULL    \/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\/
@@ -78,6 +79,7 @@ int                 { return INT; }
 return              { return RETURN; }
 void                { return VOID; }
 
+{CHAR}          {return CHAR_ASCII;}
 {STRING}        { add_string( st, yytext); return STRING; }
 {ID}            { strcpy(VarSave, yytext); return ID; }
 {INT_NUMBER}    { return INT_NUMBER; }

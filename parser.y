@@ -7,20 +7,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "parser.h"
 #include "types.h"
+#include "parser.h"
 #include "tables.h"
 
 int yylex(void);
 void yyerror(const char *s);
 
 int yylex_destroy(void);
-void check_var();
+Type check_var();
 void new_var();
 void new_fun();
 void check_fun();
 void check_params();
 
+Type unify_bin_op(Type l, Type r,
+                  const char* op, Type (*unify)(Type,Type));
+
+//void check_assign(Type l, Type r);
+void check_bool_expr(const char* cmd, Type t);
+void check_assign(Type l, Type r);
 extern int yylineno;
 extern char *yytext;
 char *VarSave;
@@ -33,7 +39,7 @@ VarTable *vt;
 FuncTable *ft;
 Type last_decl_type;
 %}
-
+%define api.value.type {Type}
 %token INCREMENT DECREMENT PLUS MINUS TIMES OVER PERCENT
 %token GREATER_THAN LESS_THAN GREATER_THAN_OR_EQUAL LESS_THAN_OR_EQUAL EQUALS NOT_EQUALS
 %token ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN
@@ -43,7 +49,7 @@ Type last_decl_type;
 %token CHAR CONTINUE DOUBLE ELSE FLOAT
 %token WHILE IF INT RETURN
 %token VOID
-%token STRING ID INT_NUMBER REAL_NUMBER
+%token STRING ID INT_NUMBER REAL_NUMBER CHAR_ASCII
 
 %left PLUS MINUS
 
@@ -153,12 +159,12 @@ expression_statement
     ;
 
 selection_statement
-    : IF OPEN_PARENTHESES expression CLOSE_PARENTHESES statement
-    | IF OPEN_PARENTHESES expression CLOSE_PARENTHESES statement ELSE statement
+    : IF OPEN_PARENTHESES expression CLOSE_PARENTHESES statement { check_bool_expr("if", $3); }
+    | IF OPEN_PARENTHESES expression CLOSE_PARENTHESES statement ELSE statement { check_bool_expr("if", $3); }
     ;
 
 iteration_statement
-    : WHILE OPEN_PARENTHESES expression CLOSE_PARENTHESES statement
+    : WHILE OPEN_PARENTHESES expression CLOSE_PARENTHESES statement { check_bool_expr("while", $3); }
     ;
 
 return_statement
@@ -171,7 +177,7 @@ expression
     ;
 
 assignment_expression
-    : ID {check_var();} assignment_operator expression
+    : ID {check_var();} assignment_operator expression { check_assign($1, $4 ); }
     | binary_expression
     ;
 
@@ -185,19 +191,19 @@ assignment_operator
     ;
 
 binary_expression
-    : binary_expression PLUS binary_expression
-    | binary_expression MINUS binary_expression
-    | binary_expression TIMES binary_expression
-    | binary_expression OVER binary_expression
-    | binary_expression PERCENT binary_expression
-    | binary_expression LESS_THAN binary_expression
-    | binary_expression GREATER_THAN binary_expression
-    | binary_expression LESS_THAN_OR_EQUAL binary_expression
-    | binary_expression GREATER_THAN_OR_EQUAL binary_expression
-    | binary_expression EQUALS binary_expression
-    | binary_expression NOT_EQUALS binary_expression
-    | binary_expression LOGICAL_AND binary_expression
-    | binary_expression LOGICAL_OR binary_expression
+    : binary_expression PLUS binary_expression  { $$ = unify_bin_op($1, $3, "+", unify_arith_op); }
+    | binary_expression MINUS binary_expression { $$ = unify_bin_op($1, $3, "-", unify_arith_op); }
+    | binary_expression TIMES binary_expression { $$ = unify_bin_op($1, $3, "*", unify_arith_op); }
+    | binary_expression OVER binary_expression  { $$ = unify_bin_op($1, $3, "/", unify_arith_op); }
+    | binary_expression PERCENT binary_expression   { $$ = unify_bin_op($1, $3, "%", unify_arith_percent); }
+    | binary_expression LESS_THAN binary_expression { $$ = unify_bin_op($1, $3, "<", unify_relational); }
+    | binary_expression GREATER_THAN binary_expression  { $$ = unify_bin_op($1, $3, ">", unify_relational); }
+    | binary_expression LESS_THAN_OR_EQUAL binary_expression    { $$ = unify_bin_op($1, $3, "<=", unify_relational); }
+    | binary_expression GREATER_THAN_OR_EQUAL binary_expression { $$ = unify_bin_op($1, $3, ">=", unify_relational); }
+    | binary_expression EQUALS binary_expression        { $$ = unify_bin_op($1, $3, "==", unify_relational); }
+    | binary_expression NOT_EQUALS binary_expression    { $$ = unify_bin_op($1, $3, "!=", unify_relational); }
+    | binary_expression LOGICAL_AND binary_expression   { $$ = unify_bin_op($1, $3, "&&", unify_relational); }
+    | binary_expression LOGICAL_OR binary_expression    { $$ = unify_bin_op($1, $3, "||", unify_relational); }
     | cast_expression
     ;
 
@@ -236,10 +242,11 @@ argument_expression_list
     ;
 
 primary_expression
-    : ID {check_var();}
-    | INT_NUMBER
-    | REAL_NUMBER
-    | OPEN_PARENTHESES expression CLOSE_PARENTHESES
+    : ID { $$ = check_var();}
+    | INT_NUMBER {$$ = INT_TYPE;}
+    | REAL_NUMBER {$$ = FLOAT_TYPE;}
+    | CHAR_ASCII {$$ = CHAR_TYPE;}
+    | OPEN_PARENTHESES expression CLOSE_PARENTHESES { $$ = $2; }
     | STRING
     ;
 
@@ -270,13 +277,14 @@ void yyerror (char const *s) {
     exit(EXIT_FAILURE);
 }
 
-void check_var() {
+Type check_var() {
     int idx = lookup_var_in_func(ft,VarSave, last_func_decl);
     if (idx == -1) {
         printf("SEMANTIC ERROR (%d): variable '%s' was not declared.\n",
                 yylineno, VarSave);
         exit(EXIT_FAILURE);
     }
+    return get_typevar_in_func(ft, idx, last_func_decl);
 }
 
 void new_var() {
@@ -317,6 +325,50 @@ void check_params(){
     if(!VerificaQtdParam(last_func_call, ft,  QtdParam)){
         printf("SEMANTIC ERROR (%d): Function '%s' was declared with %d params in (%d), but the function call has %d params\n",
                 yylineno, last_func_call, get_qtdparams(ft, idx), get_line_func(ft, idx), QtdParam);
+        exit(EXIT_FAILURE);
+    }
+}
+
+
+// ----------------------------------------------------------------------------
+
+// Type checking and inference.
+
+void type_error(const char* op, Type t1, Type t2) {
+    printf("SEMANTIC ERROR (%d): incompatible types for operator '%s', LHS is '%s' and RHS is '%s'.\n",
+           yylineno, op, get_text(t1), get_text(t2));
+    exit(EXIT_FAILURE);
+}
+
+void type_warning(const char* op, Type t1, Type t2) {
+    printf("WARNING (%d): possible loss of precision or unexpected behavior for operator '%s'. LHS is '%s' and RHS is '%s'.\n",
+           yylineno, op, get_text(t1), get_text(t2));
+}
+
+Type unify_bin_op(Type l, Type r,
+                  const char* op, Type (*unify)(Type,Type)) {
+    Type unif = unify(l, r);
+    printf("%s\n",get_text(unif));
+    if (unif == NO_TYPE) {
+        type_error(op, l, r);
+    }
+    return unif;
+}
+
+void check_assign(Type l, Type r) {
+    if (l == CHAR_TYPE && !(r == CHAR_TYPE ||r== INT_TYPE)) type_error("=", l, r);
+    if (l == INT_TYPE  && (r == FLOAT_TYPE ||r== DOUBLE_TYPE)) type_warning("=", l, r);
+    else if (l == INT_TYPE  && !(r==INT_TYPE|| r==CHAR_TYPE)) type_error("=", l, r);
+    if (l == FLOAT_TYPE && (r==DOUBLE_TYPE))  type_warning("=", l, r);
+    else if (l == FLOAT_TYPE && !(r==FLOAT_TYPE||r==INT_TYPE|| r==CHAR_TYPE))  type_error("=", l, r);
+    if (l == DOUBLE_TYPE && !(r==DOUBLE_TYPE||r == INT_TYPE || r == FLOAT_TYPE|| r == CHAR_TYPE)) type_error("=", l, r);
+}
+
+
+void check_bool_expr(const char* cmd, Type t) {
+    if (t != BOOL_TYPE) {
+        printf("SEMANTIC ERROR (%d): conditional expression in '%s' is '%s' instead of '%s'.\n",
+           yylineno, cmd, get_text(t), get_text(BOOL_TYPE));
         exit(EXIT_FAILURE);
     }
 }

@@ -1,4 +1,4 @@
-int printf(){
+int printf(int vet){
 
 }
 int main ()

@@ -101,7 +101,7 @@ int VerificaQtdParam(char*func, FuncTable*ft, int qtd);
 char *get_namevar_in_func(FuncTable *ft, int i);
 
 */
-Type get_typevar_in_func(FuncTable *ft, int i, char*func);
+Type get_typevar_in_func(FuncTable *ft, int i, char*func, int idx);
 
 void print_table(FuncTable *ft);
 

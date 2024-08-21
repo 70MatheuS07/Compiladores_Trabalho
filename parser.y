@@ -10,6 +10,7 @@
 #include "types.h"
 #include "parser.h"
 #include "tables.h"
+#include "FuncStack.h"
 
 int yylex(void);
 void yyerror(const char *s);
@@ -20,20 +21,23 @@ void new_var();
 void new_fun();
 void check_fun();
 void check_params();
-
 Type unify_bin_op(Type l, Type r,
                   const char* op, Type (*unify)(Type,Type));
 
 //void check_assign(Type l, Type r);
 void check_bool_expr(const char* cmd, Type t);
+void check_params_types(Type type);
+void check_return_types(Type type);
 void check_assign(Type l, Type r);
 extern int yylineno;
 extern char *yytext;
 char *VarSave;
 char last_func_decl[128];
 char last_func_call[128];
+
 int ArraySize=0;
 int QtdParam=0;
+FunctionStack *fs;
 StrTable *st;
 VarTable *vt;
 FuncTable *ft;
@@ -167,8 +171,8 @@ iteration_statement
     ;
 
 return_statement
-    : RETURN expression SEMICOLON
-    | RETURN SEMICOLON
+    : RETURN expression SEMICOLON{check_return_types($2);}{pop(fs);}
+    | RETURN SEMICOLON{check_return_types(VOID_TYPE);}{pop(fs);}
     ;
 
 expression
@@ -216,8 +220,8 @@ unary_operator
 unary_expression
     : postfix_expression
     | unary_operator cast_expression
-    | INCREMENT ID {check_var();}
-    | DECREMENT ID {check_var();}
+    | INCREMENT ID {$2=check_var();}
+    | DECREMENT ID {$2=check_var();}
     ;
 
 cast_expression
@@ -228,15 +232,15 @@ cast_expression
 postfix_expression
     : primary_expression
 	| ID {check_fun();strcpy(last_func_call,VarSave);}OPEN_PARENTHESES argument_expression_list CLOSE_PARENTHESES{check_params();QtdParam=0;}
-    | ID {check_var();}OPEN_BRACKET expression CLOSE_BRACKET
-    | ID {check_var();}INCREMENT
-    | ID {check_var();}DECREMENT
+    | ID {$1=check_var();}OPEN_BRACKET expression CLOSE_BRACKET
+    | ID {$1=check_var();}INCREMENT
+    | ID {$1=check_var();}DECREMENT
     ;
 
 
 argument_expression_list
-    : assignment_expression {QtdParam=1;}
-    | argument_expression_list COMMA assignment_expression{QtdParam++;}
+    : assignment_expression {check_params_types($1);QtdParam=1;}
+    | argument_expression_list COMMA assignment_expression{ check_params_types($1);}{QtdParam++;}
 	| /* empty */{QtdParam=0;}
     ;
 
@@ -254,6 +258,7 @@ primary_expression
 int main(void) {
 	st = create_str_table();
     ft= create_func_table();
+    fs= init_stack();
 	VarSave= malloc(sizeof(char)*128);
     if (yyparse() == 0) {
         printf("PARSE SUCCESSFUL!\n");
@@ -277,13 +282,14 @@ void yyerror (char const *s) {
 }
 
 Type check_var() {
+    int lookup= lookup_func(ft, last_func_decl);
     int idx = lookup_var_in_func(ft,VarSave, last_func_decl);
     if (idx == -1) {
         printf("SEMANTIC ERROR (%d): variable '%s' was not declared.\n",
                 yylineno, VarSave);
         exit(EXIT_FAILURE);
     }
-    return get_typevar_in_func(ft, idx, last_func_decl);
+    return get_typevar_in_func(ft, idx, last_func_decl, lookup);
 }
 
 void new_var() {
@@ -316,6 +322,7 @@ void check_fun(){
                 yylineno, VarSave);
         exit(EXIT_FAILURE);
     }
+    push(fs,VarSave);
     
 }
 
@@ -327,6 +334,7 @@ void check_params(){
         exit(EXIT_FAILURE);
     }
 }
+
 
 
 // ----------------------------------------------------------------------------
@@ -367,6 +375,26 @@ void check_bool_expr(const char* cmd, Type t) {
     if (t != BOOL_TYPE) {
         printf("SEMANTIC ERROR (%d): conditional expression in '%s' is '%s' instead of '%s'.\n",
            yylineno, cmd, get_text(t), get_text(BOOL_TYPE));
+        exit(EXIT_FAILURE);
+    }
+}
+
+void check_params_types(Type type){
+    int idx = lookup_func(ft, last_func_call);
+    int aux=QtdParam+1;
+    if(type!=get_typevar_in_func(ft, QtdParam, last_func_call,idx)){
+        printf("SEMANTIC ERROR (%d): The parameter %d of '%s' call is %s, but at the function declarator(%d) is %s ",
+                yylineno,aux, last_func_call,get_text(get_typevar_in_func(ft, QtdParam, last_func_call, idx)), get_line_func(ft, idx),get_text(type));
+        exit(EXIT_FAILURE);
+    }
+}
+
+void check_return_types(Type type){
+    int idx = lookup_func(ft, peek(fs));
+    printf("%d", idx);
+    if(type!=get_typertn(ft, idx)){
+        printf("SEMANTIC ERROR (%d): The return type of %s is %s, but the function is returning %s ",
+                yylineno, last_func_call,get_text(get_typertn(ft, idx)),get_text(type));
         exit(EXIT_FAILURE);
     }
 }

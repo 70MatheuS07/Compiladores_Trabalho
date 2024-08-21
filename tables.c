@@ -250,18 +250,19 @@ char *get_namevar_in_func(FuncTable *ft, int i)
 }
 */
 
-Type get_typevar_in_func(FuncTable *ft, int i, char*func)
+Type get_typevar_in_func(FuncTable *ft, int i, char*func, int idx)
 {
-    int lookup = lookup_func(ft, func);
     Type rtn;
-    if (lookup != -1)
+    if (idx != -1)
     {
-        rtn=get_type(ft->t[lookup].Var_Table, i);
+        rtn=get_type(ft->t[idx].Var_Table, i);
     }
     // Verifica se 'i' está dentro dos limites do Var_Table
    
     return rtn;
 }
+
+
 
 
 void print_table(FuncTable *ft)

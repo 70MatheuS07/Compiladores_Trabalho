@@ -37,12 +37,13 @@ Type unify_arith_percent(Type lt, Type rt){
     return arith_percent[lt][rt];
 }
 
-static const Type relational[4][4] = {
+static const Type relational[5][5] = {
     // char      int        float      void
-    { BOOL_TYPE, BOOL_TYPE, BOOL_TYPE, NO_TYPE },  // char
-    { BOOL_TYPE, BOOL_TYPE, BOOL_TYPE, NO_TYPE },  // int
-    { BOOL_TYPE, BOOL_TYPE, BOOL_TYPE, NO_TYPE },  // float
-    { NO_TYPE,   NO_TYPE,   NO_TYPE,   NO_TYPE }   // void
+    { BOOL_TYPE, BOOL_TYPE, BOOL_TYPE, NO_TYPE, BOOL_TYPE },  // char
+    { BOOL_TYPE, BOOL_TYPE, BOOL_TYPE, NO_TYPE, BOOL_TYPE},  // int
+    { BOOL_TYPE, BOOL_TYPE, BOOL_TYPE, NO_TYPE, BOOL_TYPE },  // float
+    { NO_TYPE,   NO_TYPE,   NO_TYPE,   NO_TYPE, NO_TYPE } ,  // void
+    { BOOL_TYPE, BOOL_TYPE, BOOL_TYPE ,NO_TYPE, BOOL_TYPE }  //bool
 
 };
 

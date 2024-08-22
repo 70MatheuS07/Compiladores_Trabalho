@@ -5,20 +5,11 @@ Strings table:
 
 
 Table:
-Entry 0 -- name: RetornaDiferenca, line: 1, Rtntype: int, Parameters: 2
+Entry 0 -- name: main, line: 3, Rtntype: int, Parameters: 0
 Variables table:
-Entry 0 -- name: x, line: 1, type: int, ArraySize: 0
-Entry 1 -- name: y, line: 1, type: int, ArraySize: 0
-
-
-Entry 1 -- name: printf, line: 6, Rtntype: int, Parameters: 0
-Variables table:
-
-
-Entry 2 -- name: main, line: 9, Rtntype: int, Parameters: 0
-Variables table:
-Entry 0 -- name: x, line: 11, type: int, ArraySize: 0
-Entry 1 -- name: y, line: 12, type: int, ArraySize: 0
+Entry 0 -- name: a, line: 4, type: int, ArraySize: 5
+Entry 1 -- name: i, line: 5, type: int, ArraySize: 0
+Entry 2 -- name: j, line: 5, type: int, ArraySize: 0
 
 
 

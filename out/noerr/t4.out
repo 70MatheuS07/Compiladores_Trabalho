@@ -1,0 +1,16 @@
+PARSE SUCCESSFUL!
+
+
+Strings table:
+
+
+Table:
+Entry 0 -- name: main, line: 1, Rtntype: int, Parameters: 0
+Variables table:
+Entry 0 -- name: c, line: 3, type: char, ArraySize: 0
+Entry 1 -- name: x, line: 4, type: int, ArraySize: 0
+Entry 2 -- name: coletado, line: 5, type: char, ArraySize: 0
+
+
+
+

@@ -1,5 +1,5 @@
 int add(int a, int b) {
-    return 'c';// rertornando um char em vez de int
+    return 'c'; // rertornando um char em vez de int
 }
 
 int main() {

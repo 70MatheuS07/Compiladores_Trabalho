@@ -1,21 +1,13 @@
-/* Online C Compiler and Editor */
-#include <stdio.h>
+int add(int a, int b) {
+    return a+b; // retornando um char em vez de int
+}
 
+int main() {
 
-int main ()
-{
-    int x=1;
-    int y = 2;
-    char nome[40]="nome";
-    if(x > y) printf();
-    if(x < y) printf();
-    if(x >= y) printf();
-    if(x <= y) printf();
-    if(x == y) printf();
+    char c='c';
 
-    // else(x != y)
-    else printf();
-    printf("%s", nome)
+    int result = add(c, 8);
 
+    
     return 0;
 }

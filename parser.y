@@ -383,7 +383,7 @@ void check_params_types(Type type){
     int idx = lookup_func(ft, last_func_call);
     int aux=QtdParam+1;
     if(type!=get_typevar_in_func(ft, QtdParam, last_func_call,idx)){
-        printf("SEMANTIC ERROR (%d): The parameter %d of '%s' call is %s, but at the function declarator(%d) is %s ",
+        printf("SEMANTIC ERROR (%d): The parameter %d of '%s' call is %s, but at the function declarator(%d) is %s\n",
                 yylineno,aux, last_func_call,get_text(get_typevar_in_func(ft, QtdParam, last_func_call, idx)), get_line_func(ft, idx),get_text(type));
         exit(EXIT_FAILURE);
     }
@@ -392,7 +392,7 @@ void check_params_types(Type type){
 void check_return_types(Type type){
     int idx = lookup_func(ft, last_func_decl);
     if(type!=get_typertn(ft, idx)){
-        printf("SEMANTIC ERROR (%d): The return type of %s is %s, but the function is returning %s ",
+        printf("SEMANTIC ERROR (%d): The return type of %s is %s, but the function is returning %s\n",
                 yylineno, last_func_decl,get_text(get_typertn(ft, idx)),get_text(type));
         exit(EXIT_FAILURE);
     }

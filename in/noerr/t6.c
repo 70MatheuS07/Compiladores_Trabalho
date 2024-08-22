@@ -1,24 +1,18 @@
-int RetornaDiferenca(int x, int y){
-    if(x>y) return -6;
-    else if(x<y) return 1;
-    return 0;
-}
-int printf(){
 
-}
-int main ()
-{
-    int b=-3;
-    int x = 2;
-    int y = 2;
-    
-    if(RetornaDiferenca(x,y) == 0)
-    {
-        printf();
-    }
-    else
-    {
-        //printf("X diferente Y");
+
+int main() {
+    int a[5] ={0, 1, 11};
+    int i = 0, j;
+    {}
+
+    while (i < 3) {
+        j = 0;
+        while (j < 4) {
+            //printf("%d ", a[i][j]);
+            j++;
+        }
+        //printf("\n");
+        i++;
     }
 
     return 0;

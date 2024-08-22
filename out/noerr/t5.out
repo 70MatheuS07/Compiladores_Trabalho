@@ -1,1 +1,26 @@
-SEMANTIC ERROR (6): incompatible types for operator '=', LHS is 'int' and RHS is 'bool'.
+PARSE SUCCESSFUL!
+
+
+Strings table:
+
+
+Table:
+Entry 0 -- name: RetornaDiferenca, line: 1, Rtntype: int, Parameters: 2
+Variables table:
+Entry 0 -- name: x, line: 1, type: int, ArraySize: 0
+Entry 1 -- name: y, line: 1, type: int, ArraySize: 0
+
+
+Entry 1 -- name: printf, line: 6, Rtntype: int, Parameters: 0
+Variables table:
+
+
+Entry 2 -- name: main, line: 9, Rtntype: int, Parameters: 0
+Variables table:
+Entry 0 -- name: b, line: 11, type: int, ArraySize: 0
+Entry 1 -- name: x, line: 12, type: int, ArraySize: 0
+Entry 2 -- name: y, line: 13, type: int, ArraySize: 0
+
+
+
+

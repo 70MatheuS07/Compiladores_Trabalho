@@ -1,19 +1,24 @@
 
+void printf(){
+    
+}
+// Função sem argumentos
+void greet() {
+    //printf("Hello, World!\n");
+}
+
+// Função com argumentos
+int add(int a, int b) {
+    return a + b;
+}
 
 int main() {
-    int a[5] ={0, 1, 11};
-    int i = 0, j;
-    {}
-
-    while (i < 3) {
-        j = 0;
-        while (j < 4) {
-            //printf("%d ", a[i][j]);
-            j++;
-        }
-        //printf("\n");
-        i++;
-    }
-
+    // Chamada de função sem argumentos
+    greet();
+    
+    // Chamada de função com argumentos
+    int result = add(10, 20);
+    //printf("The sum is: %d\n", result);
+    
     return 0;
 }

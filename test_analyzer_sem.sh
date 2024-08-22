@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Diretórios
-input_dir="in"
-output_dir="out"
+input_dir="in/semerr"
+output_dir="out/semerr"
 
 # Arquivo executável do analisador
 EXE="./a.out"

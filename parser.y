@@ -171,8 +171,8 @@ iteration_statement
     ;
 
 return_statement
-    : RETURN expression SEMICOLON{check_return_types($2);}{pop(fs);}
-    | RETURN SEMICOLON{check_return_types(VOID_TYPE);}{pop(fs);}
+    : RETURN expression SEMICOLON{check_return_types($2);}
+    | RETURN SEMICOLON{check_return_types(VOID_TYPE);}
     ;
 
 expression
@@ -219,7 +219,7 @@ unary_operator
 
 unary_expression
     : postfix_expression
-    | unary_operator cast_expression
+    | unary_operator cast_expression {$$=$2;}
     | INCREMENT ID {$2=check_var();}
     | DECREMENT ID {$2=check_var();}
     ;
@@ -390,11 +390,10 @@ void check_params_types(Type type){
 }
 
 void check_return_types(Type type){
-    int idx = lookup_func(ft, peek(fs));
-    printf("%d", idx);
+    int idx = lookup_func(ft, last_func_decl);
     if(type!=get_typertn(ft, idx)){
         printf("SEMANTIC ERROR (%d): The return type of %s is %s, but the function is returning %s ",
-                yylineno, last_func_call,get_text(get_typertn(ft, idx)),get_text(type));
+                yylineno, last_func_decl,get_text(get_typertn(ft, idx)),get_text(type));
         exit(EXIT_FAILURE);
     }
 }

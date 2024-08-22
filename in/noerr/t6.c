@@ -1,6 +1,6 @@
 int RetornaDiferenca(int x, int y){
-    if(x>y) return 1;
-    else if(x<y) return -1;
+    if(x>y) return -6;
+    else if(x<y) return 1;
     return 0;
 }
 int printf(){
@@ -8,6 +8,7 @@ int printf(){
 }
 int main ()
 {
+    int b=-3;
     int x = 2;
     int y = 2;
     

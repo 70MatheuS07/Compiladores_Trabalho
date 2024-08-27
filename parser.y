@@ -2,8 +2,8 @@
 %defines "parser.h"
 %define parse.error verbose
 %define parse.lac full
-%{
 
+%{
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,6 +22,7 @@ void new_var();
 void new_fun();
 void check_fun();
 void check_params();
+
 Type unify_bin_op(Type l, Type r,
                   const char* op, Type (*unify)(Type,Type));
 
@@ -45,7 +46,6 @@ StrTable *st;
 VarTable *vt;
 FuncTable *ft;
 Type last_decl_type;
-
 %}
 
 %define api.value.type {TypeSize}
@@ -73,8 +73,6 @@ Type last_decl_type;
 %precedence ELSE
 %start program
 
-
-
 %%
 
 program
@@ -92,17 +90,17 @@ global_declaration
     ;
 
 function_declaration
-    : type_specifier ID {strcpy(last_func_decl,VarSave);new_fun();} OPEN_PARENTHESES parameter_list CLOSE_PARENTHESES compound_statement 
+    : type_specifier ID { strcpy(last_func_decl,VarSave); new_fun(); } OPEN_PARENTHESES parameter_list CLOSE_PARENTHESES compound_statement 
     ;
 
 parameter_list
-    : parameter_list COMMA parameter {SomaQtdParam(last_func_decl, ft);}
-    | parameter {SomaQtdParam(last_func_decl, ft);}
+    : parameter_list COMMA parameter { SomaQtdParam(last_func_decl, ft); }
+    | parameter { SomaQtdParam(last_func_decl, ft); }
     | /* empty */
     ;
 
 parameter
-    : type_specifier ID {new_var();}
+    : type_specifier ID { new_var(); }
     ;
 
 variable_declaration
@@ -115,9 +113,9 @@ init_declarator_list
     ;
 
 init_declarator
-    : ID {new_var();}
-    | ID {new_var();}ASSIGNMENT expression
-    | ID OPEN_BRACKET INT_NUMBER{ArraySize=atoi(yytext);new_var();} CLOSE_BRACKET array_initialization 
+    : ID { new_var(); }
+    | ID { new_var(); } ASSIGNMENT expression
+    | ID OPEN_BRACKET INT_NUMBER{ ArraySize=atoi(yytext); new_var(); } CLOSE_BRACKET array_initialization 
     ;
 
 array_initialization
@@ -179,8 +177,8 @@ iteration_statement
     ;
 
 return_statement
-    : RETURN expression SEMICOLON{check_return_types($2.type);}
-    | RETURN SEMICOLON{check_return_types(VOID_TYPE);}
+    : RETURN expression SEMICOLON { check_return_types($2.type); }
+    | RETURN SEMICOLON { check_return_types(VOID_TYPE); }
     ;
 
 expression
@@ -188,8 +186,8 @@ expression
     ;
 
 assignment_expression
-    : ID {$1.type=check_var();$1.size=check_size();} assignment_operator expression { check_assign($1.type, $4.type );check_assign_size($1.size, $4.size); $$=$1;}
-    | binary_expression{$$=$1;}
+    : ID { $1.type=check_var(); $1.size=check_size(); } assignment_operator expression { check_assign($1.type, $4.type ); check_assign_size($1.size, $4.size); $$=$1; }
+    | binary_expression { $$=$1; }
     ;
 
 assignment_operator
@@ -203,31 +201,31 @@ assignment_operator
 
 binary_expression
     : binary_expression PLUS binary_expression  { $$.type = unify_bin_op($1.type, $3.type, "+", unify_arith_op);
-                                                 check_size_bin_op($1.size, $3.size,"+");/*se saiu é igual*/$$.size=$1.size;}
+                                                 check_size_bin_op($1.size, $3.size,"+");/*se saiu é igual*/ $$.size=$1.size; }
     | binary_expression MINUS binary_expression { $$.type = unify_bin_op($1.type, $3.type, "-", unify_arith_op); 
-                                                check_size_bin_op($1.size, $3.size,"-");$$.size=$1.size;}
+                                                check_size_bin_op($1.size, $3.size,"-"); $$.size=$1.size; }
     | binary_expression TIMES binary_expression { $$.type = unify_bin_op($1.type, $3.type, "*", unify_arith_op); 
-                                                check_size_bin_op($1.size, $3.size,"*");$$.size=$1.size;}
+                                                check_size_bin_op($1.size, $3.size,"*"); $$.size=$1.size; }
     | binary_expression OVER binary_expression  { $$.type = unify_bin_op($1.type, $3.type, "/", unify_arith_op); 
-                                                check_size_bin_op($1.size, $3.size,"/");$$.size=$1.size;}
+                                                check_size_bin_op($1.size, $3.size,"/"); $$.size=$1.size; }
     | binary_expression PERCENT binary_expression   { $$.type = unify_bin_op($1.type, $3.type, "%", unify_arith_percent); 
-                                                    check_size_bin_op($1.size, $3.size,"%");$$.size=$1.size;}
+                                                    check_size_bin_op($1.size, $3.size,"%"); $$.size=$1.size; }
     | binary_expression LESS_THAN binary_expression { $$.type= unify_bin_op($1.type, $3.type, "<", unify_relational); 
-                                                    check_size_bin_op($1.size, $3.size,"<");$$.size=$1.size;}
+                                                    check_size_bin_op($1.size, $3.size,"<"); $$.size=$1.size; }
     | binary_expression GREATER_THAN binary_expression  { $$.type = unify_bin_op($1.type, $3.type, ">", unify_relational); 
-                                                        check_size_bin_op($1.size, $3.size,">");$$.size=$1.size;}
+                                                        check_size_bin_op($1.size, $3.size,">"); $$.size=$1.size; }
     | binary_expression LESS_THAN_OR_EQUAL binary_expression    { $$.type = unify_bin_op($1.type, $3.type, "<=", unify_relational); 
-                                                                check_size_bin_op($1.size, $3.size,"<=");$$.size=$1.size;}
+                                                                check_size_bin_op($1.size, $3.size,"<="); $$.size=$1.size; }
     | binary_expression GREATER_THAN_OR_EQUAL binary_expression { $$.type = unify_bin_op($1.type, $3.type, ">=", unify_relational); 
-                                                                check_size_bin_op($1.size, $3.size,">=");$$.size=$1.size;}
+                                                                check_size_bin_op($1.size, $3.size,">="); $$.size=$1.size; }
     | binary_expression EQUALS binary_expression        { $$.type = unify_bin_op($1.type, $3.type, "==", unify_relational); 
-                                                        check_size_bin_op($1.size, $3.size,"==");$$.size=$1.size;}
+                                                        check_size_bin_op($1.size, $3.size,"=="); $$.size=$1.size; }
     | binary_expression NOT_EQUALS binary_expression    { $$.type = unify_bin_op($1.type, $3.type, "!=", unify_relational); 
-                                                        check_size_bin_op($1.size, $3.size,"!=");$$.size=$1.size;}
+                                                        check_size_bin_op($1.size, $3.size,"!="); $$.size=$1.size; }
     | binary_expression LOGICAL_AND binary_expression   { $$.type = unify_bin_op($1.type, $3.type, "&&", unify_relational); 
-                                                        check_size_bin_op($1.size, $3.size,"&&");$$.size=$1.size;}
+                                                        check_size_bin_op($1.size, $3.size,"&&"); $$.size=$1.size; }
     | binary_expression LOGICAL_OR binary_expression    { $$.type = unify_bin_op($1.type, $3.type, "||", unify_relational); 
-                                                        check_size_bin_op($1.size, $3.size,"||");$$.size=$1.size;}
+                                                        check_size_bin_op($1.size, $3.size,"||"); $$.size=$1.size; }
     | cast_expression
     ;
 
@@ -239,38 +237,38 @@ unary_operator
     ;
 
 unary_expression
-    : postfix_expression{$$=$1;}
-    | unary_operator cast_expression {$$.type=$2.type; $$=$2;}
-    | INCREMENT ID {$2.type=check_var();$2.size=check_size();; $$=$2;}
-    | DECREMENT ID {$2.type=check_var();$2.size=check_size();;$$=$2;}
+    : postfix_expression { $$=$1; }
+    | unary_operator cast_expression { $$.type=$2.type; $$=$2; }
+    | INCREMENT ID { $2.type=check_var(); $2.size=check_size(); $$=$2; }
+    | DECREMENT ID { $2.type=check_var(); $2.size=check_size(); $$=$2; }
     ;
 
 cast_expression
-    : unary_expression{$$=$1;}
-    | OPEN_PARENTHESES type_specifier CLOSE_PARENTHESES cast_expression{$$=$4;}
+    : unary_expression { $$=$1; }
+    | OPEN_PARENTHESES type_specifier CLOSE_PARENTHESES cast_expression { $$=$4; }
     ;
 
 postfix_expression
-    : primary_expression{$$=$1;}
-	| ID {check_fun();strcpy(last_func_call,VarSave);}OPEN_PARENTHESES argument_expression_list CLOSE_PARENTHESES{check_params();QtdParam=0;}
-    | ID {$1.type=check_var();$1.size=0;}OPEN_BRACKET expression CLOSE_BRACKET
-    | ID {$1.type=check_var();$1.size=check_size();$$=$1;}INCREMENT
-    | ID {$1.type=check_var();$1.size=check_size();$$=$1;}DECREMENT
+    : primary_expression { $$=$1; }
+	| ID { check_fun(); strcpy(last_func_call,VarSave); } OPEN_PARENTHESES argument_expression_list CLOSE_PARENTHESES { check_params();QtdParam=0; }
+    | ID { $1.type=check_var(); $1.size=0; } OPEN_BRACKET expression CLOSE_BRACKET
+    | ID { $1.type=check_var(); $1.size=check_size(); $$=$1; } INCREMENT
+    | ID { $1.type=check_var(); $1.size=check_size(); $$=$1; } DECREMENT
     ;
 
 
 argument_expression_list
-    : assignment_expression {check_params_types_sizes($1.type, $1.size);QtdParam=1; $$=$1;}
-    | argument_expression_list COMMA assignment_expression{ check_params_types_sizes($3.type, $3.size);}{QtdParam++;}
-	| /* empty */{QtdParam=0;}
+    : assignment_expression { check_params_types_sizes($1.type, $1.size); QtdParam=1; $$=$1; }
+    | argument_expression_list COMMA assignment_expression { check_params_types_sizes($3.type, $3.size); } { QtdParam++; }
+	| /* empty */ { QtdParam=0; }
     ;
 
 primary_expression
-    : ID { $$.type = check_var(); $$.size=check_size();}
+    : ID { $$.type = check_var(); $$.size=check_size(); }
     | INT_NUMBER { $$.type = INT_TYPE; $$.size=0; }
     | REAL_NUMBER { $$.type = FLOAT_TYPE; $$.size=0; }
     | CHAR_ASCII { $$.type = CHAR_TYPE; $$.size=0; }
-    | OPEN_PARENTHESES expression CLOSE_PARENTHESES { $$= $2 ;}
+    | OPEN_PARENTHESES expression CLOSE_PARENTHESES { $$= $2; }
     | STRING
     ;
 

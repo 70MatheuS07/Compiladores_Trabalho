@@ -15,9 +15,9 @@ int add(int a, int b) {
 int main() {
     // Chamada de função sem argumentos
     greet();
-    int *i;
+    int i;
     int t[18];
-    int novo= t[1]+i;
+    int novo=t+i;
     // Chamada de função com argumentos
     int result = add(10, 20);
     //printf("The sum is: %d\n", result);

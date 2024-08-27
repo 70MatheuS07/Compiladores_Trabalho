@@ -17,6 +17,7 @@ void yyerror(const char *s);
 
 int yylex_destroy(void);
 Type check_var();
+int check_size();
 void new_var();
 void new_fun();
 void check_fun();
@@ -25,8 +26,10 @@ Type unify_bin_op(Type l, Type r,
                   const char* op, Type (*unify)(Type,Type));
 
 //void check_assign(Type l, Type r);
+void check_size_bin_op(int size1, int size2,const char* op);
 void check_bool_expr(const char* cmd, Type t);
-void check_params_types(Type type);
+void check_params_types_sizes(Type type, int size);
+void check_assign_size(int size1, int size2);
 void check_return_types(Type type);
 void check_assign(Type l, Type r);
 extern int yylineno;
@@ -42,8 +45,10 @@ StrTable *st;
 VarTable *vt;
 FuncTable *ft;
 Type last_decl_type;
+
 %}
-%define api.value.type {Type}
+
+%define api.value.type {TypeSize}
 %token INCREMENT DECREMENT PLUS MINUS TIMES OVER PERCENT
 %token GREATER_THAN LESS_THAN GREATER_THAN_OR_EQUAL LESS_THAN_OR_EQUAL EQUALS NOT_EQUALS
 %token ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN
@@ -131,8 +136,11 @@ initializer
     ;
 type_specifier
     : INT { last_decl_type = INT_TYPE; }
+    | INT TIMES { last_decl_type = INT_TYPE; }
     | FLOAT { last_decl_type = FLOAT_TYPE; }
+    | FLOAT TIMES { last_decl_type = FLOAT_TYPE; }
     | CHAR { last_decl_type = CHAR_TYPE; }
+    | CHAR TIMES { last_decl_type = CHAR_TYPE; }
     | VOID { last_decl_type = VOID_TYPE; }
     ;
 
@@ -162,16 +170,16 @@ expression_statement
     ;
 
 selection_statement
-    : IF OPEN_PARENTHESES expression CLOSE_PARENTHESES statement { check_bool_expr("if", $3); }
-    | IF OPEN_PARENTHESES expression CLOSE_PARENTHESES statement ELSE statement { check_bool_expr("if", $3); }
+    : IF OPEN_PARENTHESES expression CLOSE_PARENTHESES statement { check_bool_expr("if", $3.type); }
+    | IF OPEN_PARENTHESES expression CLOSE_PARENTHESES statement ELSE statement { check_bool_expr("if", $3.type); }
     ;
 
 iteration_statement
-    : WHILE OPEN_PARENTHESES expression CLOSE_PARENTHESES statement { check_bool_expr("while", $3); }
+    : WHILE OPEN_PARENTHESES expression CLOSE_PARENTHESES statement { check_bool_expr("while", $3.type); }
     ;
 
 return_statement
-    : RETURN expression SEMICOLON{check_return_types($2);}
+    : RETURN expression SEMICOLON{check_return_types($2.type);}
     | RETURN SEMICOLON{check_return_types(VOID_TYPE);}
     ;
 
@@ -180,8 +188,8 @@ expression
     ;
 
 assignment_expression
-    : ID {$1=check_var();} assignment_operator expression { check_assign($1, $4 ); }
-    | binary_expression
+    : ID {$1.type=check_var();$1.size=check_size();} assignment_operator expression { check_assign($1.type, $4.type );check_assign_size($1.size, $4.size); $$=$1;}
+    | binary_expression{$$=$1;}
     ;
 
 assignment_operator
@@ -194,19 +202,32 @@ assignment_operator
     ;
 
 binary_expression
-    : binary_expression PLUS binary_expression  { $$ = unify_bin_op($1, $3, "+", unify_arith_op); }
-    | binary_expression MINUS binary_expression { $$ = unify_bin_op($1, $3, "-", unify_arith_op); }
-    | binary_expression TIMES binary_expression { $$ = unify_bin_op($1, $3, "*", unify_arith_op); }
-    | binary_expression OVER binary_expression  { $$ = unify_bin_op($1, $3, "/", unify_arith_op); }
-    | binary_expression PERCENT binary_expression   { $$ = unify_bin_op($1, $3, "%", unify_arith_percent); }
-    | binary_expression LESS_THAN binary_expression { $$ = unify_bin_op($1, $3, "<", unify_relational); }
-    | binary_expression GREATER_THAN binary_expression  { $$ = unify_bin_op($1, $3, ">", unify_relational); }
-    | binary_expression LESS_THAN_OR_EQUAL binary_expression    { $$ = unify_bin_op($1, $3, "<=", unify_relational); }
-    | binary_expression GREATER_THAN_OR_EQUAL binary_expression { $$ = unify_bin_op($1, $3, ">=", unify_relational); }
-    | binary_expression EQUALS binary_expression        { $$ = unify_bin_op($1, $3, "==", unify_relational); }
-    | binary_expression NOT_EQUALS binary_expression    { $$ = unify_bin_op($1, $3, "!=", unify_relational); }
-    | binary_expression LOGICAL_AND binary_expression   { $$ = unify_bin_op($1, $3, "&&", unify_relational); }
-    | binary_expression LOGICAL_OR binary_expression    { $$ = unify_bin_op($1, $3, "||", unify_relational); }
+    : binary_expression PLUS binary_expression  { $$.type = unify_bin_op($1.type, $3.type, "+", unify_arith_op);
+                                                 check_size_bin_op($1.size, $3.size,"+");/*se saiu é igual*/$$.size=$1.size;}
+    | binary_expression MINUS binary_expression { $$.type = unify_bin_op($1.type, $3.type, "-", unify_arith_op); 
+                                                check_size_bin_op($1.size, $3.size,"-");$$.size=$1.size;}
+    | binary_expression TIMES binary_expression { $$.type = unify_bin_op($1.type, $3.type, "*", unify_arith_op); 
+                                                check_size_bin_op($1.size, $3.size,"*");$$.size=$1.size;}
+    | binary_expression OVER binary_expression  { $$.type = unify_bin_op($1.type, $3.type, "/", unify_arith_op); 
+                                                check_size_bin_op($1.size, $3.size,"/");$$.size=$1.size;}
+    | binary_expression PERCENT binary_expression   { $$.type = unify_bin_op($1.type, $3.type, "%", unify_arith_percent); 
+                                                    check_size_bin_op($1.size, $3.size,"%");$$.size=$1.size;}
+    | binary_expression LESS_THAN binary_expression { $$.type= unify_bin_op($1.type, $3.type, "<", unify_relational); 
+                                                    check_size_bin_op($1.size, $3.size,"<");$$.size=$1.size;}
+    | binary_expression GREATER_THAN binary_expression  { $$.type = unify_bin_op($1.type, $3.type, ">", unify_relational); 
+                                                        check_size_bin_op($1.size, $3.size,">");$$.size=$1.size;}
+    | binary_expression LESS_THAN_OR_EQUAL binary_expression    { $$.type = unify_bin_op($1.type, $3.type, "<=", unify_relational); 
+                                                                check_size_bin_op($1.size, $3.size,"<=");$$.size=$1.size;}
+    | binary_expression GREATER_THAN_OR_EQUAL binary_expression { $$.type = unify_bin_op($1.type, $3.type, ">=", unify_relational); 
+                                                                check_size_bin_op($1.size, $3.size,">=");$$.size=$1.size;}
+    | binary_expression EQUALS binary_expression        { $$.type = unify_bin_op($1.type, $3.type, "==", unify_relational); 
+                                                        check_size_bin_op($1.size, $3.size,"==");$$.size=$1.size;}
+    | binary_expression NOT_EQUALS binary_expression    { $$.type = unify_bin_op($1.type, $3.type, "!=", unify_relational); 
+                                                        check_size_bin_op($1.size, $3.size,"!=");$$.size=$1.size;}
+    | binary_expression LOGICAL_AND binary_expression   { $$.type = unify_bin_op($1.type, $3.type, "&&", unify_relational); 
+                                                        check_size_bin_op($1.size, $3.size,"&&");$$.size=$1.size;}
+    | binary_expression LOGICAL_OR binary_expression    { $$.type = unify_bin_op($1.type, $3.type, "||", unify_relational); 
+                                                        check_size_bin_op($1.size, $3.size,"||");$$.size=$1.size;}
     | cast_expression
     ;
 
@@ -218,38 +239,38 @@ unary_operator
     ;
 
 unary_expression
-    : postfix_expression
-    | unary_operator cast_expression {$$=$2;}
-    | INCREMENT ID {$2=check_var();}
-    | DECREMENT ID {$2=check_var();}
+    : postfix_expression{$$=$1;}
+    | unary_operator cast_expression {$$.type=$2.type; $$=$2;}
+    | INCREMENT ID {$2.type=check_var();$2.size=check_size();; $$=$2;}
+    | DECREMENT ID {$2.type=check_var();$2.size=check_size();;$$=$2;}
     ;
 
 cast_expression
-    : unary_expression
-    | OPEN_PARENTHESES type_specifier CLOSE_PARENTHESES cast_expression
+    : unary_expression{$$=$1;}
+    | OPEN_PARENTHESES type_specifier CLOSE_PARENTHESES cast_expression{$$=$4;}
     ;
 
 postfix_expression
-    : primary_expression
+    : primary_expression{$$=$1;}
 	| ID {check_fun();strcpy(last_func_call,VarSave);}OPEN_PARENTHESES argument_expression_list CLOSE_PARENTHESES{check_params();QtdParam=0;}
-    | ID {$1=check_var();}OPEN_BRACKET expression CLOSE_BRACKET
-    | ID {$1=check_var();}INCREMENT
-    | ID {$1=check_var();}DECREMENT
+    | ID {$1.type=check_var();$1.size=0;}OPEN_BRACKET expression CLOSE_BRACKET
+    | ID {$1.type=check_var();$1.size=check_size();$$=$1;}INCREMENT
+    | ID {$1.type=check_var();$1.size=check_size();$$=$1;}DECREMENT
     ;
 
 
 argument_expression_list
-    : assignment_expression {check_params_types($1);QtdParam=1;}
-    | argument_expression_list COMMA assignment_expression{ check_params_types($1);}{QtdParam++;}
+    : assignment_expression {check_params_types_sizes($1.type, $1.size);QtdParam=1; $$=$1;}
+    | argument_expression_list COMMA assignment_expression{ check_params_types_sizes($3.type, $3.size);}{QtdParam++;}
 	| /* empty */{QtdParam=0;}
     ;
 
 primary_expression
-    : ID { $$ = check_var();}
-    | INT_NUMBER {$$ = INT_TYPE;}
-    | REAL_NUMBER {$$ = FLOAT_TYPE;}
-    | CHAR_ASCII {$$ = CHAR_TYPE;}
-    | OPEN_PARENTHESES expression CLOSE_PARENTHESES { $$ = $2; }
+    : ID { $$.type = check_var(); $$.size=check_size();}
+    | INT_NUMBER { $$.type = INT_TYPE; $$.size=0; }
+    | REAL_NUMBER { $$.type = FLOAT_TYPE; $$.size=0; }
+    | CHAR_ASCII { $$.type = CHAR_TYPE; $$.size=0; }
+    | OPEN_PARENTHESES expression CLOSE_PARENTHESES { $$= $2 ;}
     | STRING
     ;
 
@@ -290,6 +311,13 @@ Type check_var() {
         exit(EXIT_FAILURE);
     }
     return get_typevar_in_func(ft, idx, last_func_decl, lookup);
+}
+
+int check_size(){
+    int lookup= lookup_func(ft, last_func_decl);
+    int idx = lookup_var_in_func(ft,VarSave, last_func_decl);
+    return get_sizevar_in_func(ft, idx, last_func_decl, lookup);
+    
 }
 
 void new_var() {
@@ -362,6 +390,15 @@ Type unify_bin_op(Type l, Type r,
     return unif;
 }
 
+void check_size_bin_op(int size1, int size2,const char* op){
+    if(size1!=size2){
+        printf("SEMANTIC ERROR (%d): incompatible types for operator '%s', LHS is '%d' and RHS is '%d'.\n",
+           yylineno, op, size1, size2 );
+        exit(EXIT_FAILURE);
+    }
+
+}
+
 void check_assign(Type l, Type r) {
     if (l == CHAR_TYPE && !(r == CHAR_TYPE ||r== INT_TYPE)) type_error("=", l, r);
     if (l == INT_TYPE  && (r == FLOAT_TYPE )) type_warning("=", l, r);
@@ -369,6 +406,16 @@ void check_assign(Type l, Type r) {
     if (l == FLOAT_TYPE && !(r==FLOAT_TYPE||r==INT_TYPE|| r==CHAR_TYPE))  type_error("=", l, r);
     
 }
+
+void check_assign_size(int size1, int size2){
+    if(size1!=size2){
+        printf("SEMANTIC ERROR (%d): incompatible types for operator '%s', LHS is '%d' and RHS is '%d'.\n",
+           yylineno, "=", size1, size2 );
+        exit(EXIT_FAILURE);
+    }
+}
+
+
 
 
 void check_bool_expr(const char* cmd, Type t) {
@@ -378,13 +425,18 @@ void check_bool_expr(const char* cmd, Type t) {
         exit(EXIT_FAILURE);
     }
 }
-
-void check_params_types(Type type){
+void check_params_types_sizes(Type type, int size)
+    {
     int idx = lookup_func(ft, last_func_call);
     int aux=QtdParam+1;
     if(type!=get_typevar_in_func(ft, QtdParam, last_func_call,idx)){
         printf("SEMANTIC ERROR (%d): The parameter %d of '%s' call is %s, but at the function declarator(%d) is %s\n",
                 yylineno,aux, last_func_call,get_text(get_typevar_in_func(ft, QtdParam, last_func_call, idx)), get_line_func(ft, idx),get_text(type));
+        exit(EXIT_FAILURE);
+    }
+    if(size!=get_sizevar_in_func(ft, QtdParam, last_func_call,idx)){
+        printf("SEMANTIC ERROR (%d): The size of parameter %d of '%s' call is %d , but at the function declarator(%d) is %d\n",
+                yylineno,aux, last_func_call,get_sizevar_in_func(ft, QtdParam, last_func_call, idx), get_line_func(ft, idx),size);
         exit(EXIT_FAILURE);
     }
 }

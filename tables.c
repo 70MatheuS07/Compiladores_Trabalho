@@ -262,6 +262,19 @@ Type get_typevar_in_func(FuncTable *ft, int i, char*func, int idx)
     return rtn;
 }
 
+Type get_sizevar_in_func(FuncTable *ft, int i, char*func, int idx)
+{
+    int rtn;
+    if (idx != -1)
+    {
+        rtn=get_size(ft->t[idx].Var_Table, i);
+    }
+    // Verifica se 'i' está dentro dos limites do Var_Table
+   
+    return rtn;
+}
+
+
 
 
 

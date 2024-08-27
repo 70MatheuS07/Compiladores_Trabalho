@@ -11,6 +11,10 @@ typedef enum {
     NO_TYPE,
 } Type;
 
+typedef struct{
+	Type type;
+	int size;
+}TypeSize;
 const char* get_text(Type type);
 Type unify_arith_op(Type lt, Type rt);
 Type unify_arith_percent(Type lt, Type rt);

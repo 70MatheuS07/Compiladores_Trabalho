@@ -10,15 +10,26 @@ typedef enum {
     BOOL_TYPE,
     NO_TYPE,
 } Type;
+typedef enum {  // Basic conversions between types.
+    B2I,
+    B2R,
+    B2S,
+    I2R,
+    I2S,
+    R2S,
+    NONE,
+} Conv;
 
-typedef struct{
-	Type type;
-	int size;
-}TypeSize;
+typedef struct {
+    Type type;
+    Conv lc;  // Left conversion.
+    Conv rc;  // Right conversion.
+} Unif;
+
 const char* get_text(Type type);
-Type unify_arith_op(Type lt, Type rt);
-Type unify_arith_percent(Type lt, Type rt);
-Type unify_relational(Type lt, Type rt);
+Unif unify_arith_op(Type lt, Type rt);
+Unif unify_arith_percent(Type lt, Type rt);
+Unif unify_relational(Type lt, Type rt);
 
 #endif // TYPES_H
 

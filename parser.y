@@ -135,11 +135,8 @@ initializer
     ;
 type_specifier
     : INT { last_decl_type = INT_TYPE; }
-    | INT TIMES { last_decl_type = INT_TYPE; }
     | FLOAT { last_decl_type = FLOAT_TYPE; }
-    | FLOAT TIMES { last_decl_type = FLOAT_TYPE; }
     | CHAR { last_decl_type = CHAR_TYPE; }
-    | CHAR TIMES { last_decl_type = CHAR_TYPE; }
     | VOID { last_decl_type = VOID_TYPE; }
     ;
 
@@ -319,7 +316,7 @@ int check_size(){
     
 }
 
-void new_var() {
+AST* new_var() {
     int idx = lookup_var_in_func(ft,VarSave, last_func_decl);
     if (idx != -1) {
         printf("SEMANTIC ERROR (%d): variable '%s' already declared at line %d.\n",

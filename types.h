@@ -11,12 +11,15 @@ typedef enum {
     NO_TYPE,
 } Type;
 typedef enum {  // Basic conversions between types.
-    B2I,
-    B2R,
-    B2S,
-    I2R,
-    I2S,
-    R2S,
+    B2I,//tirar?
+    B2F,//tirar
+    C2I,
+    C2F,
+    I2F,
+    I2C,
+    I2B
+    F2B
+    F2I,
     NONE,
 } Conv;
 

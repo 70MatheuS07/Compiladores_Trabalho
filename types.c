@@ -15,11 +15,11 @@ const char* get_text(Type type) {
 }
 
 static const Unif arith_op[4][4] = {
-    // char      int       float     void
-    { {CHAR_TYPE,NONE,NONE}, {INT_TYPE,NONE,I2C},  {FLOAT_TYPE,NONE, },   {NO_TYPE,,} },  // char
-    { {INT_TYPE,,},  {INT_TYPE,,},  {FLOAT_TYPE,,},   {NO_TYPE,,} },  // int
-    { {FLOAT_TYPE,,}, {FLOAT_TYPE,,}, {FLOAT_TYPE,,}, {NO_TYPE,,} },  // float
-    { {NO_TYPE,,},     {NO_TYPE,,},   {NO_TYPE,,},    {NO_TYPE,,} }   // void
+    // char                             int                 float                   void
+    { {CHAR_TYPE, NONE, NONE}, {INT_TYPE, C2I ,NONE},   {FLOAT_TYPE, C2F, NONE},   {NO_TYPE, NONE, NONE} },  // char
+    { {INT_TYPE, NONE, C2I},   {INT_TYPE, NONE, NONE},  {FLOAT_TYPE, I2F, NONE},   {NO_TYPE, NONE, NONE} },  // int
+    { {FLOAT_TYPE, NONE, C2F}, {FLOAT_TYPE, NONE, I2F}, {FLOAT_TYPE, NONE, NONE},  {NO_TYPE, NONE, NONE} },  // float
+    { {NO_TYPE, NONE, NONE},   {NO_TYPE, NONE, NONE},   {NO_TYPE, NONE, NONE},     {NO_TYPE, NONE, NONE} }   // void
 };
 Unif unify_arith_op(Type lt, Type rt) {
     return arith_op[lt][rt];
@@ -27,10 +27,11 @@ Unif unify_arith_op(Type lt, Type rt) {
 
 
 static const Type arith_percent[4][4] = {
-    { {CHAR_TYPE,,}, {INT_TYPE,,}, {NO_TYPE,,}, {NO_TYPE,,} },
-    { {INT_TYPE,,},  {INT_TYPE,,}, {NO_TYPE,,}, {NO_TYPE,,} },
-    { {NO_TYPE,,},   {NO_TYPE,,},  {NO_TYPE,,}, {NO_TYPE,,} },
-    { {NO_TYPE,,},   {NO_TYPE,,},  {NO_TYPE,,}, {NO_TYPE,,} },
+    // char                             int                 float                   void    
+    { {CHAR_TYPE, NONE, NONE}, {INT_TYPE, C2I, NONE},  {NO_TYPE, NONE, NONE},      {NO_TYPE, NONE, NONE} },//char
+    { {INT_TYPE, NONE, C2I},   {INT_TYPE, NONE, NONE}, {NO_TYPE, NONE, NONE}, {NO_TYPE, NONE, NONE} },//int
+    { {NO_TYPE, NONE, NONE},   {NO_TYPE, NONE, NONE},  {NO_TYPE, NONE, NONE}, {NO_TYPE, NONE, NONE} },//float
+    { {NO_TYPE,NONE, NONE},    {NO_TYPE, NONE,NONE},   {NO_TYPE, NONE, NONE}, {NO_TYPE, NONE, NONE} },//void
 
 };
 
@@ -40,11 +41,11 @@ Unif unify_arith_percent(Type lt, Type rt){
 
 static const Type relational[5][5] = {
     // char      int        float      void
-    { {BOOL_TYPE,,}, {BOOL_TYPE,,}, {BOOL_TYPE,,}, {NO_TYPE,,}, {BOOL_TYPE,,} },  // char
-    { {BOOL_TYPE,,}, {BOOL_TYPE,,}, {BOOL_TYPE,,}, {NO_TYPE,,}, {BOOL_TYPE,,}},  // int
-    { {BOOL_TYPE,,}, {BOOL_TYPE,,}, {BOOL_TYPE,,}, {NO_TYPE,,}, {BOOL_TYPE,,} },  // float
-    { {NO_TYPE,,},   {NO_TYPE,,},   {NO_TYPE,,},   {NO_TYPE,,}, {NO_TYPE,,} } ,  // void
-    { {BOOL_TYPE,,}, {BOOL_TYPE,,}, {BOOL_TYPE,,} ,{NO_TYPE,,}, {BOOL_TYPE,,} }  //bool
+    { {BOOL_TYPE, C2B, C2B},  {BOOL_TYPE, C2B, I2B},  {BOOL_TYPE, C2B, F2B},    {NO_TYPE, NONE, NONE}, {BOOL_TYPE, C2B, NONE} },  // char
+    { {BOOL_TYPE, I2B, C2B},  {BOOL_TYPE, I2B, I2B},  {BOOL_TYPE, I2B, F2B},    {NO_TYPE, NONE, NONE}, {BOOL_TYPE, I2B, NONE}},  // int 
+    { {BOOL_TYPE, F2B, C2B},  {BOOL_TYPE, F2B, I2B},  {BOOL_TYPE, F2B, F2B},    {NO_TYPE, NONE, NONE}, {BOOL_TYPE, F2B, NONE} },  // float
+    { {NO_TYPE, NONE, NONE},  {NO_TYPE, NONE, NONE},  {NO_TYPE, NONE, NONE},    {NO_TYPE, NONE, NONE}, {NO_TYPE, NONE, NONE} } ,  // void
+    { {BOOL_TYPE, NONE, C2B}, {BOOL_TYPE, NONE, I2B}, {BOOL_TYPE, NONE, F2B} ,  {NO_TYPE, NONE, NONE}, {BOOL_TYPE, NONE, NONE} }  //bool
 
 };
 

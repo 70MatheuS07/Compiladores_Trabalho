@@ -12,13 +12,14 @@ typedef enum {
 } Type;
 typedef enum {  // Basic conversions between types.
     B2I,//tirar?
-    B2F,//tirar
+    B2F,//tirar?
     C2I,
     C2F,
     I2F,
     I2C,
-    I2B
-    F2B
+    I2B,
+    F2B,
+    C2B,
     F2I,
     NONE,
 } Conv;

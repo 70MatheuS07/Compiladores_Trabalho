@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "ast.h"
 #include "types.h"
 #include "parser.h"
 #include "tables.h"
@@ -48,7 +49,7 @@ FuncTable *ft;
 Type last_decl_type;
 %}
 
-%define api.value.type {TypeSize}
+%define api.value.type {AST*}
 %token INCREMENT DECREMENT PLUS MINUS TIMES OVER PERCENT
 %token GREATER_THAN LESS_THAN GREATER_THAN_OR_EQUAL LESS_THAN_OR_EQUAL EQUALS NOT_EQUALS
 %token ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN
@@ -300,7 +301,7 @@ void yyerror (char const *s) {
     exit(EXIT_FAILURE);
 }
 
-Type check_var() {
+AST* check_var() {
     int lookup= lookup_func(ft, last_func_decl);
     int idx = lookup_var_in_func(ft,VarSave, last_func_decl);
     if (idx == -1) {
@@ -308,7 +309,7 @@ Type check_var() {
                 yylineno, VarSave);
         exit(EXIT_FAILURE);
     }
-    return get_typevar_in_func(ft, idx, last_func_decl, lookup);
+    return new_node(VAR_USE_NODE,idx,get_typevar_in_func(ft, idx, last_func_decl, lookup));
 }
 
 int check_size(){
@@ -327,6 +328,7 @@ void new_var() {
     }
     add_var_in_func(ft, VarSave, last_func_decl, yylineno, last_decl_type, ArraySize);
     ArraySize=0;
+    return new_node(VAR_DECL_NODE, idx, last_decl_type)
 }
 
 

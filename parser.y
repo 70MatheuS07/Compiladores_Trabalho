@@ -17,18 +17,19 @@ int yylex(void);
 void yyerror(const char *s);
 
 int yylex_destroy(void);
-Type check_var();
+AST* check_var();
 int check_size();
-void new_var();
+AST* new_var();
 void new_fun();
 void check_fun();
 void check_params();
 
-Type unify_bin_op(Type l, Type r,
-                  const char* op, Type (*unify)(Type,Type));
+AST* unify_bin_node(AST* l, AST* r,
+                    NodeKind kind, const char* op, Unif (*unify)(Type,Type));
 
 //void check_assign(Type l, Type r);
-void check_size_bin_op(int size1, int size2,const char* op);
+void check_size_bin_op(int size1, int size2, const char* op);
+void check_size_bin_node(AST* l, AST* r, const char* op);
 void check_bool_expr(const char* cmd, Type t);
 void check_params_types_sizes(Type type, int size);
 void check_assign_size(int size1, int size2);
@@ -198,32 +199,32 @@ assignment_operator
     ;
 
 binary_expression
-    : binary_expression PLUS binary_expression  { $$.type = unify_bin_op($1.type, $3.type, "+", unify_arith_op);
-                                                 check_size_bin_op($1.size, $3.size,"+");/*se saiu é igual*/ $$.size=$1.size; }
-    | binary_expression MINUS binary_expression { $$.type = unify_bin_op($1.type, $3.type, "-", unify_arith_op); 
-                                                check_size_bin_op($1.size, $3.size,"-"); $$.size=$1.size; }
-    | binary_expression TIMES binary_expression { $$.type = unify_bin_op($1.type, $3.type, "*", unify_arith_op); 
-                                                check_size_bin_op($1.size, $3.size,"*"); $$.size=$1.size; }
-    | binary_expression OVER binary_expression  { $$.type = unify_bin_op($1.type, $3.type, "/", unify_arith_op); 
-                                                check_size_bin_op($1.size, $3.size,"/"); $$.size=$1.size; }
-    | binary_expression PERCENT binary_expression   { $$.type = unify_bin_op($1.type, $3.type, "%", unify_arith_percent); 
-                                                    check_size_bin_op($1.size, $3.size,"%"); $$.size=$1.size; }
-    | binary_expression LESS_THAN binary_expression { $$.type= unify_bin_op($1.type, $3.type, "<", unify_relational); 
-                                                    check_size_bin_op($1.size, $3.size,"<"); $$.size=$1.size; }
-    | binary_expression GREATER_THAN binary_expression  { $$.type = unify_bin_op($1.type, $3.type, ">", unify_relational); 
-                                                        check_size_bin_op($1.size, $3.size,">"); $$.size=$1.size; }
-    | binary_expression LESS_THAN_OR_EQUAL binary_expression    { $$.type = unify_bin_op($1.type, $3.type, "<=", unify_relational); 
-                                                                check_size_bin_op($1.size, $3.size,"<="); $$.size=$1.size; }
-    | binary_expression GREATER_THAN_OR_EQUAL binary_expression { $$.type = unify_bin_op($1.type, $3.type, ">=", unify_relational); 
-                                                                check_size_bin_op($1.size, $3.size,">="); $$.size=$1.size; }
-    | binary_expression EQUALS binary_expression        { $$.type = unify_bin_op($1.type, $3.type, "==", unify_relational); 
-                                                        check_size_bin_op($1.size, $3.size,"=="); $$.size=$1.size; }
-    | binary_expression NOT_EQUALS binary_expression    { $$.type = unify_bin_op($1.type, $3.type, "!=", unify_relational); 
-                                                        check_size_bin_op($1.size, $3.size,"!="); $$.size=$1.size; }
-    | binary_expression LOGICAL_AND binary_expression   { $$.type = unify_bin_op($1.type, $3.type, "&&", unify_relational); 
-                                                        check_size_bin_op($1.size, $3.size,"&&"); $$.size=$1.size; }
-    | binary_expression LOGICAL_OR binary_expression    { $$.type = unify_bin_op($1.type, $3.type, "||", unify_relational); 
-                                                        check_size_bin_op($1.size, $3.size,"||"); $$.size=$1.size; }
+    : binary_expression PLUS binary_expression { $$ = unify_bin_node($1, $3, PLUS_NODE, "+", unify_arith_op);
+                                                 check_size_bin_node($1, $3, "+");/*se saiu é igual*/ set_node_size($$, get_node_size($1)); }
+    | binary_expression MINUS binary_expression { $$ = unify_bin_node($1, $3, MINUS_NODE, "-", unify_arith_op); 
+                                                check_size_bin_node($1, $3,"-"); set_node_size($$, get_node_size($1)); }
+    | binary_expression TIMES binary_expression { $$ = unify_bin_node($1, $3, TIMES_NODE, "*", unify_arith_op); 
+                                                check_size_bin_node($1, $3,"*"); set_node_size($$, get_node_size($1)); }
+    | binary_expression OVER binary_expression { $$ = unify_bin_node($1, $3, OVER_NODE, "/", unify_arith_op); 
+                                                check_size_bin_node($1, $3,"/"); set_node_size($$, get_node_size($1)); }
+    | binary_expression PERCENT binary_expression { $$ = unify_bin_node($1, $3, PERCENT_NODE, "%", unify_arith_percent); 
+                                                    check_size_bin_node($1, $3,"%"); set_node_size($$, get_node_size($1)); }
+    | binary_expression LESS_THAN binary_expression { $$= unify_bin_node($1, $3, LESS_THAN_NODE, "<", unify_relational); 
+                                                    check_size_bin_node($1, $3,"<"); set_node_size($$, get_node_size($1)); }
+    | binary_expression GREATER_THAN binary_expression { $$ = unify_bin_node($1, $3, GREATER_THAN_NODE, ">", unify_relational); 
+                                                        check_size_bin_node($1, $3,">"); set_node_size($$, get_node_size($1)); }
+    | binary_expression LESS_THAN_OR_EQUAL binary_expression { $$ = unify_bin_node($1, $3, LESS_THAN_OR_EQUAL_NODE, "<=", unify_relational); 
+                                                                check_size_bin_node($1, $3,"<="); set_node_size($$, get_node_size($1)); }
+    | binary_expression GREATER_THAN_OR_EQUAL binary_expression { $$ = unify_bin_node($1, $3, GREATER_THAN_OR_EQUAL_NODE, ">=", unify_relational); 
+                                                                check_size_bin_node($1, $3,">="); set_node_size($$, get_node_size($1)); }
+    | binary_expression EQUALS binary_expression { $$ = unify_bin_node($1, $3, EQUALS_NODE, "==", unify_relational); 
+                                                        check_size_bin_node($1, $3,"=="); set_node_size($$, get_node_size($1)); }
+    | binary_expression NOT_EQUALS binary_expression { $$ = unify_bin_node($1, $3, NOT_EQUALS_NODE, "!=", unify_relational); 
+                                                        check_size_bin_node($1, $3,"!="); set_node_size($$, get_node_size($1)); }
+    | binary_expression LOGICAL_AND binary_expression { $$ = unify_bin_node($1, $3, LOGICAL_AND_NODE, "&&", unify_relational); 
+                                                        check_size_bin_node($1, $3,"&&"); set_node_size($$, get_node_size($1)); }
+    | binary_expression LOGICAL_OR binary_expression { $$ = unify_bin_node($1, $3, LOGICAL_OR_NODE, "||", unify_relational); 
+                                                        check_size_bin_node($1, $3,"||"); set_node_size($$, get_node_size($1)); }
     | cast_expression
     ;
 
@@ -325,12 +326,12 @@ AST* new_var() {
     }
     add_var_in_func(ft, VarSave, last_func_decl, yylineno, last_decl_type, ArraySize);
     ArraySize=0;
-    return new_node(VAR_DECL_NODE, idx, last_decl_type)
+    return new_node(VAR_DECL_NODE, idx, last_decl_type);
 }
 
 
 
-void new_fun(){
+AST* new_fun(){
 	int idx = lookup_func(ft, last_func_decl);
     if (idx != -1) {
         printf("SEMANTIC ERROR (%d): Function '%s' already declared at line %d.\n",
@@ -338,16 +339,17 @@ void new_fun(){
         exit(EXIT_FAILURE);
     }
     add_func(ft, last_func_decl, yylineno, last_decl_type);
+    return new_node(FUN_DECL_NODE, idx, last_decl_type);
 }
 
-void check_fun(){
+AST* check_fun(){
 	int idx = lookup_func(ft, VarSave);
     if (idx == -1) {
         printf("SEMANTIC ERROR (%d): Function '%s' was not declared.\n",
                 yylineno, VarSave);
         exit(EXIT_FAILURE);
     }
-    push(fs,VarSave);
+    return new_node(FUN_USE_NODE, idx, last_decl_type);
     
 }
 
@@ -377,16 +379,23 @@ void type_warning(const char* op, Type t1, Type t2) {
            yylineno, op, get_text(t1), get_text(t2));
 }
 
-Type unify_bin_op(Type l, Type r,
-                  const char* op, Type (*unify)(Type,Type)) {
-    Type unif = unify(l, r);
+AST* unify_bin_op(AST* l, AST* r,
+                  const char* op, Unif (*unify)(Type,Type)) {
+
+    Type lt = get_node_type(l);
+    Type rt = get_node_type(r);
+    Unif unif = unify(lt, rt);
     
     if (unif == NO_TYPE) {
         type_error(op, l, r);
     }
-    return unif;
+
+    l = create_conv_node(unif.lc, l);
+    r = create_conv_node(unif.rc, r);
+    return new_subtree(kind, unif.type, 2, l, r);
 }
 
+/*
 void check_size_bin_op(int size1, int size2,const char* op){
     if(size1!=size2){
         printf("SEMANTIC ERROR (%d): incompatible types for operator '%s', LHS is '%d' and RHS is '%d'.\n",
@@ -394,6 +403,19 @@ void check_size_bin_op(int size1, int size2,const char* op){
         exit(EXIT_FAILURE);
     }
 
+}
+*/
+
+void check_size_bin_node(AST* l, AST* r, const char* op){
+    int size1 = get_node_size(l);
+    int size2 = get_node_size(r);
+    
+    if(size1!=size2){
+        printf("SEMANTIC ERROR (%d): incompatible types for operator '%s', LHS is '%d' and RHS is '%d'.\n",
+           yylineno, op, size1, size2 );
+        exit(EXIT_FAILURE);
+    }
+    
 }
 
 void check_assign(Type l, Type r) {

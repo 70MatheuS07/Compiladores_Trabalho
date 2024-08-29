@@ -20,6 +20,8 @@ typedef enum {
     REPEAT_NODE,
     STR_VAL_NODE,
     TIMES_NODE,
+    FUN_DECL_NODE,
+    FUN_USE_NODE,
     VAR_DECL_NODE,
     VAR_LIST_NODE,
     VAR_USE_NODE,
@@ -53,6 +55,9 @@ float get_float_data(AST *node);
 
 Type get_node_type(AST *node);
 int get_child_count(AST *node);
+
+void set_node_size(AST *node, int size);
+int get_node_size(AST *node);
 
 void print_tree(AST *ast);
 void print_dot(AST *ast);

@@ -26,7 +26,7 @@ Unif unify_arith_op(Type lt, Type rt) {
 }
 
 
-static const Type arith_percent[4][4] = {
+static const Unif arith_percent[4][4] = {
     // char                             int                 float                   void    
     { {CHAR_TYPE, NONE, NONE}, {INT_TYPE, C2I, NONE},  {NO_TYPE, NONE, NONE},      {NO_TYPE, NONE, NONE} },//char
     { {INT_TYPE, NONE, C2I},   {INT_TYPE, NONE, NONE}, {NO_TYPE, NONE, NONE}, {NO_TYPE, NONE, NONE} },//int
@@ -39,7 +39,7 @@ Unif unify_arith_percent(Type lt, Type rt){
     return arith_percent[lt][rt];
 }
 
-static const Type relational[5][5] = {
+static const Unif relational[5][5] = {
     // char      int        float      void
     { {BOOL_TYPE, C2B, C2B},  {BOOL_TYPE, C2B, I2B},  {BOOL_TYPE, C2B, F2B},    {NO_TYPE, NONE, NONE}, {BOOL_TYPE, C2B, NONE} },  // char
     { {BOOL_TYPE, I2B, C2B},  {BOOL_TYPE, I2B, I2B},  {BOOL_TYPE, I2B, F2B},    {NO_TYPE, NONE, NONE}, {BOOL_TYPE, I2B, NONE}},  // int 
@@ -49,6 +49,6 @@ static const Type relational[5][5] = {
 
 };
 
-Type unify_relational(Type lt, Type rt){
+Unif unify_relational(Type lt, Type rt){
     return relational[lt][rt];
 }

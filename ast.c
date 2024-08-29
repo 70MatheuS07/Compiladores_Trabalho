@@ -146,6 +146,14 @@ int has_data(NodeKind kind) {
     }
 }
 
+void set_node_size(AST *node, int size){
+    node->size = size;
+}
+
+int get_node_size(AST *node){
+    return node->size;
+}
+
 int print_node_dot(AST *node) {
     int my_nr = nr++;
 
@@ -182,3 +190,4 @@ void print_dot(AST *tree) {
     print_node_dot(tree);
     fprintf(stderr, "}\n");
 }
+

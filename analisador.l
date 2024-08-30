@@ -7,6 +7,7 @@
     #include <string.h>
     #include <stdlib.h>
     #include "types.h"
+    #include "ast.h"
     #include "parser.h"
     #include "tables.h"
     extern StrTable *st;
@@ -78,11 +79,16 @@ int                 { return INT; }
 return              { return RETURN; }
 void                { return VOID; }
 
-{CHAR}          {return CHAR_ASCII;}
+{CHAR}          { yylval = new_node(REAL_VAL_NODE, 0, REAL_TYPE);
+                  set_char_data(yylval, (char) yytext[1]); 
+                  return CHAR_ASCII;}
 {STRING}        { add_string( st, yytext); return STRING; }
 {ID}            { strcpy(VarSave, yytext); return ID; }
-{INT_NUMBER}    { return INT_NUMBER; }
-{REAL_NUMBER}   { return REAL_NUMBER; }
+{INT_NUMBER}    { yylval = new_node(INT_VAL_NODE, atoi(yytext), INT_TYPE); 
+                  return INT_NUMBER; }
+{REAL_NUMBER}   { yylval = new_node(REAL_VAL_NODE, 0, REAL_TYPE);
+                  set_float_data(yylval, (float) atof(yytext)); 
+                  return REAL_NUMBER; }
 
 .                { printf("LEXICAL ERROR (%d): Unknown symbol %s\n", yylineno, yytext);
                 exit(EXIT_FAILURE); }

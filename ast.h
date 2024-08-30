@@ -39,12 +39,12 @@ struct node; // Opaque structure to ensure encapsulation.
 
 typedef struct node AST;
 
-AST* new_node(NodeKind kind, int data, Type type);
+AST* new_node(NodeKind kind, int data, Type type, int size);
 
 void add_child(AST *parent, AST *child);
 AST* get_child(AST *parent, int idx);
 
-AST* new_subtree(NodeKind kind, Type type, int child_count, ...);
+AST* new_subtree(NodeKind kind, Type type, int size ,int child_count, ...);
 
 NodeKind get_kind(AST *node);
 char* kind2str(NodeKind kind);
@@ -52,6 +52,7 @@ char* kind2str(NodeKind kind);
 int get_data(AST *node);
 void set_float_data(AST *node, float data);
 float get_float_data(AST *node);
+void set_char_data(AST *node, char data); 
 
 Type get_node_type(AST *node);
 int get_child_count(AST *node);

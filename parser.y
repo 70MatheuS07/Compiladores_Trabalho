@@ -31,10 +31,13 @@ AST* unify_bin_node(AST* l, AST* r,
 void check_size_bin_op(int size1, int size2, const char* op);
 void check_size_bin_node(AST* l, AST* r, const char* op);
 void check_bool_expr(const char* cmd, Type t);
+AST* check_if_then(AST *e, AST *b);
+AST* check_if_then_else(AST *e, AST *b1, AST *b2);
+AST* check_repeat(AST *b, AST *e);
 void check_params_types_sizes(Type type, int size);
-void check_assign_size(int size1, int size2);
+void assign_size_error(int size1, int size2);
 void check_return_types(Type type);
-void check_assign(Type l, Type r);
+AST* check_assign(Type l, Type r);
 extern int yylineno;
 extern char *yytext;
 char *VarSave;
@@ -152,13 +155,13 @@ statement_list
     ;
 
 statement
-    : expression_statement
-    | compound_statement
-    | selection_statement
-    | iteration_statement
-    | return_statement
-    | variable_declaration
-    | CONTINUE SEMICOLON
+    : expression_statement { $$ = $1; }
+    | compound_statement { $$ = $1; }
+    | selection_statement { $$ = $1; }
+    | iteration_statement { $$ = $1; }
+    | return_statement { $$ = $1; }
+    | variable_declaration { $$ = $1; }
+    | CONTINUE SEMICOLON { $$ = $1; }
     ;
 
 expression_statement
@@ -167,16 +170,16 @@ expression_statement
     ;
 
 selection_statement
-    : IF OPEN_PARENTHESES expression CLOSE_PARENTHESES statement { check_bool_expr("if", $3.type); }
-    | IF OPEN_PARENTHESES expression CLOSE_PARENTHESES statement ELSE statement { check_bool_expr("if", $3.type); }
+    : IF OPEN_PARENTHESES expression CLOSE_PARENTHESES statement { $$ = check_if_then($3, $5) ;}
+    | IF OPEN_PARENTHESES expression CLOSE_PARENTHESES statement ELSE statement { $$ = check_if_then_else($3, $5 , $7); }
     ;
 
 iteration_statement
-    : WHILE OPEN_PARENTHESES expression CLOSE_PARENTHESES statement { check_bool_expr("while", $3.type); }
+    : WHILE OPEN_PARENTHESES expression CLOSE_PARENTHESES statement { $$ = check_repeat($5, $3); }
     ;
 
 return_statement
-    : RETURN expression SEMICOLON { check_return_types($2.type); }
+    : RETURN expression SEMICOLON { check_return_types(get_node_type($2)); }
     | RETURN SEMICOLON { check_return_types(VOID_TYPE); }
     ;
 
@@ -185,7 +188,7 @@ expression
     ;
 
 assignment_expression
-    : ID { $1.type=check_var(); $1.size=check_size(); } assignment_operator expression { check_assign($1.type, $4.type ); check_assign_size($1.size, $4.size); $$=$1; }
+    : ID { $1=check_var(); } assignment_operator expression { $$=check_assign($1, $4 ); }
     | binary_expression { $$=$1; }
     ;
 
@@ -237,9 +240,9 @@ unary_operator
 
 unary_expression
     : postfix_expression { $$=$1; }
-    | unary_operator cast_expression { $$.type=$2.type; $$=$2; }
-    | INCREMENT ID { $2.type=check_var(); $2.size=check_size(); $$=$2; }
-    | DECREMENT ID { $2.type=check_var(); $2.size=check_size(); $$=$2; }
+    | unary_operator cast_expression { $$=$2; }
+    | INCREMENT ID { $2=check_var(); $$=$2; }
+    | DECREMENT ID { $2=check_var(); $$=$2; }
     ;
 
 cast_expression
@@ -250,23 +253,23 @@ cast_expression
 postfix_expression
     : primary_expression { $$=$1; }
 	| ID { check_fun(); strcpy(last_func_call,VarSave); } OPEN_PARENTHESES argument_expression_list CLOSE_PARENTHESES { check_params();QtdParam=0; }
-    | ID { $1.type=check_var(); $1.size=0; } OPEN_BRACKET expression CLOSE_BRACKET
-    | ID { $1.type=check_var(); $1.size=check_size(); $$=$1; } INCREMENT
-    | ID { $1.type=check_var(); $1.size=check_size(); $$=$1; } DECREMENT
+    | ID { $1=check_var(); } OPEN_BRACKET expression CLOSE_BRACKET
+    | ID { $1=check_var(); } INCREMENT
+    | ID { $1=check_var(); } DECREMENT
     ;
 
 
 argument_expression_list
-    : assignment_expression { check_params_types_sizes($1.type, $1.size); QtdParam=1; $$=$1; }
-    | argument_expression_list COMMA assignment_expression { check_params_types_sizes($3.type, $3.size); } { QtdParam++; }
+    : assignment_expression { check_params_types_sizes(get_node_type($1), get_node_size($1)); QtdParam=1; $$=$1; }
+    | argument_expression_list COMMA assignment_expression { check_params_types_sizes(get_node_type($1), get_node_size($1)); } { QtdParam++; }
 	| /* empty */ { QtdParam=0; }
     ;
 
 primary_expression
-    : ID { $$.type = check_var(); $$.size=check_size(); }
-    | INT_NUMBER { $$.type = INT_TYPE; $$.size=0; }
-    | REAL_NUMBER { $$.type = FLOAT_TYPE; $$.size=0; }
-    | CHAR_ASCII { $$.type = CHAR_TYPE; $$.size=0; }
+    : ID { $$ = check_var(); }
+    | INT_NUMBER { $$ = $1 }
+    | REAL_NUMBER { $$ = $1 }
+    | CHAR_ASCII { $$ = $1 }
     | OPEN_PARENTHESES expression CLOSE_PARENTHESES { $$= $2; }
     | STRING
     ;
@@ -307,7 +310,8 @@ AST* check_var() {
                 yylineno, VarSave);
         exit(EXIT_FAILURE);
     }
-    return new_node(VAR_USE_NODE,idx,get_typevar_in_func(ft, idx, last_func_decl, lookup));
+    return new_node(VAR_USE_NODE,idx,get_typevar_in_func(ft, idx, last_func_decl, lookup),
+                    get_sizevar_in_func(ft, idx, last_func_decl, lookup););
 }
 
 int check_size(){
@@ -325,8 +329,9 @@ AST* new_var() {
         exit(EXIT_FAILURE);
     }
     add_var_in_func(ft, VarSave, last_func_decl, yylineno, last_decl_type, ArraySize);
+    AST*aux= new_node(VAR_DECL_NODE, idx, last_decl_type,ArraySize);
     ArraySize=0;
-    return new_node(VAR_DECL_NODE, idx, last_decl_type);
+    return aux;
 }
 
 
@@ -379,6 +384,23 @@ void type_warning(const char* op, Type t1, Type t2) {
            yylineno, op, get_text(t1), get_text(t2));
 }
 
+AST* create_conv_node(Conv conv, AST *n) {
+    switch(conv) {
+        case C2I:  return new_subtree(C2I_NODE, INT_TYPE, 1, n);  // char -> int
+        case C2F:  return new_subtree(C2F_NODE, FLOAT_TYPE, 1, n);  // char -> float
+        case I2F:  return new_subtree(I2F_NODE, FLOAT_TYPE, 1, n);  // int -> float
+        case I2C:  return new_subtree(I2C_NODE, CHAR_TYPE, 1, n);  // int -> char
+        case I2B:  return new_subtree(I2B_NODE, BOOL_TYPE, 1, n);  // int -> bool
+        case F2B:  return new_subtree(F2B_NODE, BOOL_TYPE, 1, n);  // float -> bool
+        case C2B:  return new_subtree(C2B_NODE, BOOL_TYPE, 1, n);  // char -> bool
+        case F2I:  return new_subtree(F2I_NODE, INT_TYPE, 1, n);  // float -> int
+        case NONE: return n;  // Nenhuma conversão necessária
+        default:
+            printf("INTERNAL ERROR: invalid conversion of types!\n");
+            exit(EXIT_FAILURE);
+    }
+}
+
 AST* unify_bin_op(AST* l, AST* r,
                   const char* op, Unif (*unify)(Type,Type)) {
 
@@ -418,15 +440,26 @@ void check_size_bin_node(AST* l, AST* r, const char* op){
     
 }
 
-void check_assign(Type l, Type r) {
-    if (l == CHAR_TYPE && !(r == CHAR_TYPE ||r== INT_TYPE)) type_error("=", l, r);
-    if (l == INT_TYPE  && (r == FLOAT_TYPE )) type_warning("=", l, r);
-    else if (l == INT_TYPE  && !(r==INT_TYPE|| r==CHAR_TYPE)) type_error("=", l, r);
-    if (l == FLOAT_TYPE && !(r==FLOAT_TYPE||r==INT_TYPE|| r==CHAR_TYPE))  type_error("=", l, r);
+AST* check_assign(AST *l, AST* r) {
+    Type lt = get_node_type(l);
+    Type rt = get_node_type(r);
     
+    int lt_size=get_node_size(l);
+    int rt_size=get_node_size(l);
+    
+    if (unif == NO_TYPE) {
+        type_error(op, l, r);
+    }
+    if(lt_size!=rt_size){
+        assign_size_error(lt_size,rt_size);
+    }
+
+    l = create_conv_node(unif.lc, l);
+    r = create_conv_node(unif.rc, r);
+    return new_subtree(ASSIGN_NODE, NO_TYPE, 2, l, r);
 }
 
-void check_assign_size(int size1, int size2){
+void assign_size_error(int size1, int size2){
     if(size1!=size2){
         printf("SEMANTIC ERROR (%d): incompatible types for operator '%s', LHS is '%d' and RHS is '%d'.\n",
            yylineno, "=", size1, size2 );
@@ -444,6 +477,23 @@ void check_bool_expr(const char* cmd, Type t) {
         exit(EXIT_FAILURE);
     }
 }
+
+AST* check_if_then(AST *e, AST *b) {
+    check_bool_expr("if", get_node_type(e));
+    return new_subtree(IF_NODE, NO_TYPE, 2, e, b);
+}
+
+AST* check_if_then_else(AST *e, AST *b1, AST *b2) {
+    check_bool_expr("if", get_node_type(e));
+    return new_subtree(IF_NODE, NO_TYPE, 3, e, b1, b2);
+}
+
+AST* check_repeat(AST *b, AST *e) {
+    check_bool_expr("repeat", get_node_type(e));
+    return new_subtree(REPEAT_NODE, NO_TYPE, 2, b, e);
+}
+
+
 void check_params_types_sizes(Type type, int size)
     {
     int idx = lookup_func(ft, last_func_call);

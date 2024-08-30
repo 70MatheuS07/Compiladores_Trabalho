@@ -21,7 +21,7 @@ struct node {
     AST* child[CHILDREN_LIMIT];
 };
 
-AST* new_node(NodeKind kind, int data, Type type) {
+AST* new_node(NodeKind kind, int data, Type type, int size) {
     AST* node = malloc(sizeof * node);
     node->kind = kind;
     node->data.as_int = data;
@@ -46,13 +46,13 @@ AST* get_child(AST *parent, int idx) {
     return parent->child[idx];
 }
 
-AST* new_subtree(NodeKind kind, Type type, int child_count, ...) {
+AST* new_subtree(NodeKind kind, Type type, int size ,int child_count, ...) {
     if (child_count > CHILDREN_LIMIT) {
         fprintf(stderr, "Too many children as arguments!\n");
         exit(1);
     }
 
-    AST* node = new_node(kind, 0, type);
+    AST* node = new_node(kind, 0, type, size);
     va_list ap;
     va_start(ap, child_count);
     for (int i = 0; i < child_count; i++) {
@@ -71,6 +71,11 @@ int get_data(AST *node) {
 }
 
 void set_float_data(AST *node, float data) {
+    node->data.as_float = data;
+}
+
+
+void set_char_data(AST *node, char data) {
     node->data.as_float = data;
 }
 

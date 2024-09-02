@@ -127,12 +127,14 @@ char* kind2str(NodeKind kind) {
         case VAR_LIST_NODE: return "var_list";
         case VAR_USE_NODE:  return "var_use";
         case WRITE_NODE:    return "write";
-        case B2I_NODE:      return "B2I";
-        case B2R_NODE:      return "B2R";
-        case B2S_NODE:      return "B2S";
-        case I2R_NODE:      return "I2R";
-        case I2S_NODE:      return "I2S";
-        case R2S_NODE:      return "R2S";
+        case C2I_NODE:      return "C2I";
+        case C2F_NODE:      return "C2F";
+        case I2F_NODE:      return "I2F";
+        case I2C_NODE:      return "I2C";
+        case I2B_NODE:      return "I2B";
+        case F2B_NODE:      return "F2B";
+        case C2B_NODE:      return "C2B";
+        case F2I_NODE:      return "F2I";
         default:            return "ERROR!!";
     }
 }

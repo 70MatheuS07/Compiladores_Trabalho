@@ -34,6 +34,6 @@ const char* get_text(Type type);
 Unif unify_arith_op(Type lt, Type rt);
 Unif unify_arith_percent(Type lt, Type rt);
 Unif unify_relational(Type lt, Type rt);
-
+Unif unify_assign(Type lt, Type rt);
 #endif // TYPES_H
 

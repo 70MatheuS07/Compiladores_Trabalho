@@ -57,6 +57,9 @@ static const Unif assign[4][4] = {
     { {NO_TYPE, NONE, NONE},     {NO_TYPE, NONE, NONE},    {NO_TYPE, NONE, NONE},    {NO_TYPE, NONE, NONE} }   // Destino: void (não deve ser usado)
 };
 
+Unif unify_assign(Type lt, Type rt){
+    return assign[lt][rt];
+}
 
 Unif unify_relational(Type lt, Type rt){
     return relational[lt][rt];

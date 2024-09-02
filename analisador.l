@@ -79,14 +79,14 @@ int                 { return INT; }
 return              { return RETURN; }
 void                { return VOID; }
 
-{CHAR}          { yylval = new_node(REAL_VAL_NODE, 0, REAL_TYPE);
+{CHAR}          { yylval = new_node(CHAR_VAL_NODE, 0, CHAR_TYPE,0);
                   set_char_data(yylval, (char) yytext[1]); 
                   return CHAR_ASCII;}
 {STRING}        { add_string( st, yytext); return STRING; }
 {ID}            { strcpy(VarSave, yytext); return ID; }
-{INT_NUMBER}    { yylval = new_node(INT_VAL_NODE, atoi(yytext), INT_TYPE); 
+{INT_NUMBER}    { yylval = new_node(INT_VAL_NODE, atoi(yytext), INT_TYPE,0); 
                   return INT_NUMBER; }
-{REAL_NUMBER}   { yylval = new_node(REAL_VAL_NODE, 0, REAL_TYPE);
+{REAL_NUMBER}   { yylval = new_node(REAL_VAL_NODE, 0, FLOAT_TYPE,0);
                   set_float_data(yylval, (float) atof(yytext)); 
                   return REAL_NUMBER; }
 

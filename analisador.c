@@ -546,12 +546,13 @@ char *yytext;
     #include <string.h>
     #include <stdlib.h>
     #include "types.h"
+    #include "ast.h"
     #include "parser.h"
     #include "tables.h"
     extern StrTable *st;
     extern char * VarSave;
-#line 554 "scanner.c"
 #line 555 "scanner.c"
+#line 556 "scanner.c"
 
 #define INITIAL 0
 
@@ -766,10 +767,10 @@ YY_DECL
 		}
 
 	{
-#line 25 "analisador.l"
+#line 26 "analisador.l"
 
 
-#line 773 "scanner.c"
+#line 774 "scanner.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -839,259 +840,264 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 27 "analisador.l"
+#line 28 "analisador.l"
 {  }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 28 "analisador.l"
+#line 29 "analisador.l"
 {  }
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 29 "analisador.l"
+#line 30 "analisador.l"
 {  }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 32 "analisador.l"
+#line 33 "analisador.l"
 { return INCREMENT; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 33 "analisador.l"
+#line 34 "analisador.l"
 { return DECREMENT; } 
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 34 "analisador.l"
+#line 35 "analisador.l"
 { return PLUS; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 35 "analisador.l"
+#line 36 "analisador.l"
 { return MINUS; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 36 "analisador.l"
+#line 37 "analisador.l"
 { return TIMES; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 37 "analisador.l"
+#line 38 "analisador.l"
 { return OVER; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 38 "analisador.l"
+#line 39 "analisador.l"
 { return PERCENT; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 40 "analisador.l"
+#line 41 "analisador.l"
 { return GREATER_THAN; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 41 "analisador.l"
+#line 42 "analisador.l"
 { return LESS_THAN; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 42 "analisador.l"
+#line 43 "analisador.l"
 { return GREATER_THAN_OR_EQUAL; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 43 "analisador.l"
+#line 44 "analisador.l"
 { return LESS_THAN_OR_EQUAL; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 44 "analisador.l"
+#line 45 "analisador.l"
 { return EQUALS; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 45 "analisador.l"
+#line 46 "analisador.l"
 { return NOT_EQUALS; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 47 "analisador.l"
+#line 48 "analisador.l"
 { return ADD_ASSIGN; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 48 "analisador.l"
+#line 49 "analisador.l"
 { return SUB_ASSIGN; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 49 "analisador.l"
+#line 50 "analisador.l"
 { return MUL_ASSIGN; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 50 "analisador.l"
+#line 51 "analisador.l"
 { return DIV_ASSIGN; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 51 "analisador.l"
+#line 52 "analisador.l"
 { return MOD_ASSIGN; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 53 "analisador.l"
+#line 54 "analisador.l"
 { return ASSIGNMENT; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 55 "analisador.l"
+#line 56 "analisador.l"
 { return LOGICAL_AND; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 56 "analisador.l"
+#line 57 "analisador.l"
 { return ADDRESS; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 57 "analisador.l"
+#line 58 "analisador.l"
 { return LOGICAL_OR; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 58 "analisador.l"
+#line 59 "analisador.l"
 { return LOGICAL_NOT; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 60 "analisador.l"
+#line 61 "analisador.l"
 { return OPEN_PARENTHESES; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 61 "analisador.l"
+#line 62 "analisador.l"
 { return CLOSE_PARENTHESES; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 62 "analisador.l"
+#line 63 "analisador.l"
 { return OPEN_BRACKET; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 63 "analisador.l"
+#line 64 "analisador.l"
 { return CLOSE_BRACKET; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 64 "analisador.l"
+#line 65 "analisador.l"
 { return OPEN_KEYS; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 65 "analisador.l"
+#line 66 "analisador.l"
 { return CLOSE_KEYS; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 68 "analisador.l"
+#line 69 "analisador.l"
 { return SEMICOLON; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 69 "analisador.l"
+#line 70 "analisador.l"
 { return COMMA; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 71 "analisador.l"
+#line 72 "analisador.l"
 { return CHAR; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 72 "analisador.l"
+#line 73 "analisador.l"
 { return CONTINUE; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 73 "analisador.l"
+#line 74 "analisador.l"
 { return ELSE; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 74 "analisador.l"
+#line 75 "analisador.l"
 { return FLOAT; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 75 "analisador.l"
+#line 76 "analisador.l"
 { return WHILE; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 76 "analisador.l"
+#line 77 "analisador.l"
 { return IF; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 77 "analisador.l"
+#line 78 "analisador.l"
 { return INT; }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 78 "analisador.l"
+#line 79 "analisador.l"
 { return RETURN; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 79 "analisador.l"
+#line 80 "analisador.l"
 { return VOID; }
 	YY_BREAK
 case 44:
 /* rule 44 can match eol */
 YY_RULE_SETUP
-#line 81 "analisador.l"
-{return CHAR_ASCII;}
+#line 82 "analisador.l"
+{ yylval = new_node(CHAR_VAL_NODE, 0, CHAR_TYPE,0);
+                  set_char_data(yylval, (char) yytext[1]); 
+                  return CHAR_ASCII;}
 	YY_BREAK
 case 45:
 /* rule 45 can match eol */
 YY_RULE_SETUP
-#line 82 "analisador.l"
+#line 85 "analisador.l"
 { add_string( st, yytext); return STRING; }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 83 "analisador.l"
+#line 86 "analisador.l"
 { strcpy(VarSave, yytext); return ID; }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 84 "analisador.l"
-{ return INT_NUMBER; }
+#line 87 "analisador.l"
+{ yylval = new_node(INT_VAL_NODE, atoi(yytext), INT_TYPE,0); 
+                  return INT_NUMBER; }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 85 "analisador.l"
-{ return REAL_NUMBER; }
+#line 89 "analisador.l"
+{ yylval = new_node(REAL_VAL_NODE, 0, FLOAT_TYPE,0);
+                  set_float_data(yylval, (float) atof(yytext)); 
+                  return REAL_NUMBER; }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 87 "analisador.l"
+#line 93 "analisador.l"
 { printf("LEXICAL ERROR (%d): Unknown symbol %s\n", yylineno, yytext);
                 exit(EXIT_FAILURE); }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 90 "analisador.l"
+#line 96 "analisador.l"
 ECHO;
 	YY_BREAK
-#line 1095 "scanner.c"
+#line 1101 "scanner.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2067,5 +2073,5 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 90 "analisador.l"
+#line 96 "analisador.l"
 

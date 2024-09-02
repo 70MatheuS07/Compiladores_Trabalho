@@ -15,7 +15,7 @@ int add(int a, int b) {
 int main() {
     // Chamada de função sem argumentos
     greet();
-    int *i;
+    int i;
     int t[18];
     int novo= t[1]+i;
     // Chamada de função com argumentos

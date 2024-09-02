@@ -20,8 +20,8 @@ int yylex_destroy(void);
 AST* check_var();
 int check_size();
 AST* new_var();
-void new_fun();
-void check_fun();
+AST* new_fun();
+AST* check_fun();
 void check_params();
 
 AST* unify_bin_node(AST* l, AST* r,
@@ -37,7 +37,8 @@ AST* check_repeat(AST *b, AST *e);
 void check_params_types_sizes(Type type, int size);
 void assign_size_error(int size1, int size2);
 void check_return_types(Type type);
-AST* check_assign(Type l, Type r);
+AST* check_assign(AST* l, AST* r,
+                   Unif (*unify)(Type,Type)) ;
 extern int yylineno;
 extern char *yytext;
 char *VarSave;
@@ -51,6 +52,7 @@ StrTable *st;
 VarTable *vt;
 FuncTable *ft;
 Type last_decl_type;
+AST *root;
 %}
 
 %define api.value.type {AST*}
@@ -81,21 +83,21 @@ Type last_decl_type;
 %%
 
 program
-    : global_declarations
+    : global_declarations //{ root = new_subtree(PROGRAM_NODE, NO_TYPE, 0, 0); }
     ;
 
 global_declarations
-    : global_declarations global_declaration
+    : global_declarations global_declaration { $$ = $1;}
     | /* empty */
     ;
 
 global_declaration
-    : function_declaration
-    | variable_declaration
+    : function_declaration //{ add_child(root, $1); $$ = $1; }
+    | variable_declaration //{ add_child(root, $1); $$ = $1; }
     ;
 
 function_declaration
-    : type_specifier ID { strcpy(last_func_decl,VarSave); new_fun(); } OPEN_PARENTHESES parameter_list CLOSE_PARENTHESES compound_statement 
+    : type_specifier ID { strcpy(last_func_decl,VarSave); $2=new_fun(); } OPEN_PARENTHESES parameter_list CLOSE_PARENTHESES compound_statement 
     ;
 
 parameter_list
@@ -105,7 +107,7 @@ parameter_list
     ;
 
 parameter
-    : type_specifier ID { new_var(); }
+    : type_specifier ID { $2=new_var(); }
     ;
 
 variable_declaration
@@ -150,7 +152,7 @@ compound_statement
     ;
 
 statement_list
-    : statement_list statement
+    : statement_list statement  { $$ = new_subtree(BLOCK_NODE, NO_TYPE, 0,1, $1); } { add_child($1, $2); }
     | /* empty */
     ;
 
@@ -165,7 +167,7 @@ statement
     ;
 
 expression_statement
-    : expression SEMICOLON
+    : expression SEMICOLON { $$ = $1; }
     | SEMICOLON
     ;
 
@@ -188,7 +190,7 @@ expression
     ;
 
 assignment_expression
-    : ID { $1=check_var(); } assignment_operator expression { $$=check_assign($1, $4 ); }
+    : ID { $1=check_var(); } assignment_operator expression { $$=check_assign($1, $4, unify_assign); }
     | binary_expression { $$=$1; }
     ;
 
@@ -267,9 +269,9 @@ argument_expression_list
 
 primary_expression
     : ID { $$ = check_var(); }
-    | INT_NUMBER { $$ = $1 }
-    | REAL_NUMBER { $$ = $1 }
-    | CHAR_ASCII { $$ = $1 }
+    | INT_NUMBER { $$ = $1; }
+    | REAL_NUMBER { $$ = $1; }
+    | CHAR_ASCII { $$ = $1 ;}
     | OPEN_PARENTHESES expression CLOSE_PARENTHESES { $$= $2; }
     | STRING
     ;
@@ -311,7 +313,7 @@ AST* check_var() {
         exit(EXIT_FAILURE);
     }
     return new_node(VAR_USE_NODE,idx,get_typevar_in_func(ft, idx, last_func_decl, lookup),
-                    get_sizevar_in_func(ft, idx, last_func_decl, lookup););
+                    get_sizevar_in_func(ft, idx, last_func_decl, lookup));
 }
 
 int check_size(){
@@ -344,7 +346,7 @@ AST* new_fun(){
         exit(EXIT_FAILURE);
     }
     add_func(ft, last_func_decl, yylineno, last_decl_type);
-    return new_node(FUN_DECL_NODE, idx, last_decl_type);
+    return new_node(FUN_DECL_NODE, idx, last_decl_type,0);
 }
 
 AST* check_fun(){
@@ -354,7 +356,7 @@ AST* check_fun(){
                 yylineno, VarSave);
         exit(EXIT_FAILURE);
     }
-    return new_node(FUN_USE_NODE, idx, last_decl_type);
+    return new_node(FUN_USE_NODE, idx, last_decl_type,0);
     
 }
 
@@ -386,14 +388,14 @@ void type_warning(const char* op, Type t1, Type t2) {
 
 AST* create_conv_node(Conv conv, AST *n) {
     switch(conv) {
-        case C2I:  return new_subtree(C2I_NODE, INT_TYPE, 1, n);  // char -> int
-        case C2F:  return new_subtree(C2F_NODE, FLOAT_TYPE, 1, n);  // char -> float
-        case I2F:  return new_subtree(I2F_NODE, FLOAT_TYPE, 1, n);  // int -> float
-        case I2C:  return new_subtree(I2C_NODE, CHAR_TYPE, 1, n);  // int -> char
-        case I2B:  return new_subtree(I2B_NODE, BOOL_TYPE, 1, n);  // int -> bool
-        case F2B:  return new_subtree(F2B_NODE, BOOL_TYPE, 1, n);  // float -> bool
-        case C2B:  return new_subtree(C2B_NODE, BOOL_TYPE, 1, n);  // char -> bool
-        case F2I:  return new_subtree(F2I_NODE, INT_TYPE, 1, n);  // float -> int
+        case C2I:  return new_subtree(C2I_NODE, INT_TYPE, 0 ,1, n);  // char -> int
+        case C2F:  return new_subtree(C2F_NODE, FLOAT_TYPE, 0, 1, n);  // char -> float
+        case I2F:  return new_subtree(I2F_NODE, FLOAT_TYPE, 0, 1, n);  // int -> float
+        case I2C:  return new_subtree(I2C_NODE, CHAR_TYPE, 0, 1, n);  // int -> char
+        case I2B:  return new_subtree(I2B_NODE, BOOL_TYPE, 0, 1, n);  // int -> bool
+        case F2B:  return new_subtree(F2B_NODE, BOOL_TYPE, 0, 1, n);  // float -> bool
+        case C2B:  return new_subtree(C2B_NODE, BOOL_TYPE, 0, 1, n);  // char -> bool
+        case F2I:  return new_subtree(F2I_NODE, INT_TYPE, 0, 1, n);  // float -> int
         case NONE: return n;  // Nenhuma conversão necessária
         default:
             printf("INTERNAL ERROR: invalid conversion of types!\n");
@@ -401,20 +403,20 @@ AST* create_conv_node(Conv conv, AST *n) {
     }
 }
 
-AST* unify_bin_op(AST* l, AST* r,
+AST* unify_bin_node(AST* l, AST* r,NodeKind kind,
                   const char* op, Unif (*unify)(Type,Type)) {
 
     Type lt = get_node_type(l);
     Type rt = get_node_type(r);
     Unif unif = unify(lt, rt);
     
-    if (unif == NO_TYPE) {
-        type_error(op, l, r);
+    if (unif.type == NO_TYPE) {
+        type_error(op, lt, rt);
     }
 
     l = create_conv_node(unif.lc, l);
     r = create_conv_node(unif.rc, r);
-    return new_subtree(kind, unif.type, 2, l, r);
+    return new_subtree(kind, unif.type, 0, 2, l, r);
 }
 
 /*
@@ -440,15 +442,16 @@ void check_size_bin_node(AST* l, AST* r, const char* op){
     
 }
 
-AST* check_assign(AST *l, AST* r) {
+AST* check_assign(AST* l, AST* r,
+                   Unif (*unify)(Type,Type)) {
     Type lt = get_node_type(l);
     Type rt = get_node_type(r);
     
     int lt_size=get_node_size(l);
-    int rt_size=get_node_size(l);
-    
-    if (unif == NO_TYPE) {
-        type_error(op, l, r);
+    int rt_size=get_node_size(r);
+    Unif unif = unify(lt, rt);
+    if (unif.type == NO_TYPE) {
+        type_error("=", lt, rt);
     }
     if(lt_size!=rt_size){
         assign_size_error(lt_size,rt_size);
@@ -456,7 +459,7 @@ AST* check_assign(AST *l, AST* r) {
 
     l = create_conv_node(unif.lc, l);
     r = create_conv_node(unif.rc, r);
-    return new_subtree(ASSIGN_NODE, NO_TYPE, 2, l, r);
+    return new_subtree(ASSIGN_NODE, NO_TYPE, 0, 2, l, r);
 }
 
 void assign_size_error(int size1, int size2){
@@ -480,17 +483,17 @@ void check_bool_expr(const char* cmd, Type t) {
 
 AST* check_if_then(AST *e, AST *b) {
     check_bool_expr("if", get_node_type(e));
-    return new_subtree(IF_NODE, NO_TYPE, 2, e, b);
+    return new_subtree(IF_NODE, NO_TYPE, 0, 2, e, b);
 }
 
 AST* check_if_then_else(AST *e, AST *b1, AST *b2) {
     check_bool_expr("if", get_node_type(e));
-    return new_subtree(IF_NODE, NO_TYPE, 3, e, b1, b2);
+    return new_subtree(IF_NODE, NO_TYPE, 0, 3, e, b1, b2);
 }
 
 AST* check_repeat(AST *b, AST *e) {
     check_bool_expr("repeat", get_node_type(e));
-    return new_subtree(REPEAT_NODE, NO_TYPE, 2, b, e);
+    return new_subtree(REPEAT_NODE, NO_TYPE, 0, 2, b, e);
 }
 
 

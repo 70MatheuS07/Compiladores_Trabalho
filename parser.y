@@ -83,50 +83,76 @@ AST *root;
 %%
 
 program
-    : global_declarations //{ root = new_subtree(PROGRAM_NODE, NO_TYPE, 0, 0); }
+    : global_declarations {root = new_subtree(PROGRAM_NODE, NO_TYPE, 0, 1, $1);  }
     ;
 
 global_declarations
-    : global_declarations global_declaration { $$ = $1;}
-    | /* empty */
+    :
+      global_declarations global_declaration { 
+          add_child($1, $2); 
+          $$ = $1; 
+      }
+    | global_declaration { 
+          $$ = new_subtree(PROGRAM_NODE, NO_TYPE, 0, 1, $1); 
+      }
     ;
 
 global_declaration
-    : function_declaration //{ add_child(root, $1); $$ = $1; }
-    | variable_declaration //{ add_child(root, $1); $$ = $1; }
+    : function_declaration {$$ = $1; }
+    | variable_declaration { $$ = $1; }
     ;
 
 function_declaration
-    : type_specifier ID { strcpy(last_func_decl,VarSave); $2=new_fun(); } OPEN_PARENTHESES parameter_list CLOSE_PARENTHESES compound_statement 
+    : type_specifier ID {
+         strcpy(last_func_decl,VarSave); $2=new_fun(); 
+         } 
+      OPEN_PARENTHESES parameter_list CLOSE_PARENTHESES compound_statement {
+        $$ = new_subtree(FUN_DECL_NODE, last_decl_type, sizeof(int), 2, $2, $6); 
+      }
     ;
 
 parameter_list
-    : parameter_list COMMA parameter { SomaQtdParam(last_func_decl, ft); }
-    | parameter { SomaQtdParam(last_func_decl, ft); }
+    : parameter_list COMMA parameter { SomaQtdParam(last_func_decl, ft);add_child($1, $3); $$ = $1;  }
+    | parameter { SomaQtdParam(last_func_decl, ft); 
+         $$ = new_subtree(PARAM_LIST_NODE, NO_TYPE, 0, 1, $1); 
+      } 
     | /* empty */
     ;
 
 parameter
-    : type_specifier ID { $2=new_var(); }
+    : type_specifier ID { $$=new_var(); }
     ;
 
 variable_declaration
-    : type_specifier init_declarator_list SEMICOLON
+    : type_specifier init_declarator_list SEMICOLON{
+        $$ = new_subtree(VAR_DECL_NODE, last_decl_type, 0, 1, $2); 
+    }
     ;
 
 init_declarator_list
-    : init_declarator
-    | init_declarator_list COMMA init_declarator
+    : init_declarator{ 
+          $$ = new_subtree(VAR_LIST_NODE, NO_TYPE, 0, 1, $1); 
+      }
+    | init_declarator_list COMMA init_declarator{ 
+          add_child($1, $3); 
+          $$ = $1; 
+      }
     ;
 
 init_declarator
-    : ID { new_var(); }
-    | ID { new_var(); } ASSIGNMENT expression
-    | ID OPEN_BRACKET INT_NUMBER{ ArraySize=atoi(yytext); new_var(); } CLOSE_BRACKET array_initialization 
+    : ID { $$= new_var(); }
+    | ID { $1=new_var(); } ASSIGNMENT expression {
+        $$ = new_subtree(ASSIGN_NODE, get_node_type($1), sizeof(int), 2, $1, $3); 
+    }
+    | ID OPEN_BRACKET INT_NUMBER{ ArraySize=atoi(yytext); $1=new_var(); } CLOSE_BRACKET array_initialization {
+        $$ = new_subtree(ARRAY_DECL_NODE, get_node_type($1), sizeof(int), 1, $1); 
+    }
     ;
 
 array_initialization
-    : ASSIGNMENT OPEN_KEYS initializer_list CLOSE_KEYS
+    : ASSIGNMENT OPEN_KEYS initializer_list CLOSE_KEYS{
+        $$ = $3;
+    }
 	| /* empty */
     ;
 
@@ -152,7 +178,7 @@ compound_statement
     ;
 
 statement_list
-    : statement_list statement  { $$ = new_subtree(BLOCK_NODE, NO_TYPE, 0,1, $1); } { add_child($1, $2); }
+    : statement_list statement // { $$ = new_subtree(BLOCK_NODE, NO_TYPE, 0,1, $1); } { add_child($1, $2); }
     | /* empty */
     ;
 
@@ -292,9 +318,12 @@ int main(void) {
     print_str_table(st); printf("\n\n");
     print_table(ft); printf("\n\n");
 
+    print_dot(root);
+
     free_str_table(st);
     free_table(ft);
 	free(VarSave);
+    free_tree(root);
     yylex_destroy();
     return 0;
 }

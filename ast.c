@@ -23,6 +23,7 @@ struct node {
 
 AST* new_node(NodeKind kind, int data, Type type, int size) {
     AST* node = malloc(sizeof * node);
+
     node->kind = kind;
     node->data.as_int = data;
     node->type = type;
@@ -38,6 +39,9 @@ void add_child(AST *parent, AST *child) {
         fprintf(stderr, "Cannot add another child!\n");
         exit(1);
     }
+    if(parent==NULL || child==NULL){
+        printf("AAAAAAAAAAAAAAAAAAAAAAA");
+    }
     parent->child[parent->count] = child;
     parent->count++;
 }
@@ -52,7 +56,9 @@ AST* new_subtree(NodeKind kind, Type type, int size ,int child_count, ...) {
         exit(1);
     }
 
+
     AST* node = new_node(kind, 0, type, size);
+
     va_list ap;
     va_start(ap, child_count);
     for (int i = 0; i < child_count; i++) {

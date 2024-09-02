@@ -543,6 +543,7 @@ char *yytext;
 #line 1 "analisador.l"
 #define YY_NO_INPUT 1
 #line 7 "analisador.l"
+    //#define DEBUG_MODE
     #include <string.h>
     #include <stdlib.h>
     #include "types.h"
@@ -551,8 +552,14 @@ char *yytext;
     #include "tables.h"
     extern StrTable *st;
     extern char * VarSave;
-#line 555 "scanner.c"
-#line 556 "scanner.c"
+
+    #ifdef DEBUG_MODE
+        #define DEBUG_PRINT(fmt, ...) fprintf(stderr, fmt, __VA_ARGS__)
+    #else
+        #define DEBUG_PRINT(fmt, ...)
+    #endif
+#line 562 "scanner.c"
+#line 563 "scanner.c"
 
 #define INITIAL 0
 
@@ -767,10 +774,10 @@ YY_DECL
 		}
 
 	{
-#line 26 "analisador.l"
+#line 33 "analisador.l"
 
 
-#line 774 "scanner.c"
+#line 781 "scanner.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -840,264 +847,266 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 28 "analisador.l"
-{  }
+#line 35 "analisador.l"
+{ /* Ignora espaços, tabs e novas linhas */ }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 29 "analisador.l"
-{  }
+#line 36 "analisador.l"
+{ /* Ignora comentários de linha */ }
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 30 "analisador.l"
-{  }
+#line 37 "analisador.l"
+{ /* Ignora comentários de bloco */ }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 33 "analisador.l"
-{ return INCREMENT; }
+#line 39 "analisador.l"
+{ DEBUG_PRINT("Token: '++'\n"); return INCREMENT; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 34 "analisador.l"
-{ return DECREMENT; } 
+#line 40 "analisador.l"
+{ DEBUG_PRINT("Token: '--'\n"); return DECREMENT; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 35 "analisador.l"
-{ return PLUS; }
+#line 41 "analisador.l"
+{ DEBUG_PRINT("Token: '+'\n"); return PLUS; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 36 "analisador.l"
-{ return MINUS; }
+#line 42 "analisador.l"
+{ DEBUG_PRINT("Token: '-'\n"); return MINUS; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 37 "analisador.l"
-{ return TIMES; }
+#line 43 "analisador.l"
+{ DEBUG_PRINT("Token: '*'\n"); return TIMES; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 38 "analisador.l"
-{ return OVER; }
+#line 44 "analisador.l"
+{ DEBUG_PRINT("Token: '/'\n"); return OVER; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 39 "analisador.l"
-{ return PERCENT; }
+#line 45 "analisador.l"
+{ DEBUG_PRINT("Token: '%'\n"); return PERCENT; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 41 "analisador.l"
-{ return GREATER_THAN; }
+#line 47 "analisador.l"
+{ DEBUG_PRINT("Token: '>'\n"); return GREATER_THAN; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 42 "analisador.l"
-{ return LESS_THAN; }
+#line 48 "analisador.l"
+{ DEBUG_PRINT("Token: '<'\n"); return LESS_THAN; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 43 "analisador.l"
-{ return GREATER_THAN_OR_EQUAL; }
+#line 49 "analisador.l"
+{ DEBUG_PRINT("Token: '>='\n"); return GREATER_THAN_OR_EQUAL; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 44 "analisador.l"
-{ return LESS_THAN_OR_EQUAL; }
+#line 50 "analisador.l"
+{ DEBUG_PRINT("Token: '<='\n"); return LESS_THAN_OR_EQUAL; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 45 "analisador.l"
-{ return EQUALS; }
+#line 51 "analisador.l"
+{ DEBUG_PRINT("Token: '=='\n"); return EQUALS; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 46 "analisador.l"
-{ return NOT_EQUALS; }
+#line 52 "analisador.l"
+{ DEBUG_PRINT("Token: '!='\n"); return NOT_EQUALS; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 48 "analisador.l"
-{ return ADD_ASSIGN; }
+#line 54 "analisador.l"
+{ DEBUG_PRINT("Token: '+='\n"); return ADD_ASSIGN; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 49 "analisador.l"
-{ return SUB_ASSIGN; }
+#line 55 "analisador.l"
+{ DEBUG_PRINT("Token: '-='\n"); return SUB_ASSIGN; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 50 "analisador.l"
-{ return MUL_ASSIGN; }
+#line 56 "analisador.l"
+{ DEBUG_PRINT("Token: '*='\n"); return MUL_ASSIGN; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 51 "analisador.l"
-{ return DIV_ASSIGN; }
+#line 57 "analisador.l"
+{ DEBUG_PRINT("Token: '/='\n"); return DIV_ASSIGN; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 52 "analisador.l"
-{ return MOD_ASSIGN; }
+#line 58 "analisador.l"
+{ DEBUG_PRINT("Token: '%='\n"); return MOD_ASSIGN; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 54 "analisador.l"
-{ return ASSIGNMENT; }
+#line 60 "analisador.l"
+{ DEBUG_PRINT("Token: '='\n"); return ASSIGNMENT; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 56 "analisador.l"
-{ return LOGICAL_AND; }
+#line 62 "analisador.l"
+{ DEBUG_PRINT("Token: '&&'\n"); return LOGICAL_AND; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 57 "analisador.l"
-{ return ADDRESS; }
+#line 63 "analisador.l"
+{ DEBUG_PRINT("Token: '&'\n"); return ADDRESS; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 58 "analisador.l"
-{ return LOGICAL_OR; }
+#line 64 "analisador.l"
+{ DEBUG_PRINT("Token: '||'\n"); return LOGICAL_OR; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 59 "analisador.l"
-{ return LOGICAL_NOT; }
+#line 65 "analisador.l"
+{ DEBUG_PRINT("Token: '!'\n"); return LOGICAL_NOT; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 61 "analisador.l"
-{ return OPEN_PARENTHESES; }
+#line 67 "analisador.l"
+{ DEBUG_PRINT("Token: '(' \n"); return OPEN_PARENTHESES; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 62 "analisador.l"
-{ return CLOSE_PARENTHESES; }
+#line 68 "analisador.l"
+{ DEBUG_PRINT("Token: ')'\n"); return CLOSE_PARENTHESES; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 63 "analisador.l"
-{ return OPEN_BRACKET; }
+#line 69 "analisador.l"
+{ DEBUG_PRINT("Token: '['\n"); return OPEN_BRACKET; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 64 "analisador.l"
-{ return CLOSE_BRACKET; }
+#line 70 "analisador.l"
+{ DEBUG_PRINT("Token: ']'\n"); return CLOSE_BRACKET; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 65 "analisador.l"
-{ return OPEN_KEYS; }
+#line 71 "analisador.l"
+{ DEBUG_PRINT("Token: '{'\n"); return OPEN_KEYS; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 66 "analisador.l"
-{ return CLOSE_KEYS; }
+#line 72 "analisador.l"
+{ DEBUG_PRINT("Token: '}'\n"); return CLOSE_KEYS; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 69 "analisador.l"
-{ return SEMICOLON; }
+#line 74 "analisador.l"
+{ DEBUG_PRINT("Token: ';'\n"); return SEMICOLON; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 70 "analisador.l"
-{ return COMMA; }
+#line 75 "analisador.l"
+{ DEBUG_PRINT("Token: ','\n"); return COMMA; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 72 "analisador.l"
-{ return CHAR; }
+#line 77 "analisador.l"
+{ DEBUG_PRINT("Token: 'char'\n"); return CHAR; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 73 "analisador.l"
-{ return CONTINUE; }
+#line 78 "analisador.l"
+{ DEBUG_PRINT("Token: 'continue'\n"); return CONTINUE; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 74 "analisador.l"
-{ return ELSE; }
+#line 79 "analisador.l"
+{ DEBUG_PRINT("Token: 'else'\n"); return ELSE; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 75 "analisador.l"
-{ return FLOAT; }
+#line 80 "analisador.l"
+{ DEBUG_PRINT("Token: 'float'\n"); return FLOAT; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 76 "analisador.l"
-{ return WHILE; }
+#line 81 "analisador.l"
+{ DEBUG_PRINT("Token: 'while'\n"); return WHILE; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 77 "analisador.l"
-{ return IF; }
+#line 82 "analisador.l"
+{ DEBUG_PRINT("Token: 'if'\n"); return IF; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 78 "analisador.l"
-{ return INT; }
+#line 83 "analisador.l"
+{ DEBUG_PRINT("Token: 'int'\n"); return INT; }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 79 "analisador.l"
-{ return RETURN; }
+#line 84 "analisador.l"
+{ DEBUG_PRINT("Token: 'return'\n"); return RETURN; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 80 "analisador.l"
-{ return VOID; }
+#line 85 "analisador.l"
+{ DEBUG_PRINT("Token: 'void'\n"); return VOID; }
 	YY_BREAK
 case 44:
 /* rule 44 can match eol */
 YY_RULE_SETUP
-#line 82 "analisador.l"
-{ yylval = new_node(CHAR_VAL_NODE, 0, CHAR_TYPE,0);
+#line 87 "analisador.l"
+{ yylval = new_node(CHAR_VAL_NODE, 0, CHAR_TYPE, 0);
                   set_char_data(yylval, (char) yytext[1]); 
-                  return CHAR_ASCII;}
+                  DEBUG_PRINT("Token: CHAR_ASCII, Value: %c\n", (char) yytext[1]); 
+                  return CHAR_ASCII; }
 	YY_BREAK
 case 45:
 /* rule 45 can match eol */
 YY_RULE_SETUP
-#line 85 "analisador.l"
-{ add_string( st, yytext); return STRING; }
+#line 92 "analisador.l"
+{ add_string(st, yytext); DEBUG_PRINT("Token: STRING, Value: %s\n", yytext); return STRING; }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 86 "analisador.l"
-{ strcpy(VarSave, yytext); return ID; }
+#line 94 "analisador.l"
+{ strcpy(VarSave, yytext); DEBUG_PRINT("Token: ID, Value: %s\n", yytext); return ID; }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 87 "analisador.l"
-{ yylval = new_node(INT_VAL_NODE, atoi(yytext), INT_TYPE,0); 
+#line 96 "analisador.l"
+{ yylval = new_node(INT_VAL_NODE, atoi(yytext), INT_TYPE, 0); 
+                  DEBUG_PRINT("Token: INT_NUMBER, Value: %d\n", atoi(yytext)); 
                   return INT_NUMBER; }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 89 "analisador.l"
-{ yylval = new_node(REAL_VAL_NODE, 0, FLOAT_TYPE,0);
+#line 100 "analisador.l"
+{ yylval = new_node(REAL_VAL_NODE, 0, FLOAT_TYPE, 0);
                   set_float_data(yylval, (float) atof(yytext)); 
+                  DEBUG_PRINT("Token: REAL_NUMBER, Value: %f\n", atof(yytext)); 
                   return REAL_NUMBER; }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 93 "analisador.l"
-{ printf("LEXICAL ERROR (%d): Unknown symbol %s\n", yylineno, yytext);
-                exit(EXIT_FAILURE); }
+#line 105 "analisador.l"
+{ printf("LEXICAL ERROR (%d): Unknown symbol %s\n", yylineno, yytext); exit(EXIT_FAILURE); }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 96 "analisador.l"
+#line 107 "analisador.l"
 ECHO;
 	YY_BREAK
-#line 1101 "scanner.c"
+#line 1110 "scanner.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2073,5 +2082,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 96 "analisador.l"
+#line 107 "analisador.l"
+
 

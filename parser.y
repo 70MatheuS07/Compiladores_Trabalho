@@ -4,6 +4,7 @@
 %define parse.lac full
 
 %{
+//#define DEBUG_MODE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,6 +13,12 @@
 #include "parser.h"
 #include "tables.h"
 #include "FuncStack.h"
+
+#ifdef DEBUG_MODE
+        #define DEBUG_PRINT(fmt, ...) fprintf(stderr, fmt, __VA_ARGS__)
+    #else
+        #define DEBUG_PRINT(fmt, ...)
+    #endif
 
 int yylex(void);
 void yyerror(const char *s);
@@ -98,7 +105,7 @@ global_declarations
     ;
 
 global_declaration
-    : function_declaration {$$ = $1; }
+    : function_declaration { $$ = $1; }
     | variable_declaration { $$ = $1; }
     ;
 
@@ -305,16 +312,25 @@ primary_expression
 %%
 
 int main(void) {
-	st = create_str_table();
-    ft= create_func_table();
-    fs= init_stack();
-	VarSave= malloc(sizeof(char)*128);
+    st = create_str_table();
+    DEBUG_PRINT("Criado str table\n");
+
+    ft = create_func_table();
+    DEBUG_PRINT("Criado func table\n");
+    
+    fs = init_stack();
+    DEBUG_PRINT("Inicializado a stack\n");
+
+    VarSave = malloc(sizeof(char) * 128);
+    DEBUG_PRINT("Alocada memória para VarSave\n");
+
+    DEBUG_PRINT("Início da análise\n");
     if (yyparse() == 0) {
         printf("PARSE SUCCESSFUL!\n");
     } else {
         printf("PARSE FAILED!\n");
     }
-	printf("\n\n");
+    printf("\n\n");
     print_str_table(st); printf("\n\n");
     print_table(ft); printf("\n\n");
 
@@ -322,11 +338,12 @@ int main(void) {
 
     free_str_table(st);
     free_table(ft);
-	free(VarSave);
+    free(VarSave);
     free_tree(root);
     yylex_destroy();
     return 0;
 }
+
 
 void yyerror (char const *s) {
     printf("SYNTAX ERROR (%d): %s\n", yylineno, s);

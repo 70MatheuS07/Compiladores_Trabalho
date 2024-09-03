@@ -85,22 +85,22 @@ AST *root;
 
 %precedence CLOSE_PARENTHESES
 %precedence ELSE
-%start program
+%start primary_expression
 
 %%
 
 program
-    : global_declarations {root = new_subtree(PROGRAM_NODE, NO_TYPE, 0, 1, $1);  }
+    : global_declarations //{root = $1 ; }
     ;
 
 global_declarations
     :
       global_declarations global_declaration { 
-          add_child($1, $2); 
-          $$ = $1; 
+          //add_child($1, $2); 
+            $$ = $1; 
       }
     | global_declaration { 
-          $$ = new_subtree(PROGRAM_NODE, NO_TYPE, 0, 1, $1); 
+          //$$ = new_subtree(PROGRAM_NODE, NO_TYPE, 0, 1, $1); 
       }
     ;
 
@@ -134,6 +134,7 @@ variable_declaration
     : type_specifier init_declarator_list SEMICOLON{
         $$ = new_subtree(VAR_DECL_NODE, last_decl_type, 0, 1, $2); 
     }
+    
     ;
 
 init_declarator_list

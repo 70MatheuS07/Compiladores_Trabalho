@@ -1,8 +1,7 @@
 digraph {
 graph [ordering="out"];
 node0[label="program"];
-node1[label="program"];
+node1[label="(int) ERROR!!"];
 node2[label="(int) ERROR!!"];
-node3[label="(int) ERROR!!"];
-node2 -> node3;
-node4[label="
+node1 -> node2;
+node3[label="

@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 // Defina DEBUG_MODE se quiser habilitar o modo de depuração
-#define DEBUG_MODE
+//#define DEBUG_MODE
 
 #ifdef DEBUG_MODE
     #define DEBUG_PRINT(msg, ...) fprintf(stderr, "DEBUG: " msg "\n", ##__VA_ARGS__)

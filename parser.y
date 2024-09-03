@@ -84,7 +84,7 @@ AST *root;
 %%
 
 program
-    : global_declarations {root = new_subtree(PROGRAM_NODE, NO_TYPE, 0, 1, $1);  }
+    : global_declarations { root = $1; }
     ;
 
 global_declarations
@@ -163,7 +163,7 @@ initializer_list
     ;
 
 initializer
-    : expression
+    : expression { $$ = $1; }
     | array_initialization
     ;
 type_specifier
@@ -222,12 +222,12 @@ assignment_expression
     ;
 
 assignment_operator
-    : ASSIGNMENT
-    | ADD_ASSIGN
-    | SUB_ASSIGN
-    | MUL_ASSIGN
-    | DIV_ASSIGN
-    | MOD_ASSIGN
+    : ASSIGNMENT { $$ = $1; }
+    | ADD_ASSIGN { $$ = $1; }
+    | SUB_ASSIGN { $$ = $1; }
+    | MUL_ASSIGN { $$ = $1; }
+    | DIV_ASSIGN { $$ = $1; }
+    | MOD_ASSIGN { $$ = $1; }
     ;
 
 binary_expression
@@ -282,9 +282,9 @@ cast_expression
 postfix_expression
     : primary_expression { $$=$1; }
 	| ID { check_fun(); strcpy(last_func_call,VarSave); } OPEN_PARENTHESES argument_expression_list CLOSE_PARENTHESES { check_params();QtdParam=0; }
-    | ID { $1=check_var(); } OPEN_BRACKET expression CLOSE_BRACKET
-    | ID { $1=check_var(); } INCREMENT
-    | ID { $1=check_var(); } DECREMENT
+    | ID { $1=check_var(); $$ = $1; } OPEN_BRACKET expression CLOSE_BRACKET
+    | ID { $1=check_var(); $$ = $1; } INCREMENT
+    | ID { $1=check_var(); $$ = $1; } DECREMENT
     ;
 
 

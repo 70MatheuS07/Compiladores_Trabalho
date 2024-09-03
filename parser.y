@@ -4,7 +4,7 @@
 %define parse.lac full
 
 %{
-//#define DEBUG_MODE
+#include "debug.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,12 +13,6 @@
 #include "parser.h"
 #include "tables.h"
 #include "FuncStack.h"
-
-#ifdef DEBUG_MODE
-        #define DEBUG_PRINT(fmt, ...) fprintf(stderr, fmt, __VA_ARGS__)
-    #else
-        #define DEBUG_PRINT(fmt, ...)
-    #endif
 
 int yylex(void);
 void yyerror(const char *s);
@@ -173,10 +167,10 @@ initializer
     | array_initialization
     ;
 type_specifier
-    : INT { last_decl_type = INT_TYPE; }
-    | FLOAT { last_decl_type = FLOAT_TYPE; }
-    | CHAR { last_decl_type = CHAR_TYPE; }
-    | VOID { last_decl_type = VOID_TYPE; }
+    : INT { last_decl_type = INT_TYPE; $$ = $1; }
+    | FLOAT { last_decl_type = FLOAT_TYPE; $$ = $1; }
+    | CHAR { last_decl_type = CHAR_TYPE; $$ = $1; }
+    | VOID { last_decl_type = VOID_TYPE; $$ = $1; }
     ;
 
 
@@ -267,10 +261,10 @@ binary_expression
     ;
 
 unary_operator
-    : PLUS
-    | MINUS
-    | ADDRESS
-    | LOGICAL_NOT
+    : PLUS { $$=$1; }
+    | MINUS { $$=$1; }
+    | ADDRESS { $$=$1; }
+    | LOGICAL_NOT { $$=$1; }
     ;
 
 unary_expression
@@ -301,30 +295,30 @@ argument_expression_list
     ;
 
 primary_expression
-    : ID { $$ = check_var(); }
+    : ID { $$ = check_var(); $$ = $1; }
     | INT_NUMBER { $$ = $1; }
     | REAL_NUMBER { $$ = $1; }
-    | CHAR_ASCII { $$ = $1 ;}
+    | CHAR_ASCII { $$ = $1; }
     | OPEN_PARENTHESES expression CLOSE_PARENTHESES { $$= $2; }
-    | STRING
+    | STRING { $$ = $1; }
     ;
 
 %%
 
 int main(void) {
     st = create_str_table();
-    DEBUG_PRINT("Criado str table\n");
+    DEBUG_PRINT("Criado str table");
 
     ft = create_func_table();
-    DEBUG_PRINT("Criado func table\n");
+    DEBUG_PRINT("Criado func table");
     
     fs = init_stack();
-    DEBUG_PRINT("Inicializado a stack\n");
+    DEBUG_PRINT("Inicializado a stack");
 
     VarSave = malloc(sizeof(char) * 128);
-    DEBUG_PRINT("Alocada memória para VarSave\n");
+    DEBUG_PRINT("Alocada memória para VarSave");
 
-    DEBUG_PRINT("Início da análise\n");
+    DEBUG_PRINT("Início da análise");
     if (yyparse() == 0) {
         printf("PARSE SUCCESSFUL!\n");
     } else {

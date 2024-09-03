@@ -40,7 +40,7 @@ void add_child(AST *parent, AST *child) {
         exit(1);
     }
     if(parent==NULL || child==NULL){
-        printf("AAAAAAAAAAAAAAAAAAAAAAA");
+        ("AAAAAAAAAAAAAAAAAAAAAAA");
     }
     parent->child[parent->count] = child;
     parent->count++;

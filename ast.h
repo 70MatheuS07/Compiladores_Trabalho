@@ -2,6 +2,7 @@
 #define AST_H
 
 #include "types.h"
+#include "debug.h"
 
 typedef enum {
     ASSIGN_NODE,

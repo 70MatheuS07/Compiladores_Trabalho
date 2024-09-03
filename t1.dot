@@ -2,7 +2,7 @@ digraph {
 graph [ordering="out"];
 node0[label="program"];
 node1[label="program"];
-node2[label="(int) ERROR!!"];
-node3[label="(int) ERROR!!"];
+node2[label="(int) fun_decl"];
+node3[label="(int) fun_decl"];
 node2 -> node3;
 node4[label="

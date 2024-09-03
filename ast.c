@@ -39,8 +39,11 @@ void add_child(AST *parent, AST *child) {
         fprintf(stderr, "Cannot add another child!\n");
         exit(1);
     }
-    if(parent==NULL || child==NULL){
-        ("AAAAAAAAAAAAAAAAAAAAAAA");
+    if(parent == NULL){
+        DEBUG_PRINT("--Parent: NULL");
+    }
+    if(child == NULL){
+        DEBUG_PRINT("--Child: NULL");
     }
     parent->child[parent->count] = child;
     parent->count++;

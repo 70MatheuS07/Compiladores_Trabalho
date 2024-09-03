@@ -1,3 +1,69 @@
+DEBUG: Criado str table
+DEBUG: Criado func table
+DEBUG: Inicializado a stack
+DEBUG: Alocada memória para VarSave
+DEBUG: Início da análise
+DEBUG: Token: 'int'
+DEBUG: Token: ID
+DEBUG: Token: '('
+DEBUG: Token: ')'
+DEBUG: Token: '{'
+DEBUG: Token: 'int'
+DEBUG: Token: ID
+DEBUG: Token: ';'
+DEBUG: Token: 'float'
+DEBUG: Token: ID
+DEBUG: Token: '='
+DEBUG: Token: REAL_NUMBER
+DEBUG: Token: ';'
+DEBUG: --Child: NULL
+DEBUG: Token: 'int'
+DEBUG: Token: ID
+DEBUG: Token: '='
+DEBUG: Token: INT_NUMBER
+DEBUG: Token: ';'
+DEBUG: Token: 'char'
+DEBUG: Token: ID
+DEBUG: Token: ';'
+DEBUG: Token: ID
+DEBUG: Token: '++'
+DEBUG: Token: ';'
+DEBUG: Token: ID
+DEBUG: Token: '--'
+DEBUG: Token: ';'
+DEBUG: Token: 'int'
+DEBUG: Token: ID
+DEBUG: Token: '='
+DEBUG: Token: ID
+DEBUG: Token: '+'
+DEBUG: Token: ID
+DEBUG: Token: ';'
+DEBUG: Token: 'int'
+DEBUG: Token: ID
+DEBUG: Token: '='
+DEBUG: Token: ID
+DEBUG: Token: '-'
+DEBUG: Token: ID
+DEBUG: Token: ';'
+DEBUG: Token: 'int'
+DEBUG: Token: ID
+DEBUG: Token: '='
+DEBUG: Token: ID
+DEBUG: Token: '*'
+DEBUG: Token: ID
+DEBUG: Token: ';'
+DEBUG: Token: 'int'
+DEBUG: Token: ID
+DEBUG: Token: '='
+DEBUG: Token: ID
+DEBUG: Token: '/'
+DEBUG: Token: ID
+DEBUG: Token: ';'
+DEBUG: Token: 'return'
+DEBUG: Token: INT_NUMBER
+DEBUG: Token: ';'
+DEBUG: Token: '}'
+DEBUG: --Child: NULL
 digraph {
 graph [ordering="out"];
 node0[label="program"];

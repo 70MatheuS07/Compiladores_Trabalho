@@ -139,7 +139,7 @@ init_declarator_list
           $$ = $1; 
       }
     ;
-
+    
 init_declarator
     : ID { $$= new_var(); }
     | ID { $1=new_var(); } ASSIGNMENT expression {
@@ -291,7 +291,7 @@ postfix_expression
 argument_expression_list
     : assignment_expression { check_params_types_sizes(get_node_type($1), get_node_size($1)); QtdParam=1; $$=$1; }
     | argument_expression_list COMMA assignment_expression { check_params_types_sizes(get_node_type($1), get_node_size($1)); } { QtdParam++; }
-	| /* empty */ { QtdParam=0; }
+	| /* empty */ { QtdParam = 0; }
     ;
 
 primary_expression
@@ -299,7 +299,7 @@ primary_expression
     | INT_NUMBER { $$ = $1; }
     | REAL_NUMBER { $$ = $1; }
     | CHAR_ASCII { $$ = $1; }
-    | OPEN_PARENTHESES expression CLOSE_PARENTHESES { $$= $2; }
+    | OPEN_PARENTHESES expression CLOSE_PARENTHESES { $$ = $2; }
     | STRING { $$ = $1; }
     ;
 

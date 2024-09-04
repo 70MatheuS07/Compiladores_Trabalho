@@ -59,8 +59,7 @@ struct node; // Opaque structure to ensure encapsulation.
 
 typedef struct node AST;
 
-AST* new_node(NodeKind kind, int data, Type type, int size);
-
+AST* new_node(NodeKind kind, int data,int posFun, Type type, int size) ;
 void add_child(AST *parent, AST *child);
 AST* get_child(AST *parent, int idx);
 

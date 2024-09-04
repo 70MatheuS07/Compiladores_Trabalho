@@ -1,8 +1,8 @@
-int main(){
-    int i;
-    i++;
-    float f;
-    char c;
-
-    c=c;
+int OL(){
+    int a;
+}
+int main (){
+    float i, b;
+    int a;
+    int soma = i+a;
 }

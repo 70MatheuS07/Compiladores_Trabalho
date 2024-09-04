@@ -243,14 +243,21 @@ int get_linevar_in_func(FuncTable *ft,char*func, int i)
     }
     return rtn;
 }
-/*
-char *get_namevar_in_func(FuncTable *ft, int i)
-{
-    return get_name(ft->Var_Table, i);
-}
-*/
 
-Type get_typevar_in_func(FuncTable *ft, int i, char*func, int idx)
+char *get_namevar_in_func(FuncTable *ft, int i, int idx)
+{
+    char* rtn;
+    if (idx != -1)
+    {
+        rtn=get_name(ft->t[idx].Var_Table, i);
+    }
+    // Verifica se 'i' está dentro dos limites do Var_Table
+   
+    return rtn;
+}
+
+
+Type get_typevar_in_func(FuncTable *ft, int i, int idx)
 {
     Type rtn;
     if (idx != -1)
@@ -262,7 +269,7 @@ Type get_typevar_in_func(FuncTable *ft, int i, char*func, int idx)
     return rtn;
 }
 
-Type get_sizevar_in_func(FuncTable *ft, int i, char*func, int idx)
+Type get_sizevar_in_func(FuncTable *ft, int i, int idx)
 {
     int rtn;
     if (idx != -1)

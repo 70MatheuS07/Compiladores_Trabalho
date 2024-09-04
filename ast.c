@@ -14,18 +14,21 @@ struct node {
     union {
         int   as_int;
         float as_float;
+        char as_char;
     } data;
     Type type;
+    int posFun;
     int size;
     int count;
     AST* child[CHILDREN_LIMIT];
 };
 
-AST* new_node(NodeKind kind, int data, Type type, int size) {
+AST* new_node(NodeKind kind, int data,int posFun, Type type, int size) {
     AST* node = malloc(sizeof * node);
 
     node->kind = kind;
     node->data.as_int = data;
+    node->posFun=posFun;
     node->type = type;
     node->count = 0;
     for (int i = 0; i < CHILDREN_LIMIT; i++) {
@@ -40,7 +43,7 @@ void add_child(AST *parent, AST *child) {
         exit(1);
     }
     if(parent==NULL || child==NULL){
-        printf("AAAAAAAAAAAAAAAAAAAAAAA");
+        printf("AAAAAAAAAAAAAAAAAAAAAAA\n");
     }
     parent->child[parent->count] = child;
     parent->count++;
@@ -57,7 +60,7 @@ AST* new_subtree(NodeKind kind, Type type, int size ,int child_count, ...) {
     }
 
 
-    AST* node = new_node(kind, 0, type, size);
+    AST* node = new_node(kind, 0, 0,type, size);
 
     va_list ap;
     va_start(ap, child_count);
@@ -82,7 +85,7 @@ void set_float_data(AST *node, float data) {
 
 
 void set_char_data(AST *node, char data) {
-    node->data.as_float = data;
+    node->data.as_char = data;
 }
 
 float get_float_data(AST *node) {
@@ -109,7 +112,7 @@ void free_tree(AST *tree) {
 
 int nr;
 
-extern VarTable *vt;
+extern FuncTable *ft;;
 
 char* kind2str(NodeKind kind) {
     switch(kind) {
@@ -195,7 +198,7 @@ int print_node_dot(AST *node) {
         fprintf(stderr, "(%s) ", get_text(node->type));
     }
     if (node->kind == VAR_DECL_NODE || node->kind == VAR_USE_NODE) {
-        fprintf(stderr, "%s@", get_name(vt, node->data.as_int));
+        fprintf(stderr, "%s@", get_namevar_in_func(ft, node->data.as_int,node->posFun));
     } else {
         fprintf(stderr, "%s", kind2str(node->kind));
     }

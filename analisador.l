@@ -84,7 +84,7 @@ int                 { DEBUG_PRINT("Token: 'int'\n"); return INT; }
 return              { DEBUG_PRINT("Token: 'return'\n"); return RETURN; }
 void                { DEBUG_PRINT("Token: 'void'\n"); return VOID; }
 
-{CHAR}          { yylval = new_node(CHAR_VAL_NODE, 0, CHAR_TYPE, 0);
+{CHAR}          { yylval = new_node(CHAR_VAL_NODE, 0, 0,CHAR_TYPE, 0);
                   set_char_data(yylval, (char) yytext[1]); 
                   DEBUG_PRINT("Token: CHAR_ASCII, Value: %c\n", (char) yytext[1]); 
                   return CHAR_ASCII; }
@@ -93,11 +93,11 @@ void                { DEBUG_PRINT("Token: 'void'\n"); return VOID; }
 
 {ID}            { strcpy(VarSave, yytext); DEBUG_PRINT("Token: ID, Value: %s\n", yytext); return ID; }
 
-{INT_NUMBER}    { yylval = new_node(INT_VAL_NODE, atoi(yytext), INT_TYPE, 0); 
+{INT_NUMBER}    { yylval = new_node(INT_VAL_NODE, atoi(yytext),0 ,INT_TYPE, 0); 
                   DEBUG_PRINT("Token: INT_NUMBER, Value: %d\n", atoi(yytext)); 
                   return INT_NUMBER; }
 
-{REAL_NUMBER}   { yylval = new_node(REAL_VAL_NODE, 0, FLOAT_TYPE, 0);
+{REAL_NUMBER}   { yylval = new_node(REAL_VAL_NODE, 0, 0,FLOAT_TYPE, 0);
                   set_float_data(yylval, (float) atof(yytext)); 
                   DEBUG_PRINT("Token: REAL_NUMBER, Value: %f\n", atof(yytext)); 
                   return REAL_NUMBER; }

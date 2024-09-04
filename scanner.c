@@ -1065,7 +1065,7 @@ case 44:
 /* rule 44 can match eol */
 YY_RULE_SETUP
 #line 87 "analisador.l"
-{ yylval = new_node(CHAR_VAL_NODE, 0, CHAR_TYPE, 0);
+{ yylval = new_node(CHAR_VAL_NODE, 0, 0,CHAR_TYPE, 0);
                   set_char_data(yylval, (char) yytext[1]); 
                   DEBUG_PRINT("Token: CHAR_ASCII, Value: %c\n", (char) yytext[1]); 
                   return CHAR_ASCII; }
@@ -1084,14 +1084,14 @@ YY_RULE_SETUP
 case 47:
 YY_RULE_SETUP
 #line 96 "analisador.l"
-{ yylval = new_node(INT_VAL_NODE, atoi(yytext), INT_TYPE, 0); 
+{ yylval = new_node(INT_VAL_NODE, atoi(yytext),0 ,INT_TYPE, 0); 
                   DEBUG_PRINT("Token: INT_NUMBER, Value: %d\n", atoi(yytext)); 
                   return INT_NUMBER; }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
 #line 100 "analisador.l"
-{ yylval = new_node(REAL_VAL_NODE, 0, FLOAT_TYPE, 0);
+{ yylval = new_node(REAL_VAL_NODE, 0, 0,FLOAT_TYPE, 0);
                   set_float_data(yylval, (float) atof(yytext)); 
                   DEBUG_PRINT("Token: REAL_NUMBER, Value: %f\n", atof(yytext)); 
                   return REAL_NUMBER; }

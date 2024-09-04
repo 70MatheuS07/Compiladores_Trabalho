@@ -97,13 +97,12 @@ void SomaQtdParam(char*func, FuncTable*ft);
 int get_qtdparams(FuncTable *ft, int i);
 
 int VerificaQtdParam(char*func, FuncTable*ft, int qtd);
-/*
-char *get_namevar_in_func(FuncTable *ft, int i);
 
-*/
-Type get_typevar_in_func(FuncTable *ft, int i, char*func, int idx);
+char *get_namevar_in_func(FuncTable *ft, int i, int idx);
 
-Type get_sizevar_in_func(FuncTable *ft, int i, char*func, int idx);
+Type get_typevar_in_func(FuncTable *ft, int i, int idx);
+
+Type get_sizevar_in_func(FuncTable *ft, int i, int idx);
 
 void print_table(FuncTable *ft);
 

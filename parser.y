@@ -85,22 +85,22 @@ AST *root;
 
 %precedence CLOSE_PARENTHESES
 %precedence ELSE
-%start primary_expression
+%start program
 
 %%
 
 program
-    : global_declarations //{root = $1 ; }
+    : global_declarations {root = $1 ; }
     ;
 
 global_declarations
     :
       global_declarations global_declaration { 
-          //add_child($1, $2); 
+          add_child($1, $2); 
             $$ = $1; 
       }
     | global_declaration { 
-          //$$ = new_subtree(PROGRAM_NODE, NO_TYPE, 0, 1, $1); 
+          $$ = new_subtree(PROGRAM_NODE, NO_TYPE, 0, 1, $1); 
       }
     ;
 
@@ -114,7 +114,8 @@ function_declaration
          strcpy(last_func_decl,VarSave); $2=new_fun(); 
          } 
       OPEN_PARENTHESES parameter_list CLOSE_PARENTHESES compound_statement {
-        $$ = new_subtree(FUN_DECL_NODE, last_decl_type, sizeof(int), 2, $2, $6); 
+        add_child($2, $7);
+        $$=$2;
       }
     ;
 
@@ -132,7 +133,7 @@ parameter
 
 variable_declaration
     : type_specifier init_declarator_list SEMICOLON{
-        $$ = new_subtree(VAR_DECL_NODE, last_decl_type, 0, 1, $2); 
+        $$ = $2;
     }
     
     ;
@@ -150,7 +151,7 @@ init_declarator_list
 init_declarator
     : ID { $$= new_var(); }
     | ID { $1=new_var(); } ASSIGNMENT expression {
-        $$ = new_subtree(ASSIGN_NODE, get_node_type($1), sizeof(int), 2, $1, $3); 
+        $$ = new_subtree(ASSIGN_NODE, get_node_type($1), sizeof(int), 2, $1, $4); 
     }
     | ID OPEN_BRACKET INT_NUMBER{ ArraySize=atoi(yytext); $1=new_var(); } CLOSE_BRACKET array_initialization {
         $$ = new_subtree(ARRAY_DECL_NODE, get_node_type($1), sizeof(int), 1, $1); 
@@ -165,13 +166,18 @@ array_initialization
     ;
 
 initializer_list
-    : initializer
-    | initializer_list COMMA initializer
+    : initializer{ 
+          $$ = new_subtree(INIT_LIST_NODE, NO_TYPE, 0, 1, $1); 
+      }
+    | initializer_list COMMA initializer{
+          add_child($1, $3); 
+          $$ = $1; 
+      }
     ;
 
 initializer
-    : expression
-    | array_initialization
+    : expression { $$=$1; }
+    | array_initialization { $$=$1; }
     ;
 type_specifier
     : INT { last_decl_type = INT_TYPE; }
@@ -182,12 +188,20 @@ type_specifier
 
 
 compound_statement
-    : OPEN_KEYS statement_list CLOSE_KEYS
+    : OPEN_KEYS statement_list CLOSE_KEYS{ 
+          $$ = $2;
+      }
     ;
 
 statement_list
-    : statement_list statement // { $$ = new_subtree(BLOCK_NODE, NO_TYPE, 0,1, $1); } { add_child($1, $2); }
-    | /* empty */
+    : statement_list statement { 
+          add_child($1, $2); 
+          $$ = $1; 
+      }
+    | statement{
+        $$=new_subtree(BLOCK_NODE, NO_TYPE, 0, 1, $1); 
+
+    }
     ;
 
 statement
@@ -197,7 +211,7 @@ statement
     | iteration_statement { $$ = $1; }
     | return_statement { $$ = $1; }
     | variable_declaration { $$ = $1; }
-    | CONTINUE SEMICOLON { $$ = $1; }
+    | CONTINUE SEMICOLON { $$ = new_node(CONTINUE_NODE, 0, 0,NO_TYPE, 0);  }
     ;
 
 expression_statement
@@ -215,12 +229,16 @@ iteration_statement
     ;
 
 return_statement
-    : RETURN expression SEMICOLON { check_return_types(get_node_type($2)); }
-    | RETURN SEMICOLON { check_return_types(VOID_TYPE); }
+    : RETURN expression SEMICOLON { 
+                                    check_return_types(get_node_type($2));
+                                    $$ = new_subtree(RETURN_NODE, get_node_type($2), sizeof(int), 1, $2);
+                                  }
+    | RETURN SEMICOLON { check_return_types(VOID_TYPE); 
+                         $$ = new_node(RETURN_NODE, 0, 0,VOID_TYPE, 0); }
     ;
 
 expression
-    : assignment_expression
+    : assignment_expression{$$=$1;}
     ;
 
 assignment_expression
@@ -277,8 +295,11 @@ unary_operator
 unary_expression
     : postfix_expression { $$=$1; }
     | unary_operator cast_expression { $$=$2; }
-    | INCREMENT ID { $2=check_var(); $$=$2; }
-    | DECREMENT ID { $2=check_var(); $$=$2; }
+    | INCREMENT ID { $2=check_var();
+                     $$ = new_subtree(INCREMENT_NODE, NO_TYPE, 0, 1, $2);}
+    | DECREMENT ID { $2=check_var();
+                     $$ = new_subtree(DECREMENT_NODE, NO_TYPE, 0, 1, $2);}
+                     
     ;
 
 cast_expression
@@ -288,16 +309,27 @@ cast_expression
 
 postfix_expression
     : primary_expression { $$=$1; }
-	| ID { check_fun(); strcpy(last_func_call,VarSave); } OPEN_PARENTHESES argument_expression_list CLOSE_PARENTHESES { check_params();QtdParam=0; }
+	| ID { check_fun(); strcpy(last_func_call,VarSave); } OPEN_PARENTHESES argument_expression_list CLOSE_PARENTHESES {
+          check_params();
+          $$ = new_subtree(FUN_USE_NODE, NO_TYPE, 0, 1, $1); 
+          QtdParam=0; }
     | ID { $1=check_var(); } OPEN_BRACKET expression CLOSE_BRACKET
+         { $$ = new_subtree(ARRAY_ACCESS_NODE, NO_TYPE, 0, 2, $1, $3);}
     | ID { $1=check_var(); } INCREMENT
+         { $$ = new_subtree(INCREMENT_NODE, NO_TYPE, 0, 1, $1); }
     | ID { $1=check_var(); } DECREMENT
+         { $$ = new_subtree(DECREMENT_NODE, NO_TYPE, 0, 1, $1);}
     ;
 
 
 argument_expression_list
-    : assignment_expression { check_params_types_sizes(get_node_type($1), get_node_size($1)); QtdParam=1; $$=$1; }
-    | argument_expression_list COMMA assignment_expression { check_params_types_sizes(get_node_type($1), get_node_size($1)); } { QtdParam++; }
+    : assignment_expression { check_params_types_sizes(get_node_type($1), get_node_size($1));
+                              QtdParam=1;
+                              $$=$1; 
+                            }
+    | argument_expression_list COMMA assignment_expression { 
+                              check_params_types_sizes(get_node_type($1), get_node_size($1)); } 
+                              { QtdParam++; }
 	| /* empty */ { QtdParam=0; }
     ;
 
@@ -359,26 +391,30 @@ AST* check_var() {
                 yylineno, VarSave);
         exit(EXIT_FAILURE);
     }
-    return new_node(VAR_USE_NODE,idx,get_typevar_in_func(ft, idx, last_func_decl, lookup),
-                    get_sizevar_in_func(ft, idx, last_func_decl, lookup));
+    return new_node(VAR_USE_NODE,idx,lookup,get_typevar_in_func(ft, idx, lookup),
+                    get_sizevar_in_func(ft, idx, lookup));
 }
 
 int check_size(){
     int lookup= lookup_func(ft, last_func_decl);
     int idx = lookup_var_in_func(ft,VarSave, last_func_decl);
-    return get_sizevar_in_func(ft, idx, last_func_decl, lookup);
+    return get_sizevar_in_func(ft, idx, lookup);
     
 }
 
 AST* new_var() {
-    int idx = lookup_var_in_func(ft,VarSave, last_func_decl);
-    if (idx != -1) {
+    int lookup = lookup_var_in_func(ft,VarSave, last_func_decl);
+    if (lookup != -1) {
         printf("SEMANTIC ERROR (%d): variable '%s' already declared at line %d.\n",
-                yylineno, VarSave, get_linevar_in_func(ft,last_func_decl, idx));
+                yylineno, VarSave, get_linevar_in_func(ft,last_func_decl, lookup));
         exit(EXIT_FAILURE);
     }
-    add_var_in_func(ft, VarSave, last_func_decl, yylineno, last_decl_type, ArraySize);
-    AST*aux= new_node(VAR_DECL_NODE, idx, last_decl_type,ArraySize);
+    int idx=add_var_in_func(ft, VarSave, last_func_decl, yylineno, last_decl_type, ArraySize);
+    lookup=lookup_func(ft, last_func_decl);
+    AST*aux= new_node(VAR_DECL_NODE, idx,lookup, last_decl_type,ArraySize);
+
+
+    
     ArraySize=0;
     return aux;
 }
@@ -393,7 +429,7 @@ AST* new_fun(){
         exit(EXIT_FAILURE);
     }
     add_func(ft, last_func_decl, yylineno, last_decl_type);
-    return new_node(FUN_DECL_NODE, idx, last_decl_type,0);
+    return new_node(FUN_DECL_NODE, idx,0, last_decl_type,0);
 }
 
 AST* check_fun(){
@@ -403,7 +439,7 @@ AST* check_fun(){
                 yylineno, VarSave);
         exit(EXIT_FAILURE);
     }
-    return new_node(FUN_USE_NODE, idx, last_decl_type,0);
+    return new_node(FUN_USE_NODE, idx,0, last_decl_type,0);
     
 }
 
@@ -548,14 +584,14 @@ void check_params_types_sizes(Type type, int size)
     {
     int idx = lookup_func(ft, last_func_call);
     int aux=QtdParam+1;
-    if(type!=get_typevar_in_func(ft, QtdParam, last_func_call,idx)){
+    if(type!=get_typevar_in_func(ft, QtdParam,idx)){
         printf("SEMANTIC ERROR (%d): The parameter %d of '%s' call is %s, but at the function declarator(%d) is %s\n",
-                yylineno,aux, last_func_call,get_text(get_typevar_in_func(ft, QtdParam, last_func_call, idx)), get_line_func(ft, idx),get_text(type));
+                yylineno,aux, last_func_call,get_text(get_typevar_in_func(ft, QtdParam, idx)), get_line_func(ft, idx),get_text(type));
         exit(EXIT_FAILURE);
     }
-    if(size!=get_sizevar_in_func(ft, QtdParam, last_func_call,idx)){
+    if(size!=get_sizevar_in_func(ft, QtdParam,idx)){
         printf("SEMANTIC ERROR (%d): The size of parameter %d of '%s' call is %d , but at the function declarator(%d) is %d\n",
-                yylineno,aux, last_func_call,get_sizevar_in_func(ft, QtdParam, last_func_call, idx), get_line_func(ft, idx),size);
+                yylineno,aux, last_func_call,get_sizevar_in_func(ft, QtdParam, idx), get_line_func(ft, idx),size);
         exit(EXIT_FAILURE);
     }
 }

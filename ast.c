@@ -30,6 +30,7 @@ AST* new_node(NodeKind kind, int data,int posFun, Type type, int size) {
     node->data.as_int = data;
     node->posFun=posFun;
     node->type = type;
+    node->size=size;
     node->count = 0;
     for (int i = 0; i < CHILDREN_LIMIT; i++) {
         node->child[i] = NULL;
@@ -116,8 +117,8 @@ extern FuncTable *ft;;
 
 char* kind2str(NodeKind kind) {
     switch(kind) {
-        case ASSIGN_NODE:               return ":=";
-        case EQ_NODE:                   return "=";
+        case ASSIGN_NODE:               return "=";
+        case EQ_NODE:                   return "==";
         case BLOCK_NODE:                return "block";
         case CHAR_VAL_NODE:             return "char_val";
         case BOOL_VAL_NODE:             return "bool_val";
@@ -199,7 +200,12 @@ int print_node_dot(AST *node) {
     }
     if (node->kind == VAR_DECL_NODE || node->kind == VAR_USE_NODE) {
         fprintf(stderr, "%s@", get_namevar_in_func(ft, node->data.as_int,node->posFun));
-    } else {
+    }
+    else
+    if(node->kind == FUN_DECL_NODE || node->kind == FUN_USE_NODE){
+        fprintf(stderr, "%s@", get_name_func(ft, node->data.as_int));
+    }
+     else {
         fprintf(stderr, "%s", kind2str(node->kind));
     }
     if (has_data(node->kind)) {

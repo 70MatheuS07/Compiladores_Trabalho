@@ -18,7 +18,7 @@ int main ()
     }
     else
     {
-        //printf("X diferente Y");
+        printf();
     }
 
     return 0;

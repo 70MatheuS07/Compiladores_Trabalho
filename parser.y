@@ -151,10 +151,10 @@ init_declarator_list
 init_declarator
     : ID { $$= new_var(); }
     | ID { $1=new_var(); } ASSIGNMENT expression {
-        $$ = new_subtree(ASSIGN_NODE, get_node_type($1), sizeof(int), 2, $1, $4); 
+        $$ = new_subtree(ASSIGN_NODE, get_node_type($1), 0, 2, $1, $4); 
     }
     | ID OPEN_BRACKET INT_NUMBER{ ArraySize=atoi(yytext); $1=new_var(); } CLOSE_BRACKET array_initialization {
-        $$ = new_subtree(ARRAY_DECL_NODE, get_node_type($1), sizeof(int), 1, $1); 
+        $$ = new_subtree(ARRAY_DECL_NODE, get_node_type($1), get_node_size($1), 1, $1); 
     }
     ;
 
@@ -191,6 +191,8 @@ compound_statement
     : OPEN_KEYS statement_list CLOSE_KEYS{ 
           $$ = $2;
       }
+      | OPEN_KEYS CLOSE_KEYS
+        { $$ = new_subtree(BLOCK_NODE, NO_TYPE, 0, 0); }
     ;
 
 statement_list
@@ -231,7 +233,7 @@ iteration_statement
 return_statement
     : RETURN expression SEMICOLON { 
                                     check_return_types(get_node_type($2));
-                                    $$ = new_subtree(RETURN_NODE, get_node_type($2), sizeof(int), 1, $2);
+                                    $$ = new_subtree(RETURN_NODE, get_node_type($2), 0, 1, $2);
                                   }
     | RETURN SEMICOLON { check_return_types(VOID_TYPE); 
                          $$ = new_node(RETURN_NODE, 0, 0,VOID_TYPE, 0); }
@@ -296,9 +298,9 @@ unary_expression
     : postfix_expression { $$=$1; }
     | unary_operator cast_expression { $$=$2; }
     | INCREMENT ID { $2=check_var();
-                     $$ = new_subtree(INCREMENT_NODE, NO_TYPE, 0, 1, $2);}
+                     $$ = new_subtree(INCREMENT_NODE, get_node_type($2), 0, 1, $2);}
     | DECREMENT ID { $2=check_var();
-                     $$ = new_subtree(DECREMENT_NODE, NO_TYPE, 0, 1, $2);}
+                     $$ = new_subtree(DECREMENT_NODE, get_node_type($2), 0, 1, $2);}
                      
     ;
 
@@ -309,16 +311,16 @@ cast_expression
 
 postfix_expression
     : primary_expression { $$=$1; }
-	| ID { check_fun(); strcpy(last_func_call,VarSave); } OPEN_PARENTHESES argument_expression_list CLOSE_PARENTHESES {
+	| ID { $1=check_fun(); strcpy(last_func_call,VarSave); } OPEN_PARENTHESES argument_expression_list CLOSE_PARENTHESES {
           check_params();
-          $$ = new_subtree(FUN_USE_NODE, NO_TYPE, 0, 1, $1); 
+          $$ = $1;
           QtdParam=0; }
     | ID { $1=check_var(); } OPEN_BRACKET expression CLOSE_BRACKET
-         { $$ = new_subtree(ARRAY_ACCESS_NODE, NO_TYPE, 0, 2, $1, $3);}
+         { $$ = new_subtree(ARRAY_ACCESS_NODE, get_node_type($1), 0, 2, $1, $3);}
     | ID { $1=check_var(); } INCREMENT
-         { $$ = new_subtree(INCREMENT_NODE, NO_TYPE, 0, 1, $1); }
+         { $$ = new_subtree(INCREMENT_NODE, get_node_type($1), 0, 1, $1); }
     | ID { $1=check_var(); } DECREMENT
-         { $$ = new_subtree(DECREMENT_NODE, NO_TYPE, 0, 1, $1);}
+         { $$ = new_subtree(DECREMENT_NODE, get_node_type($1), 0, 1, $1);}
     ;
 
 
@@ -428,7 +430,7 @@ AST* new_fun(){
                 yylineno, last_func_decl, get_line_func(ft, idx));
         exit(EXIT_FAILURE);
     }
-    add_func(ft, last_func_decl, yylineno, last_decl_type);
+    idx=add_func(ft, last_func_decl, yylineno, last_decl_type);
     return new_node(FUN_DECL_NODE, idx,0, last_decl_type,0);
 }
 
@@ -481,7 +483,7 @@ AST* create_conv_node(Conv conv, AST *n) {
         case F2I:  return new_subtree(F2I_NODE, INT_TYPE, 0, 1, n);  // float -> int
         case NONE: return n;  // Nenhuma conversão necessária
         default:
-            printf("INTERNAL ERROR: invalid conversion of types!\n");
+            printf("INTERNAL ERROR: invalid conversion of types!%d\n", conv);
             exit(EXIT_FAILURE);
     }
 }

@@ -41,11 +41,11 @@ Unif unify_arith_percent(Type lt, Type rt){
 
 static const Unif relational[5][5] = {
     // char      int        float      void
-    { {BOOL_TYPE, C2B, C2B},  {BOOL_TYPE, C2B, I2B},  {BOOL_TYPE, C2B, F2B},    {NO_TYPE, NONE, NONE}, {BOOL_TYPE, C2B, NONE} },  // char
-    { {BOOL_TYPE, I2B, C2B},  {BOOL_TYPE, I2B, I2B},  {BOOL_TYPE, I2B, F2B},    {NO_TYPE, NONE, NONE}, {BOOL_TYPE, I2B, NONE}},  // int 
-    { {BOOL_TYPE, F2B, C2B},  {BOOL_TYPE, F2B, I2B},  {BOOL_TYPE, F2B, F2B},    {NO_TYPE, NONE, NONE}, {BOOL_TYPE, F2B, NONE} },  // float
+    { {BOOL_TYPE, NONE, NONE},  {BOOL_TYPE, NONE, NONE},  {BOOL_TYPE, NONE, NONE},    {NO_TYPE, NONE, NONE}, {BOOL_TYPE, NONE, NONE} },  // char
+    { {BOOL_TYPE, NONE, NONE},  {BOOL_TYPE, NONE, NONE},  {BOOL_TYPE, NONE, NONE},    {NO_TYPE, NONE, NONE}, {BOOL_TYPE, NONE, NONE}},  // int 
+    { {BOOL_TYPE, NONE, NONE},  {BOOL_TYPE, NONE, NONE},  {BOOL_TYPE, NONE, NONE},    {NO_TYPE, NONE, NONE}, {BOOL_TYPE, NONE, NONE} },  // float
     { {NO_TYPE, NONE, NONE},  {NO_TYPE, NONE, NONE},  {NO_TYPE, NONE, NONE},    {NO_TYPE, NONE, NONE}, {NO_TYPE, NONE, NONE} } ,  // void
-    { {BOOL_TYPE, NONE, C2B}, {BOOL_TYPE, NONE, I2B}, {BOOL_TYPE, NONE, F2B} ,  {NO_TYPE, NONE, NONE}, {BOOL_TYPE, NONE, NONE} }  //bool
+    { {BOOL_TYPE, NONE, NONE}, {BOOL_TYPE, NONE, NONE}, {BOOL_TYPE, NONE, NONE} ,  {NO_TYPE, NONE, NONE}, {BOOL_TYPE, NONE, NONE} }  //bool
 
 };
 

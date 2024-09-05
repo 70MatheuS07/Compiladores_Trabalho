@@ -11,8 +11,6 @@ typedef enum {
     NO_TYPE,
 } Type;
 typedef enum {  // Basic conversions between types.
-    B2I,//tirar?
-    B2F,//tirar?
     C2I,
     C2F,
     I2F,

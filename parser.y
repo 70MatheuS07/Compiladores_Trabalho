@@ -114,6 +114,7 @@ function_declaration
          strcpy(last_func_decl,VarSave); $2=new_fun(); 
          } 
       OPEN_PARENTHESES parameter_list CLOSE_PARENTHESES compound_statement {
+        add_child($2, $5);
         add_child($2, $7);
         $$=$2;
       }
@@ -124,7 +125,7 @@ parameter_list
     | parameter { SomaQtdParam(last_func_decl, ft); 
          $$ = new_subtree(PARAM_LIST_NODE, NO_TYPE, 0, 1, $1); 
       } 
-    | /* empty */
+    | /* empty */{$$ = new_subtree(PARAM_LIST_NODE, NO_TYPE, 0, 0);} 
     ;
 
 parameter
@@ -154,7 +155,7 @@ init_declarator
         $$ = new_subtree(ASSIGN_NODE, get_node_type($1), 0, 2, $1, $4); 
     }
     | ID OPEN_BRACKET INT_NUMBER{ ArraySize=atoi(yytext); $1=new_var(); } CLOSE_BRACKET array_initialization {
-        $$ = new_subtree(ARRAY_DECL_NODE, get_node_type($1), get_node_size($1), 1, $1); 
+        $$ = new_subtree(ARRAY_DECL_NODE, get_node_type($1), get_node_size($1), 2, $1, $6); 
     }
     ;
 
@@ -162,7 +163,7 @@ array_initialization
     : ASSIGNMENT OPEN_KEYS initializer_list CLOSE_KEYS{
         $$ = $3;
     }
-	| /* empty */
+	| /* empty */ {$$=new_subtree(INIT_LIST_NODE, NO_TYPE, 0, 0); }
     ;
 
 initializer_list
@@ -284,7 +285,7 @@ binary_expression
                                                         check_size_bin_node($1, $3,"&&"); set_node_size($$, get_node_size($1)); }
     | binary_expression LOGICAL_OR binary_expression { $$ = unify_bin_node($1, $3, LOGICAL_OR_NODE, "||", unify_relational); 
                                                         check_size_bin_node($1, $3,"||"); set_node_size($$, get_node_size($1)); }
-    | cast_expression
+    | cast_expression { $$= $1; }
     ;
 
 unary_operator
@@ -316,7 +317,7 @@ postfix_expression
           $$ = $1;
           QtdParam=0; }
     | ID { $1=check_var(); } OPEN_BRACKET expression CLOSE_BRACKET
-         { $$ = new_subtree(ARRAY_ACCESS_NODE, get_node_type($1), 0, 2, $1, $3);}
+         { $$ = new_subtree(ARRAY_ACCESS_NODE, get_node_type($1), 0, 2, $1, $4);}
     | ID { $1=check_var(); } INCREMENT
          { $$ = new_subtree(INCREMENT_NODE, get_node_type($1), 0, 1, $1); }
     | ID { $1=check_var(); } DECREMENT

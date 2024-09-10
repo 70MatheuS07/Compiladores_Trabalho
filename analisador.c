@@ -1064,7 +1064,7 @@ YY_RULE_SETUP
 case 44:
 /* rule 44 can match eol */
 YY_RULE_SETUP
-#line 87 "analisador.l"
+#line 88 "analisador.l"
 { yylval = new_node(CHAR_VAL_NODE, 0, 0,CHAR_TYPE, 0);
                   set_char_data(yylval, (char) yytext[1]); 
                   DEBUG_PRINT("Token: CHAR_ASCII, Value: %c\n", (char) yytext[1]); 
@@ -1073,24 +1073,24 @@ YY_RULE_SETUP
 case 45:
 /* rule 45 can match eol */
 YY_RULE_SETUP
-#line 92 "analisador.l"
+#line 93 "analisador.l"
 { add_string(st, yytext); DEBUG_PRINT("Token: STRING, Value: %s\n", yytext); return STRING; }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 94 "analisador.l"
+#line 95 "analisador.l"
 { strcpy(VarSave, yytext); DEBUG_PRINT("Token: ID, Value: %s\n", yytext); return ID; }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 96 "analisador.l"
+#line 97 "analisador.l"
 { yylval = new_node(INT_VAL_NODE, atoi(yytext),0 ,INT_TYPE, 0); 
                   DEBUG_PRINT("Token: INT_NUMBER, Value: %d\n", atoi(yytext)); 
                   return INT_NUMBER; }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 100 "analisador.l"
+#line 101 "analisador.l"
 { yylval = new_node(REAL_VAL_NODE, 0, 0,FLOAT_TYPE, 0);
                   set_float_data(yylval, (float) atof(yytext)); 
                   DEBUG_PRINT("Token: REAL_NUMBER, Value: %f\n", atof(yytext)); 
@@ -1098,12 +1098,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 105 "analisador.l"
+#line 106 "analisador.l"
 { printf("LEXICAL ERROR (%d): Unknown symbol %s\n", yylineno, yytext); exit(EXIT_FAILURE); }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 107 "analisador.l"
+#line 108 "analisador.l"
 ECHO;
 	YY_BREAK
 #line 1110 "scanner.c"
@@ -2082,6 +2082,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 107 "analisador.l"
+#line 108 "analisador.l"
 
 

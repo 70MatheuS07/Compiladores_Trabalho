@@ -84,6 +84,7 @@ int                 { DEBUG_PRINT("Token: 'int'\n"); return INT; }
 return              { DEBUG_PRINT("Token: 'return'\n"); return RETURN; }
 void                { DEBUG_PRINT("Token: 'void'\n"); return VOID; }
 
+
 {CHAR}          { yylval = new_node(CHAR_VAL_NODE, 0, 0,CHAR_TYPE, 0);
                   set_char_data(yylval, (char) yytext[1]); 
                   DEBUG_PRINT("Token: CHAR_ASCII, Value: %c\n", (char) yytext[1]); 

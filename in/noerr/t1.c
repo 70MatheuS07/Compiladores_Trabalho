@@ -1,6 +1,6 @@
 int main ()
 {
-    int x;
+    int x=1, i=10, o=0;
     float t=1.99;
     int y = 2;
     char n;

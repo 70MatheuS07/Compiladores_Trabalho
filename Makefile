@@ -23,12 +23,12 @@ flex: analisador.l
 	flex analisador.l
 
 # Alvo para compilação
-gcc: analisador.c parser.c tables.c types.c FuncStack.c ast.c
-	gcc $(CFLAGS) -o a.out analisador.c parser.c tables.c types.c FuncStack.c ast.c -lfl
+gcc: analisador.c parser.c tables.c types.c FuncStack.c ast.c interpreter.c
+	gcc $(CFLAGS) -o a.out analisador.c parser.c tables.c types.c FuncStack.c ast.c interpreter.c -lfl
 
 # Alvo para compilação com depuração
-gcc_debug: analisador.c parser.c tables.c types.c FuncStack.c ast.c
-	gcc $(CFLAGS_DEBUG) -o a.out analisador.c parser.c tables.c types.c FuncStack.c ast.c -lfl
+gcc_debug: analisador.c parser.c tables.c types.c FuncStack.c ast.c interpreter.c
+	gcc $(CFLAGS_DEBUG) -o a.out analisador.c parser.c tables.c types.c FuncStack.c ast.c interpreter.c -lfl
 
 # Alvo para limpeza dos arquivos gerados
 clean:

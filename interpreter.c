@@ -419,6 +419,11 @@ void run_var_decl(AST *ast) {
     // Nothing to do, memory was already cleared upon initialization.
 }
 
+void run_fun_decl(AST *ast) {
+    trace("fun_decl");
+    // Nothing to do, memory was already cleared upon initialization.
+}
+
 void run_var_list(AST *ast) {
     trace("var_list");
     // Nothing to do, memory was already cleared upon initialization.
@@ -510,7 +515,7 @@ void rec_run_ast(AST *ast) {
         case VAR_LIST_NODE: run_var_list(ast);  break;
         case VAR_USE_NODE:  run_var_use(ast);   break;
         case WRITE_NODE:    run_write(ast);     break;
-
+        case FUN_DECL_NODE: run_fun_decl(ast);  break;
         //case B2I_NODE:      run_b2i(ast);       break;
         //case B2R_NODE:      run_b2r(ast);       break;
         //case B2S_NODE:      run_b2s(ast);       break;

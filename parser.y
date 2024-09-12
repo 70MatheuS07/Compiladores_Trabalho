@@ -370,6 +370,9 @@ int main(void) {
     print_str_table(st); printf("\n\n");
     print_table(ft); printf("\n\n");
 
+    stdin = fopen(ctermid(NULL), "r");
+    run_ast(root);
+
     print_dot(root);
 
     free_str_table(st);

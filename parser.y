@@ -372,7 +372,7 @@ int main(void) {
 
     stdin = fopen(ctermid(NULL), "r");
     run_ast(root);
-
+    fclose(stdin);
     print_dot(root);
 
     free_str_table(st);

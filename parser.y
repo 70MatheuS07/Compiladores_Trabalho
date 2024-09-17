@@ -369,11 +369,11 @@ int main(void) {
     printf("\n\n");
     print_str_table(st); printf("\n\n");
     print_table(ft); printf("\n\n");
+    print_dot(root);
 
     stdin = fopen(ctermid(NULL), "r");
     run_ast(root);
     fclose(stdin);
-    print_dot(root);
 
     free_str_table(st);
     free_table(ft);

@@ -89,7 +89,7 @@ void init_mem() {
 
 // ----------------------------------------------------------------------------
 
-// #define TRACE
+#define TRACE
 #ifdef TRACE
 #define trace(msg) printf("TRACE: %s\n", msg)
 #else
@@ -421,6 +421,7 @@ void run_var_decl(AST *ast) {
 
 void run_fun_decl(AST *ast) {
     trace("fun_decl");
+    rec_run_ast(get_child(ast, 0)); // Run var_list
     // Nothing to do, memory was already cleared upon initialization.
 }
 
@@ -493,7 +494,13 @@ void run_r2s(AST* ast) {
     pushi(add_string(st, str_buf));
 }
 
+void run_param_list(AST *ast) {
+    trace("param_list");
+    // Nothing to do, memory was already cleared upon initialization.
+}
+
 void rec_run_ast(AST *ast) {
+    //printf("%s\n", kind2str(get_kind(ast)));
     switch(get_kind(ast)) {
         case ASSIGN_NODE:   run_assign(ast);    break;
         case EQ_NODE:       run_eq(ast);        break;
@@ -523,6 +530,7 @@ void rec_run_ast(AST *ast) {
         // Mudei I2S_NODE para I2C_NODE
         case I2C_NODE:      run_i2s(ast);       break;
         //case R2S_NODE:      run_r2s(ast);       break;
+        case PARAM_LIST_NODE: run_param_list(ast); break;
 
         default:
             fprintf(stderr, "Invalid kind: %s!\n", kind2str(get_kind(ast)));
@@ -533,7 +541,11 @@ void rec_run_ast(AST *ast) {
 // ----------------------------------------------------------------------------
 
 void run_ast(AST *ast) {
+    printf("RUNNING AST\n");
     init_stack();
+    printf("STACK INITIALIZED\n");
     init_mem();
+    printf("MEMORY INITIALIZED\n");
     rec_run_ast(ast);
+    printf("AST RUN\n");
 }

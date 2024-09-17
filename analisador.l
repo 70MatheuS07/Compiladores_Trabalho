@@ -83,14 +83,15 @@ if                  { DEBUG_PRINT("Token: 'if'\n"); return IF; }
 int                 { DEBUG_PRINT("Token: 'int'\n"); return INT; }
 return              { DEBUG_PRINT("Token: 'return'\n"); return RETURN; }
 void                { DEBUG_PRINT("Token: 'void'\n"); return VOID; }
+scanf               { DEBUG_PRINT("Token: 'scanf'\n"); return SCANF; } 
+printf              { DEBUG_PRINT("Token: 'printf'\n"); return PRINTF; } 
 
-
-{CHAR}          { yylval = new_node(CHAR_VAL_NODE, 0, 0,CHAR_TYPE, 0);
-                  set_char_data(yylval, (char) yytext[1]); 
+{CHAR}          {yylval = new_node(CHAR_VAL_NODE, (int)yytext[1], 0,CHAR_TYPE, 0); 
                   DEBUG_PRINT("Token: CHAR_ASCII, Value: %c\n", (char) yytext[1]); 
                   return CHAR_ASCII; }
 
-{STRING}        { add_string(st, yytext); DEBUG_PRINT("Token: STRING, Value: %s\n", yytext); return STRING; }
+{STRING}        { yylval = new_node(STR_VAL_NODE, add_string(st, yytext), 0, NO_TYPE, 0); 
+                  DEBUG_PRINT("Token: STRING, Value: %s\n", yytext); return STRING;}
 
 {ID}            { strcpy(VarSave, yytext); DEBUG_PRINT("Token: ID, Value: %s\n", yytext); return ID; }
 

@@ -116,14 +116,13 @@ void read_real(int var_idx) {
     storef(var_idx, x);
 }
 
-void read_bool(int var_idx) {
+void read_char(int var_idx){
     int x;
-    do {
-        printf("read (bool - 0 = false, 1 = true): ");
-        scanf("%d", &x);
-    } while (x != 0 && x != 1);
+    printf("read (char): ");
+    scanf("%c", &x);
     storei(var_idx, x);
 }
+
 
 void read_str(int var_idx) {
     printf("read (str): ");
@@ -140,9 +139,10 @@ void write_real() {
     printf("%f\n", popf());
 }
 
-void write_bool() {
-    popi() == 0 ? printf("false\n") : printf("true\n");
+void write_char(){
+    printf("%c\n", popi() );
 }
+
 
 // Helper function to write strings.
 void escape_str(const char* s, char *n) {
@@ -187,26 +187,12 @@ void plus_real(AST *ast) {
     pushf(l + r);
 }
 
-void plus_bool(AST *ast) {
-    run_bin_op();
-    int r = popi();
-    int l = popi();
-    pushi(l || r); // Can't add l and r here because of overflow (>1).
-}
 
-void plus_str(AST *ast) {
-    run_bin_op();
-    int r = popi();
-    int l = popi();
-    clear_str_buf();
-    strcat(str_buf, get_string(st, l));
-    strcat(str_buf, get_string(st, r));
-    pushi(add_string(st, str_buf));
-}
+
 
 void run_other_arith(AST *ast, int (*int_op)(int,int), float (*real_op)(float,float)) {
     run_bin_op();
-    if (get_node_type(ast) == INT_TYPE) {
+    if (get_node_type(ast) == INT_TYPE || get_node_type(ast)==CHAR_TYPE) {
         int r = popi();
         int l = popi();
         pushi(int_op(l,r));
@@ -240,6 +226,11 @@ int int_times(int l, int r) {
 float float_times(float l, float r) {
     return l * r;
 }
+
+int int_percent(int l, int r){
+    return l % r;
+}
+
 
 void run_cmp(AST *ast, int (*int_cmp)(int,int),
              int (*real_cmp)(float,float), int (*str_cmp)(char*,char*)) {
@@ -283,6 +274,51 @@ int str_lt(char *l, char *r) {
     return (strcmp(l, r) < 0);
 }
 
+int int_gt(int l, int r) {
+    return l > r;
+}
+
+int float_gt(float l, float r) {
+    return l > r;
+}
+
+int int_lte(int l, int r) {
+    return l <= r;
+}
+
+int float_lte(float l, float r) {
+    return l <= r;
+}
+
+int int_gte(int l, int r) {
+    return l >= r;
+}
+
+int int_gte(int l, int r) {
+    return l >= r;
+}
+
+int float_gte(float l, float r) {
+    return l > r;
+}
+
+int int_ne(int l, int r){
+    return l!=r;
+}
+
+int float_ne(int l, int r){
+    return l!=r;
+}
+
+int int_la(int l, int r){
+    return l && r;
+}
+
+float float_lo(float l, float r){
+    return l || r;
+}
+
+
 // ----------------------------------------------------------------------------
 
 void run_assign(AST *ast) {
@@ -291,7 +327,7 @@ void run_assign(AST *ast) {
     rec_run_ast(rexpr);
     int var_idx = get_data(get_child(ast, 0));
     Type var_type = get_type(vt, var_idx);
-    if (var_type == REAL_TYPE) {
+    if (var_type == FLOAT_TYPE) {
         storef(var_idx, popf());
     } else {
         storei(var_idx, popi());
@@ -352,9 +388,9 @@ void run_plus(AST *ast) {
     Type plus_type = get_node_type(ast);
     switch(plus_type) {
         case INT_TYPE:  plus_int(ast);     break;
-        case REAL_TYPE: plus_real(ast);    break;
+        case FLOAT_TYPE: plus_real(ast);    break;
         case BOOL_TYPE: plus_bool(ast);    break;
-        case STR_TYPE:  plus_str(ast);     break;
+      //  case STR_TYPE:  plus_str(ast);     break;
         case NO_TYPE:
         default:
             fprintf(stderr, "Invalid type: %s!\n", get_text(plus_type));
@@ -374,9 +410,9 @@ void run_read(AST *ast) {
     Type var_type = get_type(vt, var_idx);
     switch(var_type) {
         case INT_TYPE:  read_int(var_idx);     break;
-        case REAL_TYPE: read_real(var_idx);    break;
+        case FLOAT_TYPE: read_real(var_idx);    break;
         case BOOL_TYPE: read_bool(var_idx);    break;
-        case STR_TYPE:  read_str(var_idx);     break;
+        //case STR_TYPE:  read_str(var_idx);     break;
         case NO_TYPE:
         default:
             fprintf(stderr, "Invalid type: %s!\n", get_text(var_type));
@@ -422,7 +458,7 @@ void run_var_list(AST *ast) {
 void run_var_use(AST *ast) {
     trace("var_use");
     int var_idx = get_data(ast);
-    if (get_node_type(ast) == REAL_TYPE) {
+    if (get_node_type(ast) == FLOAT_TYPE) {
         pushf(loadf(var_idx));
     } else {
         pushi(loadi(var_idx));
@@ -436,9 +472,9 @@ void run_write(AST *ast) {
     Type expr_type = get_node_type(expr);
     switch(expr_type) {
         case INT_TYPE:  write_int();    break;
-        case REAL_TYPE: write_real();   break;
+        case FLOAT_TYPE: write_real();   break;
         case BOOL_TYPE: write_bool();   break;
-        case STR_TYPE:  write_str();    break;
+        //case STR_TYPE:  write_str();    break;
         case NO_TYPE:
         default:
             fprintf(stderr, "Invalid type: %s!\n", get_text(expr_type));
@@ -487,7 +523,7 @@ void rec_run_ast(AST *ast) {
         case ASSIGN_NODE:   run_assign(ast);    break;
         case EQ_NODE:       run_eq(ast);        break;
         case BLOCK_NODE:    run_block(ast);     break;
-        case BOOL_VAL_NODE: run_bool_val(ast);  break;
+        case BOOL_VAL_NODE: run_bool_val(ast);  break;//
         case IF_NODE:       run_if(ast);        break;
         case INT_VAL_NODE:  run_int_val(ast);   break;
         case LT_NODE:       run_lt(ast);        break;

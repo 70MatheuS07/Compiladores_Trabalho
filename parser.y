@@ -73,6 +73,7 @@ AST *root;
 %token WHILE IF INT RETURN
 %token VOID
 %token STRING ID INT_NUMBER REAL_NUMBER CHAR_ASCII
+%token SCANF PRINTF
 
 %left PLUS MINUS
 
@@ -214,6 +215,8 @@ statement
     | iteration_statement { $$ = $1; }
     | return_statement { $$ = $1; }
     | variable_declaration { $$ = $1; }
+    | read-stmt SEMICOLON { $$ =$1; }
+    | write-stmt SEMICOLON { $$ = $1; }
     | CONTINUE SEMICOLON { $$ = new_node(CONTINUE_NODE, 0, 0,NO_TYPE, 0);  }
     ;
 
@@ -336,13 +339,22 @@ argument_expression_list
 	| /* empty */ { QtdParam=0; }
     ;
 
+read-stmt:
+     SCANF OPEN_PARENTHESES ID { $3 = check_var(); }CLOSE_PARENTHESES { $$ = new_subtree(READ_NODE, NO_TYPE, 0, 1, $3); }
+;
+
+write-stmt:
+     PRINTF OPEN_PARENTHESES primary_expression CLOSE_PARENTHESES{ $$ = new_subtree(WRITE_NODE, NO_TYPE, 0, 1, $3); }
+;
+
+
 primary_expression
     : ID { $$ = check_var(); }
     | INT_NUMBER { $$ = $1; }
     | REAL_NUMBER { $$ = $1; }
     | CHAR_ASCII { $$ = $1 ;}
     | OPEN_PARENTHESES expression CLOSE_PARENTHESES { $$= $2; }
-    | STRING
+    | STRING { $$ = $1; }
     ;
 
 %%

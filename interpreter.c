@@ -295,9 +295,8 @@ void run_assign(AST *ast) {
     rec_run_ast(rexpr);
     trace("assign after rexpr");
     int var_idx = get_data(get_child(ast, 0));
-    trace("assign after var_idx");
-    Type var_type = get_type(get, var_idx);
-    trace("assign after var_type");
+    int pos_func = get_pos_fun(get_child(ast, 0));
+    Type var_type = get_typevar_in_func(ft, var_idx, pos_func);
     if (var_type == FLOAT_TYPE) {
         storef(var_idx, popf());
     } else {
@@ -374,14 +373,14 @@ void run_plus(AST *ast) {
 
 void run_program(AST *ast) {
     trace("program");
-    rec_run_ast(get_child(ast, 0)); // run var_list
-    rec_run_ast(get_child(ast, 1)); // run block
+    rec_run_ast(get_child(ast, get_child_count(ast)-1)); // run fun_decl
 }
 
 void run_read(AST *ast) {
     trace("read");
     int var_idx = get_data(get_child(ast, 0));
-    Type var_type = get_type(vt, var_idx);
+    int pos_func = get_pos_fun(get_child(ast, 0));
+    Type var_type = get_typevar_in_func(ft, var_idx, pos_func);
     switch(var_type) {
         case INT_TYPE:  read_int(var_idx);     break;
         case FLOAT_TYPE: read_real(var_idx);    break;
@@ -428,9 +427,8 @@ void run_var_decl(AST *ast) {
 
 void run_fun_decl(AST *ast) {
     trace("fun_decl");
-    rec_run_ast(get_child(ast, 0)); // Run param_list
-    rec_run_ast(get_child(ast, 1)); // Run block
-    // Nothing to do, memory was already cleared upon initialization.
+    rec_run_ast(get_child(ast, 0)); // run var_list
+    rec_run_ast(get_child(ast, 1)); // run block
 }
 
 void run_var_list(AST *ast) {

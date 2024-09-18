@@ -80,6 +80,10 @@ int get_data(AST *node) {
     return node->data.as_int;
 }
 
+int get_pos_fun(AST*node){
+    return node->posFun;
+}
+
 void set_float_data(AST *node, float data) {
     node->data.as_float = data;
 }

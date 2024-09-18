@@ -282,6 +282,31 @@ int int_lt(int l, int r) {
 int float_lt(float l, float r) {
     return l < r;
 }
+
+int int_gt(int l, int r) {
+    return l > r;
+}
+
+int float_gt(float l, float r) {
+    return l > r;
+}
+
+int int_gt_or_eq(int l, int r) {
+    return l >= r;
+}
+
+int float_gt_or_eq(float l, float r) {
+    return l >= r;
+}
+
+int int_lt_or_eq(int l, int r) {
+    return l <= r;
+}
+
+int float_lt_or_eq(float l, float r) {
+    return l <= r;
+}
+
 /*
 int str_lt(char *l, char *r) {
     return (strcmp(l, r) < 0);
@@ -578,13 +603,33 @@ void run_array_decl(AST *ast) {
     
 }
 
+void run_greather_than(AST *ast) {
+    trace("greather_than");
+    run_cmp(ast, int_gt, float_gt);
+}
+
+void run_less_than(AST *ast) {
+    trace("less_than");
+    run_cmp(ast, int_lt, float_lt);
+}
+
+void run_greather_than_or_equal(AST *ast) {
+    trace("greather_than_or_equal");
+    run_cmp(ast, int_gt_or_eq, float_gt_or_eq);
+}
+
+void run_less_than_or_equal(AST *ast) {
+    trace("less_than_or_equal");
+    run_cmp(ast, int_lt_or_eq, float_lt_or_eq);
+}
+
 
 
 void rec_run_ast(AST *ast) {
-    printf("%s\n", kind2str(get_kind(ast)));
+    //printf("%s\n", kind2str(get_kind(ast)));
     switch(get_kind(ast)) {
         case ASSIGN_NODE:   run_assign(ast);    break;
-        case EQ_NODE:       run_eq(ast);        break;
+        case EQUALS_NODE:       run_eq(ast);        break;
         case BLOCK_NODE:    run_block(ast);     break;
         case BOOL_VAL_NODE: run_bool_val(ast);  break;
         case IF_NODE:       run_if(ast);        break;
@@ -617,7 +662,10 @@ void rec_run_ast(AST *ast) {
         case C2F_NODE: run_c2f(ast); break;
         case RETURN_NODE: run_return(ast); break;
         case ARRAY_DECL_NODE: run_array_decl(ast); break;
-        
+        case GREATER_THAN_NODE: run_greather_than(ast); break;
+        case LESS_THAN_NODE: run_less_than(ast); break;
+        case GREATER_THAN_OR_EQUAL_NODE: run_greather_than_or_equal(ast); break;
+        case LESS_THAN_OR_EQUAL_NODE: run_less_than_or_equal(ast); break;
 
         default:
             fprintf(stderr, "Invalid kind: %s!\n", kind2str(get_kind(ast)));

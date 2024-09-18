@@ -90,7 +90,7 @@ void init_mem() {
 
 // ----------------------------------------------------------------------------
 
-#define TRACE
+//#define TRACE
 #ifdef TRACE
 #define trace(msg) printf("TRACE: %s\n", msg)
 #else
@@ -293,17 +293,14 @@ void run_assign(AST *ast) {
     trace("assign");
     AST *rexpr = get_child(ast, 1);
     rec_run_ast(rexpr);
-    trace("assign after rexpr");
     int var_idx = get_data(get_child(ast, 0));
     int pos_func = get_pos_fun(get_child(ast, 0));
     Type var_type = get_typevar_in_func(ft, var_idx, pos_func);
     if (var_type == FLOAT_TYPE) {
         storef(var_idx, popf());
     } else {
-        trace("assign int");
         storei(var_idx, popi());
     }
-    trace("assign done");
 }
 
 void run_eq(AST *ast) {
@@ -509,7 +506,6 @@ void run_param_list(AST *ast) {
 
     int size = get_child_count(ast);
     if (size == 0) {
-        trace("param_list empty");
         return;
     }
     else
@@ -521,7 +517,39 @@ void run_param_list(AST *ast) {
     }
 }
 
+void run_increment(AST *ast){
+    trace("increment");
+    int var_idx = get_data(get_child(ast, 0));
+    int pos_func = get_pos_fun(get_child(ast, 0));
+    Type var_type = get_typevar_in_func(ft, var_idx, pos_func);
+    if (var_type == FLOAT_TYPE) {
+        storef(var_idx, loadf(var_idx) + 1);
+    } else {
+        storei(var_idx, loadi(var_idx) + 1);
+    }
+}
 
+void run_decrement(AST *ast){
+    trace("decrement");
+    int var_idx = get_data(get_child(ast, 0));
+    int pos_func = get_pos_fun(get_child(ast, 0));
+    Type var_type = get_typevar_in_func(ft, var_idx, pos_func);
+    if (var_type == FLOAT_TYPE) {
+        storef(var_idx, loadf(var_idx) - 1);
+    } else {
+        storei(var_idx, loadi(var_idx) - 1);
+    }
+}
+
+void run_c2f(AST *ast) {
+    rec_run_ast(get_child(ast, 0));
+    pushf((float) popi());
+}
+
+void run_return(AST *ast) {
+    trace("return");
+    rec_run_ast(get_child(ast, 0));
+}
 
 void rec_run_ast(AST *ast) {
     //printf("%s\n", kind2str(get_kind(ast)));
@@ -555,6 +583,10 @@ void rec_run_ast(AST *ast) {
         case I2C_NODE:      run_i2s(ast);       break;
         //case R2S_NODE:      run_r2s(ast);       break;
         case PARAM_LIST_NODE: run_param_list(ast); break;
+        case INCREMENT_NODE: run_increment(ast); break;
+        case DECREMENT_NODE: run_decrement(ast); break;
+        case C2F_NODE: run_c2f(ast); break;
+        case RETURN_NODE: run_return(ast); break;
 
         default:
             fprintf(stderr, "Invalid kind: %s!\n", kind2str(get_kind(ast)));
@@ -571,5 +603,5 @@ void run_ast(AST *ast) {
     init_mem();
     printf("MEMORY INITIALIZED\n");
     rec_run_ast(ast);
-    printf("AST RUN\n");
+    printf("AST FINISH\n");
 }

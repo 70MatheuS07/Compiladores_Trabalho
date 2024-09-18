@@ -69,6 +69,7 @@ NodeKind get_kind(AST *node);
 char* kind2str(NodeKind kind);
 
 int get_data(AST *node);
+int get_pos_fun(AST*node);
 void set_float_data(AST *node, float data);
 float get_float_data(AST *node);
 void set_char_data(AST *node, char data); 

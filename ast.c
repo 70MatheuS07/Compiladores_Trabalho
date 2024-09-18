@@ -233,3 +233,23 @@ void print_dot(AST *tree) {
     fprintf(stderr, "}\n");
 }
 
+void print_tree_names(AST *node, int indent) {
+    if (node == NULL) {
+        return;
+    }
+
+    // Imprime os espaços correspondentes ao nível de indentação
+    for (int i = 0; i < indent; i++) {
+        printf("  "); // Dois espaços por nível de indentação
+    }
+
+    // Obtém o nome do nó através da função kind2str e imprime
+    printf("%s\n", kind2str(get_kind(node)));
+
+    // Itera sobre os filhos do nó atual e imprime recursivamente
+    int child_count = get_child_count(node);
+    for (int i = 0; i < child_count; i++) {
+        AST *child = get_child(node, i);
+        print_tree_names(child, indent + 1); // Aumenta a indentação para o próximo nível
+    }
+}

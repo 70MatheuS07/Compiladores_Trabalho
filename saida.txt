@@ -1,3 +1,0 @@
-bison parser.y
-flex analisador.l
-gcc -Wall analisador.c parser.c tables.c types.c FuncStack.c -lfl

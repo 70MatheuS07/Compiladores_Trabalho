@@ -9,6 +9,7 @@
 
 extern StrTable *st;
 extern VarTable *vt;
+extern FuncTable *ft;
 
 typedef union {
     int   as_int;
@@ -292,13 +293,18 @@ void run_assign(AST *ast) {
     trace("assign");
     AST *rexpr = get_child(ast, 1);
     rec_run_ast(rexpr);
+    trace("assign after rexpr");
     int var_idx = get_data(get_child(ast, 0));
-    Type var_type = get_type(vt, var_idx);
+    trace("assign after var_idx");
+    Type var_type = get_type(get, var_idx);
+    trace("assign after var_type");
     if (var_type == FLOAT_TYPE) {
         storef(var_idx, popf());
     } else {
+        trace("assign int");
         storei(var_idx, popi());
     }
+    trace("assign done");
 }
 
 void run_eq(AST *ast) {
@@ -422,12 +428,17 @@ void run_var_decl(AST *ast) {
 
 void run_fun_decl(AST *ast) {
     trace("fun_decl");
-    rec_run_ast(get_child(ast, 0)); // Run var_list
+    rec_run_ast(get_child(ast, 0)); // Run param_list
+    rec_run_ast(get_child(ast, 1)); // Run block
     // Nothing to do, memory was already cleared upon initialization.
 }
 
 void run_var_list(AST *ast) {
     trace("var_list");
+    int size = get_child_count(ast);
+    for (int i = 0; i < size; i++) {
+        rec_run_ast(get_child(ast, i));
+    }
     // Nothing to do, memory was already cleared upon initialization.
 }
 
@@ -497,8 +508,22 @@ void run_r2s(AST* ast) {
 
 void run_param_list(AST *ast) {
     trace("param_list");
-    // Nothing to do, memory was already cleared upon initialization.
+
+    int size = get_child_count(ast);
+    if (size == 0) {
+        trace("param_list empty");
+        return;
+    }
+    else
+    {
+        printf("param_list size: %d\n", size);
+        for (int i = 0; i < size; i++) {
+            rec_run_ast(get_child(ast, i));
+        }
+    }
 }
+
+
 
 void rec_run_ast(AST *ast) {
     //printf("%s\n", kind2str(get_kind(ast)));
@@ -542,7 +567,7 @@ void rec_run_ast(AST *ast) {
 // ----------------------------------------------------------------------------
 
 void run_ast(AST *ast) {
-    printf("RUNNING AST\n");
+    printf("\nRUNNING AST\n");
     init_stack();
     printf("STACK INITIALIZED\n");
     init_mem();

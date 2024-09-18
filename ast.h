@@ -84,4 +84,6 @@ void print_dot(AST *ast);
 
 void free_tree(AST *ast);
 
+void print_tree_names(AST *node, int indent);
+
 #endif

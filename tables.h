@@ -108,6 +108,8 @@ void print_table(FuncTable *ft);
 
 void free_table(FuncTable *ft);
 
+VarTable *get_var_table(FuncTable *ft, int i);
+
 #endif // TABLES_H
 
 

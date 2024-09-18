@@ -382,6 +382,8 @@ int main(void) {
     print_table(ft); printf("\n\n");
     print_dot(root);
 
+    print_tree_names(root, 2);
+
     stdin = fopen(ctermid(NULL), "r");
     run_ast(root);
     fclose(stdin);

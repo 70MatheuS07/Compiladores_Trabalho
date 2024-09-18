@@ -425,9 +425,9 @@ void run_repeat(AST *ast) {
     trace("repeat");
     int again = 1;
     while (again) {
-        rec_run_ast(get_child(ast, 0)); // Run body.
-        rec_run_ast(get_child(ast, 1)); // Run test.
-        again = !popi();
+            rec_run_ast(get_child(ast, 0)); // Run body.
+            rec_run_ast(get_child(ast, 1)); // Run test.
+            again = !popi();
     }
 }
 
@@ -623,13 +623,43 @@ void run_less_than_or_equal(AST *ast) {
     run_cmp(ast, int_lt_or_eq, float_lt_or_eq);
 }
 
+void run_char_val(AST *ast) {
+    trace("char_val");
+    pushi(get_data(ast));
+}
 
+void run_logical_or(AST *ast) {
+    trace("logical_or");
+    rec_run_ast(get_child(ast, 0));
+    rec_run_ast(get_child(ast, 1));
+    int r = popi();
+    int l = popi();
+    printf("%d %d\n", l, r);
+    pushi(l || r);
+}
+
+void run_not_equals(AST *ast) {
+    trace("not_equals");
+    run_bin_op();
+    int r = popi();
+    int l = popi();
+    pushi(l != r);
+}
+
+void run_logical_and(AST *ast) {
+    trace("logical_and");
+    rec_run_ast(get_child(ast, 0));
+    rec_run_ast(get_child(ast, 1));
+    int r = popi();
+    int l = popi();
+    pushi(l && r);
+}
 
 void rec_run_ast(AST *ast) {
     //printf("%s\n", kind2str(get_kind(ast)));
     switch(get_kind(ast)) {
         case ASSIGN_NODE:   run_assign(ast);    break;
-        case EQUALS_NODE:       run_eq(ast);        break;
+        case EQUALS_NODE:   run_eq(ast);        break;
         case BLOCK_NODE:    run_block(ast);     break;
         case BOOL_VAL_NODE: run_bool_val(ast);  break;
         case IF_NODE:       run_if(ast);        break;
@@ -666,6 +696,10 @@ void rec_run_ast(AST *ast) {
         case LESS_THAN_NODE: run_less_than(ast); break;
         case GREATER_THAN_OR_EQUAL_NODE: run_greather_than_or_equal(ast); break;
         case LESS_THAN_OR_EQUAL_NODE: run_less_than_or_equal(ast); break;
+        case CHAR_VAL_NODE: run_char_val(ast); break;
+        case LOGICAL_OR_NODE: run_logical_or(ast); break;
+        case NOT_EQUALS_NODE: run_not_equals(ast); break;
+        case LOGICAL_AND_NODE: run_logical_and(ast); break;
 
         default:
             fprintf(stderr, "Invalid kind: %s!\n", kind2str(get_kind(ast)));

@@ -1,15 +1,14 @@
 int main ()
 {
     char c = 'c';
-    int x = 0;
+    int x = 7;
     char coletado = 'd';
 
-   while(coletado == 'c' && x == 7){
+   while(coletado == 'd' && x == 7){
         //scanf("%c%d", &coletado, &x);
-
-        if(coletado != 'd' || x != 7){
-            //printf("tente novamente\n");
-        }
+        printf(777777777);
+        coletado = 'a';
+        x = 10;
     }
 
     return 0;

@@ -1,6 +1,6 @@
 int main ()
 {
-    int x = 2;
+    int x = 3;
     int y = 2;
     char nome[40];
     if(x > y) printf(1);

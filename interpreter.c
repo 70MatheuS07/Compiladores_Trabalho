@@ -629,7 +629,7 @@ void rec_run_ast(AST *ast) {
     //printf("%s\n", kind2str(get_kind(ast)));
     switch(get_kind(ast)) {
         case ASSIGN_NODE:   run_assign(ast);    break;
-        case EQUALS_NODE:       run_eq(ast);        break;
+        case EQUALS_NODE:   run_eq(ast);        break;
         case BLOCK_NODE:    run_block(ast);     break;
         case BOOL_VAL_NODE: run_bool_val(ast);  break;
         case IF_NODE:       run_if(ast);        break;

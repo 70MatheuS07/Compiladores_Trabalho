@@ -46,7 +46,7 @@ void check_params_types_sizes(Type type, int size);
 void assign_size_error(int size1, int size2);
 void check_return_types(Type type);
 AST* check_assign(AST* l, AST* r,
-                   Unif (*unify)(Type,Type)) ;
+                   Unif (*unify)(Type,Type), const char* op, NodeKind kind) ;
 extern int yylineno;
 extern char *yytext;
 char *VarSave;
@@ -249,18 +249,15 @@ expression
     ;
 
 assignment_expression
-    : ID { $1=check_var(); } assignment_operator expression { $$=check_assign($1, $4, unify_assign); }
+    : ID { $1=check_var(); } ASSIGNMENT expression { $$=check_assign($1, $4, unify_assign, "=", ASSIGN_NODE); }
+    | ID { $1=check_var(); } ADD_ASSIGN expression { $$=check_assign($1, $4, unify_assign, "+=", ADD_ASSIGN_NODE); }
+    | ID { $1=check_var(); } SUB_ASSIGN expression { $$=check_assign($1, $4, unify_assign, "-=", SUB_ASSIGN_NODE); }
+    | ID { $1=check_var(); } MUL_ASSIGN expression { $$=check_assign($1, $4, unify_assign,"*=", MUL_ASSIGN_NODE); }
+    | ID { $1=check_var(); } DIV_ASSIGN expression { $$=check_assign($1, $4, unify_assign, "/=", DIV_ASSIGN_NODE); }
+    | ID { $1=check_var(); } MOD_ASSIGN expression { $$=check_assign($1, $4, unify_assign, "%=", MOD_ASSIGN_NODE); }
     | binary_expression { $$=$1; }
     ;
 
-assignment_operator
-    : ASSIGNMENT
-    | ADD_ASSIGN
-    | SUB_ASSIGN
-    | MUL_ASSIGN
-    | DIV_ASSIGN
-    | MOD_ASSIGN
-    ;
 
 binary_expression
     : binary_expression PLUS binary_expression { $$ = unify_bin_node($1, $3, PLUS_NODE, "+", unify_arith_op);
@@ -545,7 +542,7 @@ void check_size_bin_node(AST* l, AST* r, const char* op){
 }
 
 AST* check_assign(AST* l, AST* r,
-                   Unif (*unify)(Type,Type)) {
+                   Unif (*unify)(Type,Type), const char* op, NodeKind kind) {
     Type lt = get_node_type(l);
     Type rt = get_node_type(r);
     
@@ -553,7 +550,7 @@ AST* check_assign(AST* l, AST* r,
     int rt_size=get_node_size(r);
     Unif unif = unify(lt, rt);
     if (unif.type == NO_TYPE) {
-        type_error("=", lt, rt);
+        type_error(op, lt, rt);
     }
     if(lt_size!=rt_size){
         assign_size_error(lt_size,rt_size);
@@ -561,7 +558,7 @@ AST* check_assign(AST* l, AST* r,
 
     l = create_conv_node(unif.lc, l);
     r = create_conv_node(unif.rc, r);
-    return new_subtree(ASSIGN_NODE, NO_TYPE, 0, 2, l, r);
+    return new_subtree(kind, NO_TYPE, 0, 2, l, r);
 }
 
 void assign_size_error(int size1, int size2){

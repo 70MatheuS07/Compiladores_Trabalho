@@ -5,7 +5,8 @@ int main ()
     char coletado = 'd';
 
    while(coletado == 'c' && x == 7){
-        //scanf("%c%d", &coletado, &x);
+        scanf(c);
+        scanf(x);
 
         if(coletado != 'd' || x != 7){
             //printf("tente novamente\n");

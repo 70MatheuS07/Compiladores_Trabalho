@@ -419,6 +419,7 @@ void run_var_decl(AST *ast) {
     // Nothing to do, memory was already cleared upon initialization.
 }
 
+
 void run_fun_decl(AST *ast) {
     trace("fun_decl");
     rec_run_ast(get_child(ast, 0)); // Run var_list

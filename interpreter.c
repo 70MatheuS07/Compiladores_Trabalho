@@ -551,8 +551,37 @@ void run_return(AST *ast) {
     rec_run_ast(get_child(ast, 0));
 }
 
+void run_array_decl(AST *ast) {
+    trace("array_decl");
+    AST* child_init = get_child(ast, 1);
+    int size = get_child_count(child_init);
+
+    // Depois eu trato isso
+    /*
+    if(size == 0){
+        
+    }
+    */
+
+    int var_idx = get_data(get_child(ast, 0));
+    int pos_func = get_pos_fun(get_child(ast, 0));
+    Type var_type = get_typevar_in_func(ft, var_idx, pos_func);
+    switch(var_type) {
+        case INT_TYPE: storei(var_idx, get_node_size(ast));      break;  
+        case FLOAT_TYPE: storef(var_idx, get_node_size(ast));    break;
+        case CHAR_TYPE:  storei(var_idx, get_node_size(ast));    break;
+        case NO_TYPE:
+        default:
+            fprintf(stderr, "Invalid type: %s!\n", get_text(var_type));
+            exit(EXIT_FAILURE);
+    }
+    
+}
+
+
+
 void rec_run_ast(AST *ast) {
-    //printf("%s\n", kind2str(get_kind(ast)));
+    printf("%s\n", kind2str(get_kind(ast)));
     switch(get_kind(ast)) {
         case ASSIGN_NODE:   run_assign(ast);    break;
         case EQ_NODE:       run_eq(ast);        break;
@@ -587,6 +616,8 @@ void rec_run_ast(AST *ast) {
         case DECREMENT_NODE: run_decrement(ast); break;
         case C2F_NODE: run_c2f(ast); break;
         case RETURN_NODE: run_return(ast); break;
+        case ARRAY_DECL_NODE: run_array_decl(ast); break;
+        
 
         default:
             fprintf(stderr, "Invalid kind: %s!\n", kind2str(get_kind(ast)));

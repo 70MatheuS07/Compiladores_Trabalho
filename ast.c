@@ -122,6 +122,11 @@ extern FuncTable *ft;;
 char* kind2str(NodeKind kind) {
     switch(kind) {
         case ASSIGN_NODE:               return "=";
+        case ADD_ASSIGN_NODE:           return "+=";
+        case SUB_ASSIGN_NODE:           return "-=";
+        case MUL_ASSIGN_NODE:           return "*=";
+        case DIV_ASSIGN_NODE:           return "/=";
+        case MOD_ASSIGN_NODE:           return "%=";
         case EQ_NODE:                   return "==";
         case BLOCK_NODE:                return "block";
         case CHAR_VAL_NODE:             return "char_val";

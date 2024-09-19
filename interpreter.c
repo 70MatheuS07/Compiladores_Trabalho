@@ -655,6 +655,17 @@ void run_logical_and(AST *ast) {
     pushi(l && r);
 }
 
+void save_assign(AST *ast) {
+    int var_idx = get_data(get_child(ast, 0));
+    int pos_func = get_pos_fun(get_child(ast, 0));
+    Type var_type = get_typevar_in_func(ft, var_idx, pos_func);
+    if (var_type == FLOAT_TYPE) {
+        storef(var_idx, popf());
+    } else {
+        storei(var_idx, popi());
+    }
+}
+
 void run_sub_assign(AST *ast) {
     trace("sub_assign");
     rec_run_ast(get_child(ast, 0));
@@ -697,17 +708,6 @@ void run_mod_assign(AST *ast) {
     pushi(l % r);
 
     save_assign(ast);
-}
-
-void save_assign(AST *ast) {
-    int var_idx = get_data(get_child(ast, 0));
-    int pos_func = get_pos_fun(get_child(ast, 0));
-    Type var_type = get_typevar_in_func(ft, var_idx, pos_func);
-    if (var_type == FLOAT_TYPE) {
-        storef(var_idx, popf());
-    } else {
-        storei(var_idx, popi());
-    }
 }
 
 void rec_run_ast(AST *ast) {

@@ -3,9 +3,7 @@ int RetornaDiferenca(int x, int y){
     else if(x<y) return 1;
     return 0;
 }
-int printf(){
 
-}
 int main ()
 {
     int b=-3;

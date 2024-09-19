@@ -423,11 +423,12 @@ void run_real_val(AST *ast) {
 
 void run_repeat(AST *ast) {
     trace("repeat");
-    int again = 1;
+    rec_run_ast(get_child(ast, 1));
+    int again = popi();
     while (again) {
-            rec_run_ast(get_child(ast, 0)); // Run body.
-            rec_run_ast(get_child(ast, 1)); // Run test.
-            again = !popi();
+        rec_run_ast(get_child(ast, 0)); // Run body.
+        rec_run_ast(get_child(ast, 1)); // Run test.
+        again = popi();
     }
 }
 
@@ -634,7 +635,6 @@ void run_logical_or(AST *ast) {
     rec_run_ast(get_child(ast, 1));
     int r = popi();
     int l = popi();
-    printf("%d %d\n", l, r);
     pushi(l || r);
 }
 
@@ -653,6 +653,61 @@ void run_logical_and(AST *ast) {
     int r = popi();
     int l = popi();
     pushi(l && r);
+}
+
+void run_sub_assign(AST *ast) {
+    trace("sub_assign");
+    rec_run_ast(get_child(ast, 0));
+    rec_run_ast(get_child(ast, 1));
+    int r = popi();
+    int l = popi();
+    pushi(l - r);
+
+    save_assign(ast);
+}
+
+void run_div_assign(AST *ast) {
+    trace("div_assign");
+    rec_run_ast(get_child(ast, 0));
+    rec_run_ast(get_child(ast, 1));
+    int r = popi();
+    int l = popi();
+    pushi(l / r);
+
+    save_assign(ast);
+}
+
+void run_mul_assign(AST *ast) {
+    trace("mul_assign");
+    rec_run_ast(get_child(ast, 0));
+    rec_run_ast(get_child(ast, 1));
+    int r = popi();
+    int l = popi();
+    pushi(l * r);
+
+    save_assign(ast);
+}
+
+void run_mod_assign(AST *ast) {
+    trace("mod_assign");
+    rec_run_ast(get_child(ast, 0));
+    rec_run_ast(get_child(ast, 1));
+    int r = popi();
+    int l = popi();
+    pushi(l % r);
+
+    save_assign(ast);
+}
+
+void save_assign(AST *ast) {
+    int var_idx = get_data(get_child(ast, 0));
+    int pos_func = get_pos_fun(get_child(ast, 0));
+    Type var_type = get_typevar_in_func(ft, var_idx, pos_func);
+    if (var_type == FLOAT_TYPE) {
+        storef(var_idx, popf());
+    } else {
+        storei(var_idx, popi());
+    }
 }
 
 void rec_run_ast(AST *ast) {
@@ -700,6 +755,10 @@ void rec_run_ast(AST *ast) {
         case LOGICAL_OR_NODE: run_logical_or(ast); break;
         case NOT_EQUALS_NODE: run_not_equals(ast); break;
         case LOGICAL_AND_NODE: run_logical_and(ast); break;
+        case SUB_ASSIGN_NODE: run_sub_assign(ast); break;
+        case DIV_ASSIGN_NODE: run_div_assign(ast); break;
+        case MUL_ASSIGN_NODE: run_mul_assign(ast); break;
+        case MOD_ASSIGN_NODE: run_mod_assign(ast); break;
 
         default:
             fprintf(stderr, "Invalid kind: %s!\n", kind2str(get_kind(ast)));

@@ -72,4 +72,3 @@ node3 -> node34;
 node1 -> node3;
 node0 -> node1;
 }
-Invalid kind: <!

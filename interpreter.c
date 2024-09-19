@@ -795,6 +795,11 @@ void run_array_acess(AST *ast) {
     }
 }
 
+void run_c2i(AST *ast) {
+    rec_run_ast(get_child(ast, 0));
+    pushi((int)popi());
+}
+
 void rec_run_ast(AST *ast) {
     //printf("%s\n", kind2str(get_kind(ast)));
     switch(get_kind(ast)) {
@@ -845,6 +850,7 @@ void rec_run_ast(AST *ast) {
         case DIV_ASSIGN_NODE: run_div_assign(ast); break;
         case MUL_ASSIGN_NODE: run_mul_assign(ast); break;
         case MOD_ASSIGN_NODE: run_mod_assign(ast); break;
+        case C2I_NODE: run_c2i(ast); break;
 
         default:
             fprintf(stderr, "Invalid kind: %s!\n", kind2str(get_kind(ast)));

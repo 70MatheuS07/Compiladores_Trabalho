@@ -14,7 +14,6 @@ struct node {
     union {
         int   as_int;
         float as_float;
-        char as_char;
     } data;
     Type type;
     int posFun;
@@ -88,10 +87,6 @@ void set_float_data(AST *node, float data) {
     node->data.as_float = data;
 }
 
-
-void set_char_data(AST *node, char data) {
-    node->data.as_char = data;
-}
 
 float get_float_data(AST *node) {
     return node->data.as_float;

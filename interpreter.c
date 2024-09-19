@@ -90,7 +90,7 @@ void init_mem() {
 
 // ----------------------------------------------------------------------------
 
-//#define TRACE
+#define TRACE
 #ifdef TRACE
 #define trace(msg) printf("TRACE: %s\n", msg)
 #else
@@ -126,6 +126,13 @@ void read_bool(int var_idx) {
     storei(var_idx, x);
 }
 */
+
+void read_char(int var_idx){
+    char x;
+    printf("read (char): ");
+    scanf("%*c%c" , &x);
+    storei(var_idx, (int)x);
+}
 void read_str(int var_idx) {
     printf("read (str): ");
     clear_str_buf();
@@ -166,6 +173,11 @@ void write_str() {
     clear_str_buf();
     escape_str(get_string(st, s), str_buf);
     printf(str_buf); // Weird language semantics, if printing a string, no new line.
+}
+
+void write_char(){
+    printf("%c\n", popi());
+
 }
 
 #define run_bin_op()                \
@@ -408,7 +420,7 @@ void run_read(AST *ast) {
         case FLOAT_TYPE: read_real(var_idx);    break;
         // case BOOL_TYPE: read_bool(var_idx);    break;
         // Mudei STR_TYPE para CHAR_TYPE
-        case CHAR_TYPE:  read_str(var_idx);     break;
+        case CHAR_TYPE:  read_char(var_idx);     break;
         case NO_TYPE:
         default:
             fprintf(stderr, "Invalid type: %s!\n", get_text(var_type));
@@ -483,7 +495,7 @@ void run_write(AST *ast) {
         case FLOAT_TYPE: write_real();   break;
         //case BOOL_TYPE: write_bool();   break;
         // Mudei STR_TYPE para CHAR_TYPE
-        case CHAR_TYPE:  write_str();    break;
+        case CHAR_TYPE:  write_char();    break;
         case NO_TYPE:
         default:
             fprintf(stderr, "Invalid type: %s!\n", get_text(expr_type));
@@ -577,32 +589,6 @@ void run_return(AST *ast) {
     rec_run_ast(get_child(ast, 0));
 }
 
-void run_array_decl(AST *ast) {
-    trace("array_decl");
-    AST* child_init = get_child(ast, 1);
-    int size = get_child_count(child_init);
-
-    // Depois eu trato isso
-    /*
-    if(size == 0){
-        
-    }
-    */
-
-    int var_idx = get_data(get_child(ast, 0));
-    int pos_func = get_pos_fun(get_child(ast, 0));
-    Type var_type = get_typevar_in_func(ft, var_idx, pos_func);
-    switch(var_type) {
-        case INT_TYPE: storei(var_idx, get_node_size(ast));      break;  
-        case FLOAT_TYPE: storef(var_idx, get_node_size(ast));    break;
-        case CHAR_TYPE:  storei(var_idx, get_node_size(ast));    break;
-        case NO_TYPE:
-        default:
-            fprintf(stderr, "Invalid type: %s!\n", get_text(var_type));
-            exit(EXIT_FAILURE);
-    }
-    
-}
 
 void run_greather_than(AST *ast) {
     trace("greather_than");
@@ -710,6 +696,105 @@ void run_mod_assign(AST *ast) {
     save_assign(ast);
 }
 
+void run_array_decl(AST *ast) {
+    trace("array_decl");
+
+    // Pega tamanho do vetor
+    AST *child_init = get_child(ast, 1);
+    int size = get_node_size(get_child(ast, 0));
+
+    // Se o tamanho do array não foi definido
+    if (size == 0) {
+        fprintf(stderr, "Erro: Array sem tamanho especificado!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // Obtém o índice da variável e a posição da função
+    int var_idx = get_data(get_child(ast, 0));
+    int pos_func = get_pos_fun(get_child(ast, 0));
+
+    // Obtém o tipo da variável
+    Type var_type = get_typevar_in_func(ft, var_idx, pos_func);
+
+    // Prepara o array para inicialização
+    switch (var_type) {
+        case INT_TYPE:
+            for (int i = 0; i < size; i++) {
+                if (i < get_child_count(child_init)) {
+                    // Inicializa o array com os valores de init_list (ordem correta, da esquerda para a direita)
+                    int value = get_data(get_child(child_init, i));
+                    storei(var_idx + i, value);
+                } else {
+                    // Inicializa as posições restantes com 0
+                    storei(var_idx + i, 0);
+                }
+            }
+            break;
+
+        case FLOAT_TYPE:
+            for (int i = 0; i < size; i++) {
+                if (i < get_child_count(child_init)) {
+                    // Inicializa o array com os valores de init_list
+                    float value = (float)get_data(get_child(child_init, i));
+                    storef(var_idx + i, value);
+                } else {
+                    // Inicializa as posições restantes com 0.0
+                    storef(var_idx + i, 0.0f);
+                }
+            }
+            break;
+
+        case CHAR_TYPE:
+            for (int i = 0; i < size; i++) {
+                if (i < get_child_count(child_init)) {
+                    // Inicializa o array com os valores de init_list
+                    int value = get_data(get_child(child_init, i));
+                    storei(var_idx + i, value);  // Char tratado como int
+                } else {
+                    // Inicializa as posições restantes com 0
+                    storei(var_idx + i, 0);
+                }
+            }
+            break;
+
+        case NO_TYPE:
+        default:
+            fprintf(stderr, "Invalid type: %s!\n", get_text(var_type));
+            exit(EXIT_FAILURE);
+    }
+}
+
+void run_array_acess(AST *ast) {
+    trace("array_acess");
+
+    // Executa o índice
+    rec_run_ast(get_child(ast, 1));  // O índice está no segundo filho
+    int idx = popi();  // Obtém o índice
+
+    printf("%d\n", idx);
+
+    // Obtém o índice da variável e a posição da função
+    int var_idx = get_data(get_child(ast, 0));  // O primeiro filho é a variável
+    int pos_func = get_pos_fun(get_child(ast, 0));
+
+    // Verifica o tamanho do array para evitar acessos fora dos limites
+    int size = get_sizevar_in_func(ft, var_idx, pos_func);
+    if (idx >= size) {
+        fprintf(stderr, "Erro: Índice fora dos limites do array!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // Obtém o tipo da variável
+    Type var_type = get_typevar_in_func(ft, var_idx, pos_func);
+
+    // Verifica o tipo da variável para carregar como int ou float
+    if (var_type == FLOAT_TYPE) {
+        pushf(loadf(var_idx + idx));
+    } else {
+        pushi(loadi(var_idx + idx));
+    }
+}
+
 void rec_run_ast(AST *ast) {
     //printf("%s\n", kind2str(get_kind(ast)));
     switch(get_kind(ast)) {
@@ -747,6 +832,7 @@ void rec_run_ast(AST *ast) {
         case C2F_NODE: run_c2f(ast); break;
         case RETURN_NODE: run_return(ast); break;
         case ARRAY_DECL_NODE: run_array_decl(ast); break;
+        case ARRAY_ACCESS_NODE: run_array_acess(ast); break;
         case GREATER_THAN_NODE: run_greather_than(ast); break;
         case LESS_THAN_NODE: run_less_than(ast); break;
         case GREATER_THAN_OR_EQUAL_NODE: run_greather_than_or_equal(ast); break;

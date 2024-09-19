@@ -771,7 +771,7 @@ void run_array_acess(AST *ast) {
     rec_run_ast(get_child(ast, 1));  // O índice está no segundo filho
     int idx = popi();  // Obtém o índice
 
-    printf("%d\n", idx);
+    //printf("%d\n", idx);
 
     // Obtém o índice da variável e a posição da função
     int var_idx = get_data(get_child(ast, 0));  // O primeiro filho é a variável

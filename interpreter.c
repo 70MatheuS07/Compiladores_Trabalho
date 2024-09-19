@@ -90,7 +90,7 @@ void init_mem() {
 
 // ----------------------------------------------------------------------------
 
-#define TRACE
+//#define TRACE
 #ifdef TRACE
 #define trace(msg) printf("TRACE: %s\n", msg)
 #else

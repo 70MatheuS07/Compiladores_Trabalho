@@ -110,11 +110,11 @@ node55[label="(int) i@4"];
 node54 -> node55;
 node3 -> node54;
 node56[label="="];
-node57[label="(int) i@4"];
+node57[label="(int) int_val5"];
 node56 -> node57;
 node58[label="(int) +"];
 node59[label="(int) array_access"];
-node60[label="(int) vet@3"];
+node60[label="(int) int_val5"];
 node59 -> node60;
 node61[label="(int) int_val0"];
 node59 -> node61;
@@ -134,3 +134,4 @@ node3 -> node65;
 node1 -> node3;
 node0 -> node1;
 }
+Erro: Índice fora dos limites do array!

@@ -10,7 +10,7 @@ int main ()
     if(x <= y) printf(4);
     if(x == y) printf(5);
     int i;
-    i= vet[0]+1;
+    i= vet[0]+2;
     printf(i);
     // else(x != y)
 

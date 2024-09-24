@@ -7,7 +7,7 @@ int main() {
     int y = a[2];
 
     // Está dando erro aqui
-    //a[2] = 3;
+    a[2] = 3;
 
     // Necessário bubblesort
 

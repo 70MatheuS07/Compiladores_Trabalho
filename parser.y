@@ -87,6 +87,8 @@ AST *root;
 
 %precedence CLOSE_PARENTHESES
 %precedence ELSE
+
+
 %start program
 
 %%
@@ -249,14 +251,23 @@ expression
     ;
 
 assignment_expression
-    : ID { $1=check_var(); } ASSIGNMENT expression { $$=check_assign($1, $4, unify_assign, "=", ASSIGN_NODE); }
-    | ID { $1=check_var(); } ADD_ASSIGN expression { $$=check_assign($1, $4, unify_assign, "+=", ADD_ASSIGN_NODE); }
-    | ID { $1=check_var(); } SUB_ASSIGN expression { $$=check_assign($1, $4, unify_assign, "-=", SUB_ASSIGN_NODE); }
-    | ID { $1=check_var(); } MUL_ASSIGN expression { $$=check_assign($1, $4, unify_assign,"*=", MUL_ASSIGN_NODE); }
-    | ID { $1=check_var(); } DIV_ASSIGN expression { $$=check_assign($1, $4, unify_assign, "/=", DIV_ASSIGN_NODE); }
-    | ID { $1=check_var(); } MOD_ASSIGN expression { $$=check_assign($1, $4, unify_assign, "%=", MOD_ASSIGN_NODE); }
+    : assign_left ASSIGNMENT expression { $$=check_assign($1, $3, unify_assign, "=", ASSIGN_NODE); }
+    | assign_left ADD_ASSIGN expression { $$=check_assign($1, $3, unify_assign, "+=", ADD_ASSIGN_NODE); }
+    | assign_left SUB_ASSIGN expression { $$=check_assign($1, $3, unify_assign, "-=", SUB_ASSIGN_NODE); }
+    | assign_left MUL_ASSIGN expression { $$=check_assign($1, $3, unify_assign,"*=", MUL_ASSIGN_NODE); }
+    | assign_left DIV_ASSIGN expression { $$=check_assign($1, $3, unify_assign, "/=", DIV_ASSIGN_NODE); }
+    | assign_left MOD_ASSIGN expression { $$=check_assign($1, $3, unify_assign, "%=", MOD_ASSIGN_NODE); }
     | binary_expression { $$=$1; }
     ;
+
+assign_left
+    : lval { $$=$1;}
+    | lval OPEN_BRACKET expression CLOSE_BRACKET
+         { $$ = new_subtree(ARRAY_ACCESS_NODE, get_node_type($1), 0, 2, $1, $3);}
+    ;
+
+lval
+: ID { $1=check_var(); $$=$1 ;};
 
 
 binary_expression
@@ -317,11 +328,11 @@ postfix_expression
           check_params();
           $$ = $1;
           QtdParam=0; }
-    | ID { $1=check_var(); } OPEN_BRACKET expression CLOSE_BRACKET
-         { $$ = new_subtree(ARRAY_ACCESS_NODE, get_node_type($1), 0, 2, $1, $4);}
-    | ID { $1=check_var(); } INCREMENT
+    | lval OPEN_BRACKET expression CLOSE_BRACKET
+         { $$ = new_subtree(ARRAY_ACCESS_NODE, get_node_type($1), 0, 2, $1, $3);}
+    | lval INCREMENT
          { $$ = new_subtree(INCREMENT_NODE, get_node_type($1), 0, 1, $1); }
-    | ID { $1=check_var(); } DECREMENT
+    | lval DECREMENT
          { $$ = new_subtree(DECREMENT_NODE, get_node_type($1), 0, 1, $1);}
     ;
 

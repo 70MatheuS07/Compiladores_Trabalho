@@ -2729,7 +2729,7 @@ int main(void) {
     //print_tree_names(root, 2);
 
     stdin = fopen(ctermid(NULL), "r");
-    run_ast(root);
+    emit_code(root);
     fclose(stdin);
 
     free_str_table(st);

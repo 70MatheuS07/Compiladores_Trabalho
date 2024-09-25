@@ -28,7 +28,7 @@ void print_str_table(StrTable* st);
 
 // Clears the allocated structure.
 void free_str_table(StrTable* st);
-
+int get_str_table_size(StrTable *table);
 
 // Variables Table
 // ----------------------------------------------------------------------------
@@ -42,6 +42,7 @@ typedef struct var_table VarTable;
 // Creates an empty variables table.
 VarTable* create_var_table();
 
+int get_var_table_size(VarTable *table);
 // Adds a fresh var to the table.
 // No check is made by this function, so make sure to call 'lookup_var' first.
 // Returns the index where the variable was inserted.
@@ -76,6 +77,12 @@ typedef struct func_table FuncTable;
 
 
 FuncTable *create_func_table();
+
+int get_function_table_size(FuncTable* table);
+
+VarTable* get_var_table(FuncTable*table, int pos);
+
+
 int lookup_func(FuncTable *ft, char *s);
 
 int lookup_var_in_func(FuncTable *ft, char *s, char *func);

@@ -114,6 +114,76 @@ static char* OpStr[] = {
     "syscall"   // SYSCALL
 };
 
+static char* RegTemp[] = {
+    "$zero",  // 0: sempre 0
+    "$at",    // 1: assembler temporary
+    "$v0",    // 2: valor de retorno
+    "$v1",    // 3: valor de retorno
+    "$a0",    // 4: argumento
+    "$a1",    // 5: argumento
+    "$a2",    // 6: argumento
+    "$a3",    // 7: argumento
+    "$t0",    // 8: temporário
+    "$t1",    // 9: temporário
+    "$t2",    // 10: temporário
+    "$t3",    // 11: temporário
+    "$t4",    // 12: temporário
+    "$t5",    // 13: temporário
+    "$t6",    // 14: temporário
+    "$t7",    // 15: temporário
+    "$s0",    // 16: salvo
+    "$s1",    // 17: salvo
+    "$s2",    // 18: salvo
+    "$s3",    // 19: salvo
+    "$s4",    // 20: salvo
+    "$s5",    // 21: salvo
+    "$s6",    // 22: salvo
+    "$s7",    // 23: salvo
+    "$t8",    // 24: temporário
+    "$t9",    // 25: temporário
+    "$k0",    // 26: reservado para o kernel
+    "$k1",    // 27: reservado para o kernel
+    "$gp",    // 28: ponteiro global
+    "$sp",    // 29: ponteiro de pilha
+    "$fp",    // 30: ponteiro de quadro (também chamado de $s8)
+    "$ra"     // 31: endereço de retorno
+};
+
+static char* RegFloat[] = {
+"$f0",   // 0: valor de retorno / argumento
+    "$f1",   // 1: valor de retorno / argumento
+    "$f2",   // 2: temporário
+    "$f3",   // 3: temporário
+    "$f4",   // 4: temporário
+    "$f5",   // 5: temporário
+    "$f6",   // 6: temporário
+    "$f7",   // 7: temporário
+    "$f8",   // 8: temporário
+    "$f9",   // 9: temporário
+    "$f10",  // 10: temporário
+    "$f11",  // 11: temporário
+    "$f12",  // 12: argumento
+    "$f13",  // 13: argumento
+    "$f14",  // 14: temporário
+    "$f15",  // 15: temporário
+    "$f16",  // 16: temporário
+    "$f17",  // 17: temporário
+    "$f18",  // 18: temporário
+    "$f19",  // 19: temporário
+    "$f20",  // 20: salvo
+    "$f21",  // 21: salvo
+    "$f22",  // 22: salvo
+    "$f23",  // 23: salvo
+    "$f24",  // 24: temporário
+    "$f25",  // 25: temporário
+    "$f26",  // 26: temporário
+    "$f27",  // 27: temporário
+    "$f28",  // 28: temporário
+    "$f29",  // 29: salvo
+    "$f30",  // 30: salvo
+    "$f31"   // 31: salvo
+};
+ 
 // Definição da estrutura de instrução MIPS.
 typedef struct {
     OpCode op;    // Operação (opcode)

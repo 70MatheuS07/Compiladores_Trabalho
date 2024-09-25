@@ -23,6 +23,10 @@ StrTable *create_str_table()
     return st;
 }
 
+int get_str_table_size(StrTable *table){
+    return table->size;
+}
+
 int add_string(StrTable *st, char *s)
 {
     for (int i = 0; i < st->size; i++)
@@ -82,6 +86,10 @@ VarTable *create_var_table()
     VarTable *vt = malloc(sizeof *vt);
     vt->size = 0;
     return vt;
+}
+
+int get_var_table_size(VarTable *table){
+    return table->size;
 }
 
 int lookup_var(VarTable *vt, char *s)
@@ -168,6 +176,14 @@ FuncTable *create_func_table()
     ft->size = 0;
     ft->t->QtdParam=0;
     return ft;
+}
+
+int get_function_table_size(FuncTable* table){
+    return table->size;
+}
+
+VarTable* get_var_table(FuncTable*table, int pos){
+    return table->t[pos].Var_Table;
 }
 
 int lookup_func(FuncTable *ft, char *s)

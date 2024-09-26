@@ -17,15 +17,23 @@ extern FuncTable *ft;
 Instr code[INSTR_MEM_SIZE];
 int next_instr;
 
-//isso vai ser usado para os operandos, podem ser tanto string como intei
-union {
-        int   imm_int;
-        char reg[100] ;
-        float imm_float;
-        char imm_char;
-    } oprd;
 
 // ----------------------------------------------------------------------------
+
+// AST Traversal --------------------------------------------------------------
+
+int int_regs_count;
+int float_regs_count;
+
+#define new_int_reg() \
+    int_regs_count++
+
+#define new_float_reg() \
+    float_regs_count++
+
+int rec_emit_code(AST *ast);
+// ----------------------------------------------------------------------------
+
 // Emits ----------------------------------------------------------------------
 
 void emit(OpCode op, int o1, int o2, int o3) {
@@ -96,9 +104,9 @@ int emit_write(AST *ast)
 int emit_str_val(AST *ast) {
     int x = new_int_reg();
     int c = get_data(ast);
-    emit2(LDIi, x, c);
+    printf("la %s, %s",RegInt[ new_int_reg], st[c]);
     return x;
-
+}
 
 // ----------------------------------------------------------------------------
 
@@ -140,18 +148,6 @@ void dump_var_table()
 // -----------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------
-// AST Traversal --------------------------------------------------------------
-
-int int_regs_count;
-int float_regs_count;
-
-#define new_int_reg() \
-    int_regs_count++
-
-#define new_float_reg() \
-    float_regs_count++
-
-int rec_emit_code(AST *ast);
 // ----------------------------------------------------------------------------
 
 int rec_emit_code(AST *ast)
@@ -237,4 +233,6 @@ void emit_code(AST *ast)
     printf(".data:\n");
     dump_str_table();
     dump_var_table();
+    int_regs_count=8;
+    float_regs_count=0
 }

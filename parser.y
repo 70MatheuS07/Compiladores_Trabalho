@@ -380,15 +380,13 @@ int main(void) {
     DEBUG_PRINT("Alocada memória para VarSave\n");
 
     DEBUG_PRINT("Início da análise\n");
-    if (yyparse() == 0) {
-        printf("PARSE SUCCESSFUL!\n");
-    } else {
-        printf("PARSE FAILED!\n");
-    }
-    printf("\n\n");
-    print_str_table(st); printf("\n\n");
-    print_table(ft); printf("\n\n");
-    print_dot(root);
+    
+    yyparse();
+
+    //printf("\n\n");
+    //print_str_table(st); printf("\n\n");
+    //print_table(ft); printf("\n\n");
+    //print_dot(root);
 
     //print_tree_names(root, 2);
 

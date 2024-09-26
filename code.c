@@ -93,12 +93,10 @@ int emit_write(AST *ast)
     trace("Emit write");
     AST *expr = get_child(ast, 0);
     int x = rec_emit_code(expr);
+
     Type expr_type = get_node_type(expr);
 
-    if(get_node_type(expr) == STR_VAL_NODE){
-        emit("la", 4, x);
-    }
-    else{
+    if(get_kind(expr) != STR_VAL_NODE){
         switch(expr_type){
         case INT_TYPE:   emit("la", 4, x); break;
         case FLOAT_TYPE: emit("la", 5, x); break;
@@ -109,16 +107,16 @@ int emit_write(AST *ast)
             exit(EXIT_FAILURE);
         }
     }
-    printf("AAAAAAAAAAAAAAAAAAAA");
-    emit("syscall");
+
+    emit("li %s, %d\n", RegInt[2], x);
+    emit("syscall\n");
 }
 
 
 int emit_str_val(AST *ast) {
-    int x = new_int_reg();
     int c = get_data(ast);
-    emit("la %s, string%d\n",RegInt[x], c);
-    return x;
+    emit("la %s, string%d\n",RegInt[4], c);
+    return 4;
 }
 
 // ----------------------------------------------------------------------------
@@ -146,7 +144,7 @@ void dump_str_table()
     int table_size = get_str_table_size(st);
     for (int i = 0; i < table_size; i++)
     {
-        printf("string%d: asciiz %s\n", i, get_string(st, i));
+        printf("string%d: .asciiz %s\n", i, get_string(st, i));
     }
 }
 
@@ -282,6 +280,7 @@ void emit_code(AST *ast)
     int_regs_count=8;
     float_regs_count=0;
     printf("    .text\n");
+    printf("    .globl main\n\n");
+    printf("main:\n");
     rec_emit_code(ast);
-    dump_program();
 }

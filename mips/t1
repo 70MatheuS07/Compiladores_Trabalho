@@ -1,0 +1,157 @@
+.data
+    # Declaração das variáveis, todas inicializadas com 0
+    x:      .word 0          # int x = 0;
+    i:      .word 0          # int i = 0;
+    o:      .word 0          # int o = 0;
+    y:      .word 0          # int y = 0;
+    soma:   .word 0          # int soma = 0;
+    sub:    .word 0          # int sub = 0;
+    mult:   .word 0          # int mult = 0;
+    div:    .word 0          # int div = 0;
+    
+    t:      .float 0.0       # float t = 0.0;
+    n:      .byte 0          # char n = 0;
+
+    newline: .asciiz "\n"    # Para imprimir nova linha
+
+.text
+    .globl main
+
+main:
+    # Inicializa as variáveis com os valores específicos
+    li $t0, 1               # x = 1
+    sw $t0, x               # Armazena x na memória
+
+    li $t1, 10              # i = 10
+    sw $t1, i               # Armazena i na memória
+
+    li $t2, 0               # o = 0 (já estava 0, mas fazemos a atribuição)
+    sw $t2, o               # Armazena o na memória
+
+    li $t3, 2               # y = 2
+    sw $t3, y               # Armazena y na memória
+
+    # Inicializa o ponto flutuante t = 1.99
+    li $t4, 199             # 1.99 * 100 para simular precisão de duas casas decimais
+    mtc1 $t4, $f4           # Move o valor inteiro para o registrador de ponto flutuante
+    cvt.s.w $f4, $f4        # Converte o valor de inteiro para ponto flutuante
+    s.s $f4, t              # Armazena t na memória
+
+    li $t4, 'a'             # n = 'a'
+    sb $t4, n               # Armazena n na memória
+
+    # Carrega a variável x para $t0 para impressão
+    lw $t0, x
+
+    # Imprime x
+    li $v0, 1               # syscall para imprimir inteiro
+    move $a0, $t0           # move x para $a0
+    syscall
+
+    # Imprime nova linha
+    li $v0, 4               # syscall para imprimir string
+    la $a0, newline         # endereço da string '\n'
+    syscall
+
+    # Incrementa x (x++)
+    addi $t0, $t0, 1        # x++
+
+    # Atualiza a variável x na memória
+    sw $t0, x
+
+    # Imprime x
+    li $v0, 1
+    move $a0, $t0
+    syscall
+
+    # Imprime nova linha
+    li $v0, 4
+    la $a0, newline
+    syscall
+
+    # Decrementa x (x--)
+    addi $t0, $t0, -1       # x--
+
+    # Atualiza a variável x na memória
+    sw $t0, x
+
+    # Imprime x
+    li $v0, 1
+    move $a0, $t0
+    syscall
+
+    # Imprime nova linha
+    li $v0, 4
+    la $a0, newline
+    syscall
+
+    # Soma: soma = n + x
+    lb $t4, n               # Carrega o valor de n
+    add $t5, $t4, $t0       # t5 = n + x
+
+    # Armazenar a soma em sua variável
+    sw $t5, soma
+
+    # Imprimir soma
+    li $v0, 1
+    move $a0, $t5
+    syscall
+
+    # Imprimir nova linha
+    li $v0, 4
+    la $a0, newline
+    syscall
+
+    # Subtração: sub = x - y
+    lw $t3, y               # Carrega o valor de y
+    sub $t6, $t0, $t3       # t6 = x - y
+
+    # Armazenar a subtração em sua variável
+    sw $t6, sub
+
+    # Imprimir sub
+    li $v0, 1
+    move $a0, $t6
+    syscall
+
+    # Imprimir nova linha
+    li $v0, 4
+    la $a0, newline
+    syscall
+
+    # Multiplicação: mult = x * y
+    mul $t7, $t0, $t3       # t7 = x * y
+
+    # Armazenar a multiplicação em sua variável
+    sw $t7, mult
+
+    # Imprimir multiplicação
+    li $v0, 1
+    move $a0, $t7
+    syscall
+
+    # Imprimir nova linha
+    li $v0, 4
+    la $a0, newline
+    syscall
+
+    # Divisão: div = x / y
+    div $t0, $t3            # Divide x por y
+    mflo $t8                # Carrega o quociente
+
+    # Armazenar a divisão em sua variável
+    sw $t8, div
+
+    # Imprimir divisão
+    li $v0, 1
+    move $a0, $t8
+    syscall
+
+    # Imprimir nova linha
+    li $v0, 4
+    la $a0, newline
+    syscall
+
+    # Finaliza o programa
+    li $v0, 10              # syscall para sair
+    syscall

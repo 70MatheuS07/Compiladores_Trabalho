@@ -1,5 +1,5 @@
 int main(){
-    printf("OLA MUNDO");
-    printf("ALGUMA");
+    printf("OLA MUNDO\n");
+    printf("ALGUMA\n");
     printf("coisa");
 }

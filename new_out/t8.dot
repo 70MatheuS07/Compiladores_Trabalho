@@ -20,3 +20,4 @@ node3 -> node8;
 node1 -> node3;
 node0 -> node1;
 }
+Invalid type: (null)!

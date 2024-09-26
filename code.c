@@ -4,6 +4,13 @@
 #include "instruction.h"
 #include "tables.h"
 
+#define TRACE
+#ifdef TRACE
+#define trace(msg) printf("TRACE: %s\n", msg)
+#else
+#define trace(msg)
+#endif
+
 // ----------------------------------------------------------------------------
 // Tables ---------------------------------------------------------------------
 
@@ -26,6 +33,21 @@ union {
     } oprd;
 
 // ----------------------------------------------------------------------------
+
+// AST Traversal --------------------------------------------------------------
+
+int int_regs_count;
+int float_regs_count;
+
+#define new_int_reg() \
+    int_regs_count++
+
+#define new_float_reg() \
+    float_regs_count++
+
+int rec_emit_code(AST *ast);
+// ----------------------------------------------------------------------------
+
 // Emits ----------------------------------------------------------------------
 
 void emit(OpCode op, int o1, int o2, int o3) {
@@ -50,14 +72,22 @@ void emit(OpCode op, int o1, int o2, int o3) {
 
 int emit_program(AST *ast)
 {
+    trace("Emit program");
     rec_emit_code(get_child(ast, 0));
+}
+
+int emit_fun_decl(AST *ast){
+    trace("Emit fun_decl");
+    rec_emit_code(get_child(ast, 0)); // var_list
+    rec_emit_code(get_child(ast, 1)); // block
 }
 
 int emit_param_list(AST *ast)
 {
+    trace("Emit param_list");
     int size = get_child_count(ast);
     if (size == 0) {
-        return;
+        return -1;
     }
     else
     {
@@ -70,6 +100,7 @@ int emit_param_list(AST *ast)
 
 int emit_block(AST *ast)
 {
+    trace("Emit block");
     int size = get_child_count(ast);
     for (int i = 0; i < size; i++) {
         rec_emit_code(get_child(ast, i));
@@ -78,37 +109,66 @@ int emit_block(AST *ast)
 
 int emit_write(AST *ast)
 {
+    trace("Emit write");
     AST *expr = get_child(ast, 0);
     int x = rec_emit_code(expr);
     Type expr_type = get_node_type(expr);
 
-    switch(expr_type){
-        case INT_TYPE:   emit2(SYSCALL, 4, x); break;
-        case FLOAT_TYPE: emit2(SYSCALL, 5, x); break;
-        case : emit2(SYSCALL, 7, x); break;
+    if(get_node_type(expr) == STR_VAL_NODE){
+        emit2(LA, 4, x);
+    }
+    else{
+        switch(expr_type){
+        case INT_TYPE:   emit2(LA, 4, x); break;
+        case FLOAT_TYPE: emit2(LA, 5, x); break;
+        case CHAR_TYPE:  emit2(LA, 7, x); break;
         case NO_TYPE:
         default:
             fprintf(stderr, "Invalid type: %s!\n", get_text(expr_type));
             exit(EXIT_FAILURE);
+        }
     }
+
+    emit0(SYSCALL);
+    printf("BBBBBBBBBBBB\n");
+    next_instr += 2;
+}
 
 
 int emit_str_val(AST *ast) {
     int x = new_int_reg();
     int c = get_data(ast);
-    emit2(LDIi, x, c);
+    emit2(LI, x, c);
+    next_instr++;
     return x;
-
+}
 
 // ----------------------------------------------------------------------------
 
 // Prints ----------------------------------------------------------------------
+
+#define LINE_SIZE 80
+#define MAX_STR_SIZE 128
+
+void get_instruction_string(Instr instr, char *s) {
+    OpCode op = instr.op;
+    s += sprintf(s, "%s", OpStr[op]);
+    int op_count = OpCount[op];
+    if (op_count == 1) {
+        sprintf(s, " %d", instr.o1);
+    } else if (op_count == 2) {
+        sprintf(s, " %d, %d", instr.o1, instr.o2);
+    } else if (op_count == 3) {
+        sprintf(s, " %d, %d, %d", instr.o1, instr.o2, instr.o3);
+    }
+}
+
 void dump_str_table()
 {
     int table_size = get_str_table_size(st);
     for (int i = 0; i < table_size; i++)
     {
-        printf("    string%d: asciiz %s\n", i, get_string(st, i));
+        printf("string%d: asciiz %s\n", i, get_string(st, i));
     }
 }
 
@@ -137,21 +197,22 @@ void dump_var_table()
         }
     }
 }
+
+void write_instruction(int addr) {
+    Instr instr = code[addr];
+    char instr_str[LINE_SIZE];
+    get_instruction_string(instr, instr_str);
+    printf("%s\n", instr_str);
+}
+
+void dump_program() {
+    printf("next_instr: %d\n", next_instr);
+    for (int addr = 0; addr < next_instr; addr++) {
+        write_instruction(addr);
+    }
+}
 // -----------------------------------------------------------------------------
 
-// ----------------------------------------------------------------------------
-// AST Traversal --------------------------------------------------------------
-
-int int_regs_count;
-int float_regs_count;
-
-#define new_int_reg() \
-    int_regs_count++
-
-#define new_float_reg() \
-    float_regs_count++
-
-int rec_emit_code(AST *ast);
 // ----------------------------------------------------------------------------
 
 int rec_emit_code(AST *ast)
@@ -161,6 +222,9 @@ int rec_emit_code(AST *ast)
      //Essa é a base para o t8.c
     case PROGRAM_NODE:
         emit_program(ast);
+        break;
+    case FUN_DECL_NODE:
+        emit_fun_decl(ast);
         break;
     case PARAM_LIST_NODE:
         emit_param_list(ast);
@@ -234,7 +298,11 @@ void emit_code(AST *ast)
     next_instr = 0;
     int_regs_count = 0;
     float_regs_count = 0;
-    printf(".data:\n");
+    printf("    .data\n");
     dump_str_table();
     dump_var_table();
+
+    printf("    .text\n");
+    rec_emit_code(ast);
+    dump_program();
 }

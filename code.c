@@ -1,15 +1,18 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include "code.h"
 #include "instruction.h"
 #include "tables.h"
 
-#define TRACE
+//#define TRACE
 #ifdef TRACE
 #define trace(msg) printf("TRACE: %s\n", msg)
 #else
 #define trace(msg)
 #endif
+
+
 
 // ----------------------------------------------------------------------------
 // Tables ---------------------------------------------------------------------
@@ -41,27 +44,12 @@ int float_regs_count;
 int rec_emit_code(AST *ast);
 // ----------------------------------------------------------------------------
 
-// Emits ----------------------------------------------------------------------
-
-void emit(OpCode op, int o1, int o2, int o3) {
-    code[next_instr].op = op;
-    code[next_instr].o1 = o1;
-    code[next_instr].o2 = o2;
-    code[next_instr].o3 = o3;
-    next_instr++;
+void emit(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    vprintf(format, args); // Você pode substituir vprintf por outro comportamento, como gravar em arquivo.
+    va_end(args);
 }
-
-#define emit0(op) \
-    emit(op, 0, 0, 0)
-
-#define emit1(op, o1) \
-    emit(op, o1, 0, 0)
-
-#define emit2(op, o1, o2) \
-    emit(op, o1, o2, 0)
-
-#define emit3(op, o1, o2, o3) \
-    emit(op, o1, o2, o3)
 
 int emit_program(AST *ast)
 {
@@ -108,30 +96,28 @@ int emit_write(AST *ast)
     Type expr_type = get_node_type(expr);
 
     if(get_node_type(expr) == STR_VAL_NODE){
-        emit2(LA, 4, x);
+        emit("la", 4, x);
     }
     else{
         switch(expr_type){
-        case INT_TYPE:   emit2(LA, 4, x); break;
-        case FLOAT_TYPE: emit2(LA, 5, x); break;
-        case CHAR_TYPE:  emit2(LA, 7, x); break;
+        case INT_TYPE:   emit("la", 4, x); break;
+        case FLOAT_TYPE: emit("la", 5, x); break;
+        case CHAR_TYPE:  emit("la", 7, x); break;
         case NO_TYPE:
         default:
             fprintf(stderr, "Invalid type: %s!\n", get_text(expr_type));
             exit(EXIT_FAILURE);
         }
     }
-
-    emit0(SYSCALL);
-    printf("BBBBBBBBBBBB\n");
-    next_instr += 2;
+    printf("AAAAAAAAAAAAAAAAAAAA");
+    emit("syscall");
 }
 
 
 int emit_str_val(AST *ast) {
     int x = new_int_reg();
     int c = get_data(ast);
-    printf("la %s, %s",RegInt[new_int_reg], st[c]);
+    emit("la %s, string%d\n",RegInt[x], c);
     return x;
 }
 

@@ -119,6 +119,46 @@ int emit_str_val(AST *ast) {
     return 4;
 }
 
+int emit_var_list(AST *ast)
+{
+    trace("Emit var_list");
+    int size = get_child_count(ast);
+    for (int i = 0; i < size; i++) {
+        rec_emit_code(get_child(ast, i));
+    }
+}
+
+int emit_assign(AST *ast)
+{
+    trace("Emit assign");
+    AST *rexpr = get_child(ast, 1);
+    int x = rec_emit_code(rexpr);
+    int var_idx = get_data(get_child(ast, 0));
+    int pos_func = get_pos_fun(get_child(ast, 0));
+    Type var_type = get_typevar_in_func(ft, var_idx, pos_func);
+
+    switch (var_type){
+        case INT_TYPE:
+            emit("li %s, %d\n", RegInt[8], get_data(rexpr));
+            emit("sw %s, %s\n\n", RegInt[8], get_namevar_in_func(ft, var_idx, pos_func));
+            break;
+
+        case FLOAT_TYPE:
+            emit("li.s %s, %f\n", RegFloat[2], get_float_data(rexpr));
+            emit("s.s %s, %s\n\n", RegFloat[2], get_namevar_in_func(ft, var_idx, pos_func));
+            break;
+
+        case CHAR_TYPE:
+            emit("li %s, %c\n", RegInt[8], get_data(rexpr));
+            emit("sb %s, %s\n\n", RegInt[8], get_namevar_in_func(ft, var_idx, pos_func));
+            break;
+        
+        default:
+            fprintf(stderr, "Invalid type: %s!\n", get_text(var_type));
+            break;
+    }
+}
+
 // ----------------------------------------------------------------------------
 
 // Prints ----------------------------------------------------------------------
@@ -213,7 +253,13 @@ int rec_emit_code(AST *ast)
         break;
     case STR_VAL_NODE:
         emit_str_val(ast);
-        //break;
+        break;
+    case VAR_LIST_NODE:
+        emit_var_list(ast);
+        break;
+    case ASSIGN_NODE:
+        emit_assign(ast);
+        break;
         // case ASSIGN_NODE:   emit_assign(ast);    break;
         // case EQUALS_NODE:   emit_eq(ast);        break;
         // case BLOCK_NODE:    emit_block(ast);     break;

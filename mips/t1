@@ -32,10 +32,8 @@ main:
     sw $t3, y               # Armazena y na memória
 
     # Inicializa o ponto flutuante t = 1.99
-    li $t4, 199             # 1.99 * 100 para simular precisão de duas casas decimais
-    mtc1 $t4, $f4           # Move o valor inteiro para o registrador de ponto flutuante
-    cvt.s.w $f4, $f4        # Converte o valor de inteiro para ponto flutuante
-    s.s $f4, t              # Armazena t na memória
+    li.s $f2, 1.99
+    s.s $f2, t
 
     li $t4, 'a'             # n = 'a'
     sb $t4, n               # Armazena n na memória

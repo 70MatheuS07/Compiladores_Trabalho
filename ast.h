@@ -78,6 +78,7 @@ int get_pos_fun(AST*node);
 void set_float_data(AST *node, float data);
 float get_float_data(AST *node);
 void set_char_data(AST *node, char data); 
+char get_char_data(AST *node);
 
 Type get_node_type(AST *node);
 int get_child_count(AST *node);

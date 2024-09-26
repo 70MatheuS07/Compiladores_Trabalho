@@ -5,26 +5,26 @@ int main ()
     int y = 2;
     char n = 'a';
     printf(x);
-    printf("\n");
+    //printf("\n");
     x++;
     printf(x);
-    printf("\n");
+    //printf("\n");
     x--;
     printf(x);
-    printf("\n");
+    //printf("\n");
     int soma = n + x;
     int sub = x - y;
     int mult = x * y;    
     int div = x / y;
 
     printf(soma);
-    printf("\n");
+    //printf("\n");
     printf(sub);
-    printf("\n");
+    //printf("\n");
     printf(mult);
-    printf("\n");
+    //printf("\n");
     printf(div);
-    printf("\n");
+    //printf("\n");
 
     return 0;
 }

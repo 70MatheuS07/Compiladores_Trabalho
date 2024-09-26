@@ -87,7 +87,6 @@ void set_float_data(AST *node, float data) {
     node->data.as_float = data;
 }
 
-
 float get_float_data(AST *node) {
     return node->data.as_float;
 }

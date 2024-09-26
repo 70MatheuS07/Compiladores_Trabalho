@@ -24,13 +24,6 @@ extern FuncTable *ft;
 Instr code[INSTR_MEM_SIZE];
 int next_instr;
 
-//isso vai ser usado para os operandos, podem ser tanto string como intei
-union {
-        int   imm_int;
-        char reg[100] ;
-        float imm_float;
-        char imm_char;
-    } oprd;
 
 // ----------------------------------------------------------------------------
 
@@ -138,8 +131,7 @@ int emit_write(AST *ast)
 int emit_str_val(AST *ast) {
     int x = new_int_reg();
     int c = get_data(ast);
-    emit2(LI, x, c);
-    next_instr++;
+    printf("la %s, %s",RegInt[new_int_reg], st[c]);
     return x;
 }
 
@@ -301,7 +293,8 @@ void emit_code(AST *ast)
     printf("    .data\n");
     dump_str_table();
     dump_var_table();
-
+    int_regs_count=8;
+    float_regs_count=0;
     printf("    .text\n");
     rec_emit_code(ast);
     dump_program();

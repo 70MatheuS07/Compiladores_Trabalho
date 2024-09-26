@@ -114,7 +114,7 @@ static char* OpStr[] = {
     "syscall"   // SYSCALL
 };
 
-static char* RegTemp[] = {
+static char* RegInt[] = {
     "$zero",  // 0: sempre 0
     "$at",    // 1: assembler temporary
     "$v0",    // 2: valor de retorno

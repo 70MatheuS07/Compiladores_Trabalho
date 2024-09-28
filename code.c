@@ -35,11 +35,28 @@ int float_regs_count;
 #define new_int_reg() \
     int_regs_count++
 
+
 #define new_float_reg() \
     float_regs_count++
 
 int rec_emit_code(AST *ast);
 // ----------------------------------------------------------------------------
+
+void check_int_registers(){
+    if(int_regs_count==10){
+        int_regs_count = 0;
+    }
+}
+    
+
+void check_float_registers(){
+    if(float_regs_count==25){
+        int_regs_count = 0;
+    }
+        
+
+}
+
 
 void emit(const char *format, ...)
 {
@@ -99,7 +116,7 @@ int emit_write(AST *ast)
     NodeKind kind = get_kind(expr);
     if (get_kind(expr) == STR_VAL_NODE)
     {
-        emit("li %s, %d\n", RegInt[2], 4);
+        emit("li $v0, %d\n", 4);
     }
 
     else
@@ -111,18 +128,18 @@ int emit_write(AST *ast)
         switch (expr_type)
         {
         case INT_TYPE:
-            emit("  la %s %s\n", RegInt[4], get_namevar_in_func(ft, var_idx, pos_func));
-            emit("  li %s, %d\n", RegInt[2], 1);
+            emit("  move $a0 %s\n", RegTempInt[x]);
+            emit("  li $v0, %d\n",  1);
             ;
             break;
         case FLOAT_TYPE:
-            emit("  la %s %s\n", RegInt[4], get_namevar_in_func(ft, var_idx, pos_func));
-            emit("  li %s, %d\n", RegInt[2], 2);
+            emit("  move $f12 %s\n", RegTempInt[x]);
+            emit("  li $v0, %d\n",  2);
             ;
             break;
         case CHAR_TYPE:
-            emit("  la %s %s\n", RegInt[4], get_namevar_in_func(ft, var_idx, pos_func));
-            emit("  li %s, %d\n", RegInt[2], 11);
+            emit("  move $a0 %s\n", RegTempInt[x]);
+            emit("  li $v0, %d\n", 11);
             ;
             break;
         case NO_TYPE:
@@ -138,21 +155,23 @@ int emit_write(AST *ast)
 int emit_str_val(AST *ast)
 {
     int c = get_data(ast);
-    emit("  la %s, string%d\n", RegInt[4], c);
+    emit("  la $a0, string%d\n", c);
     return 4;
 }
 
 int emit_int_val(AST *ast)
 {
+    check_int_registers();
     int x = new_int_reg();
     int c = get_data(ast);
-    emit("  li %s, %d\n", RegInt[x], c);
+    emit("  li %s, %d\n", RegTempInt[x], c);
     return x;
 }
 
 int emit_real_val(AST *ast)
 {
     //  Obter um novo registrador de ponto flutuante
+    check_float_registers();
     int x = new_float_reg();
 
     //  Obter o valor de ponto flutuante (imediato) da AST
@@ -166,7 +185,7 @@ int emit_real_val(AST *ast)
     emit("  li $t0, %d\n", int_representation);
 
     //  Mover o valor do registrador inteiro para o registrador de ponto flutuante
-    emit("  mtc1 $t0, %s\n", RegFloat[x]);
+    emit("  mtc1 $t0, %s\n", RegTempFloat[x]);
 
     // Retorna o índice do registrador de ponto flutuante usado
     return x;
@@ -174,9 +193,10 @@ int emit_real_val(AST *ast)
 
 int emit_char_val(AST *ast)
 {
+    check_int_registers();
     int x = new_int_reg();
     int c = get_data(ast);
-    emit("  li %s, '%c'\n", RegInt[x], c);
+    emit("  li %s, '%c'\n", RegTempInt[x], c);
     return x;
 }
 
@@ -203,21 +223,21 @@ int emit_assign(AST *ast)
     {
     case INT_TYPE:
 
-        emit("  sw %s, %s\n\n", RegInt[x], get_namevar_in_func(ft, var_idx, pos_func));
+        emit("  sw %s, var%d%d\n\n", RegTempInt[x], pos_func, var_idx);
         break;
 
     case FLOAT_TYPE:
 
-        emit("  s.s %s, %s\n\n", RegFloat[x], get_namevar_in_func(ft, var_idx, pos_func));
+        emit("  s.s %s, var%d%d\n\n", RegTempFloat[x], pos_func, var_idx);
         break;
 
     case CHAR_TYPE:
 
-        emit("  sb %s, %s\n\n", RegInt[x], get_namevar_in_func(ft, var_idx, pos_func));
+        emit("  sb %s, var%d%d\n\n", RegTempInt[x], pos_func, var_idx);
         break;
 
     default:
-        fprintf(stderr, "Invalid type: %s!\n", get_text(var_type));
+        fprintf(stderr, "Invalid type: %s!\n", pos_func, var_idx);
         break;
     }
 }
@@ -229,13 +249,15 @@ int emit_plus(AST *ast)
     int z = rec_emit_code(get_child(ast, 1));
     if (get_node_type(ast) == FLOAT_TYPE)
     {
+        check_float_registers();
         x = new_float_reg();
-        emit("  add.s %s, %s, %s\n", RegFloat[x], RegFloat[y], RegFloat[z]);
+        emit("  add.s %s, %s, %s\n", RegTempFloat[x], RegTempFloat[y], RegTempFloat[z]);
     }
     else if (get_node_type(ast) == INT_TYPE)
     {
+        check_int_registers();
         x = new_int_reg();
-        emit("  add %s, %s, %s\n", RegInt[x], RegInt[y], RegInt[z]);
+        emit("  add %s, %s, %s\n", RegTempInt[x], RegTempInt[y], RegTempInt[z]);
     }
     return x;
 }
@@ -247,13 +269,15 @@ int emit_minus(AST *ast)
     int z = rec_emit_code(get_child(ast, 1));
     if (get_node_type(ast) == FLOAT_TYPE)
     {
+        check_float_registers();
         x = new_float_reg();
-        emit("  sub.s %s, %s, %s\n", RegFloat[x], RegFloat[y], RegFloat[z]);
+        emit("  sub.s %s, %s, %s\n", RegTempFloat[x], RegTempFloat[y], RegTempFloat[z]);
     }
     else
     {
+        check_int_registers();
         x = new_int_reg();
-        emit("  sub %s, %s, %s\n", RegInt[x], RegInt[y], RegInt[z]);
+        emit("  sub %s, %s, %s\n", RegTempInt[x], RegTempInt[y], RegTempInt[z]);
     }
     return x;
 }
@@ -265,13 +289,15 @@ int emit_times(AST *ast)
     int z = rec_emit_code(get_child(ast, 1));
     if (get_node_type(ast) == FLOAT_TYPE)
     {
+        check_float_registers();
         x = new_float_reg();
-        emit("  mul.s %s, %s, %s\n", RegFloat[x], RegFloat[y], RegFloat[z]);
+        emit("  mul.s %s, %s, %s\n", RegTempFloat[x], RegTempFloat[y], RegTempFloat[z]);
     }
     else
     {
+        check_int_registers();
         x = new_int_reg();
-        emit("  mul %s, %s, %s\n", RegInt[x], RegInt[y], RegInt[z]);
+        emit("  mul %s, %s, %s\n", RegTempInt[x], RegTempInt[y], RegTempInt[z]);
     }
     return x;
 }
@@ -279,19 +305,24 @@ int emit_times(AST *ast)
 int emit_over(AST *ast)
 {
     int x;
-    int y = rec_emit_code(get_child(ast, 0));
-    int z = rec_emit_code(get_child(ast, 1));
+    int y = rec_emit_code(get_child(ast, 0));  // Avalia o primeiro operando
+    int z = rec_emit_code(get_child(ast, 1));  // Avalia o segundo operando
+    
     if (get_node_type(ast) == FLOAT_TYPE)
     {
-        x = new_float_reg();
-        emit("  div.s %s, %s, %s\n", RegFloat[x], RegFloat[y], RegFloat[z]);
+        check_float_registers();  // Verifica se há registradores float disponíveis
+        x = new_float_reg();      // Aloca um novo registrador float
+        emit("  div.s %s, %s, %s\n", RegTempFloat[x], RegTempFloat[y], RegTempFloat[z]);  // Emite código para divisão de float
     }
     else
     {
-        x = new_int_reg();
-        emit("  div %s, %s, %s\n", RegInt[x], RegInt[y], RegInt[z]);
+        check_int_registers();  // Verifica se há registradores inteiros disponíveis
+        emit("  div %s, %s\n", RegTempInt[y], RegTempInt[z]);  // Realiza a divisão de inteiros (o resultado vai para `lo` e `hi`)
+        x = new_int_reg();      // Aloca um novo registrador inteiro
+        emit("  mflo %s\n", RegTempInt[x]);  // Move o quociente de `lo` para o registrador de destino
     }
-    return x;
+    
+    return x;  // Retorna o registrador que contém o resultado
 }
 
 int emit_var_use(AST *ast)
@@ -306,18 +337,21 @@ int emit_var_use(AST *ast)
     switch (var_type)
     {
     case INT_TYPE:
+        check_int_registers();
         x = new_int_reg();
-        emit("  lw %s, %s\n", RegInt[x], get_namevar_in_func(ft, var_idx, pos_func));
+        emit("  lw %s, var%d%d\n", RegTempInt[x], pos_func, var_idx);
         break;
 
     case FLOAT_TYPE:
+        check_float_registers();
         x = new_float_reg();
-        emit("  s.s %s, %s\n", RegFloat[x], get_namevar_in_func(ft, var_idx, pos_func));
+        emit("  s.s %s, var%d%d\n", RegTempFloat[x], pos_func, var_idx);
         break;
 
     case CHAR_TYPE:
+        check_int_registers();
         x = new_int_reg();
-        emit("  sb %s, %s\n", RegInt[x], get_namevar_in_func(ft, var_idx, pos_func));
+        emit("  sb %s, var%d%d\n", RegTempInt[x], pos_func, var_idx);
         break;
 
     default:
@@ -342,18 +376,23 @@ int emit_increment(AST *ast)
     if (var_type == INT_TYPE)
     {
 
-        emit("  addi %s, %s ,%d\n", RegInt[x], RegInt[x], 1);
+        emit("  addi %s, %s ,%d\n", RegTempInt[x], RegTempInt[x], 1);
+        emit (" sw %s, var%d%d\n", RegTempInt[x], pos_func, var_idx);
     }
     else
     {
+        check_float_registers();
         int y = new_float_reg();
+        check_int_registers();
         int a = new_int_reg();
 
-        emit("  li %s %s\n", RegInt[a], "0x3F800000"); // 0x3F800000 é 1.0 em IEEE 754
+        emit("  li %s %s\n", RegTempInt[a], "0x3F800000"); // 0x3F800000 é 1.0 em IEEE 754
         int_regs_count--;
-        emit("  mtc1 %s, %s\n", RegInt[a], RegFloat[y]);
-        emit("  add.s %s, %s, %s\n", RegFloat[x], RegFloat[x], RegFloat[y]);
+        emit("  mtc1 %s, %s\n", RegTempInt[a], RegTempFloat[y]);
+        emit("  add.s %s, %s, %s\n", RegTempFloat[x], RegTempFloat[x], RegTempFloat[y]);
+        emit("  s.s %s var%d%d\n", RegTempFloat[x], pos_func, var_idx);
     }
+    printf("\n\n");
 }
 
 int emit_decrement(AST *ast)
@@ -367,17 +406,21 @@ int emit_decrement(AST *ast)
     if (var_type == INT_TYPE)
     {
 
-        emit("  subi %s, %s ,%d\n", RegInt[x], RegInt[x], 1);
+        emit("  subi %s, %s ,%d\n", RegTempInt[x], RegTempInt[x], 1);
+        emit (" sw %s, var%d%d\n", RegTempInt[x], pos_func, var_idx);
     }
     else
     {
+        check_float_registers();
         int y = new_float_reg();
+        check_int_registers();
         int a = new_int_reg();
 
-        emit("  li %s %s\n", RegInt[a], "0x3F800000"); // 0x3F800000 é 1.0 em IEEE 754
+        emit("  li %s %s\n", RegTempInt[a], "0x3F800000"); // 0x3F800000 é 1.0 em IEEE 754
         int_regs_count--;
-        emit("  mtc1 %s, %s\n", RegInt[a], RegFloat[y]);
-        emit("  sub.s %s, %s, %s\n", RegFloat[x], RegFloat[x], RegFloat[y]);
+        emit("  mtc1 %s, %s\n", RegTempInt[a], RegTempFloat[y]);
+        emit("  sub.s %s, %s, %s\n", RegTempFloat[x], RegTempFloat[x], RegTempFloat[y]);
+        emit("  s.s %s var%d%d\n", RegTempFloat[x], pos_func, var_idx);
     }
 }
 
@@ -412,7 +455,7 @@ int emit_array_decl(AST *ast)
         case INT_TYPE:
             for (int i = 0; i < size; i++) {
                 printf("li $t0, %d\n", get_data(get_child(child_init, i)));
-                printf("sw $t0, %s+%d\n\n", get_namevar_in_func(ft, var_idx, pos_func), i*2);
+                printf("sw $t0, var%d%d+%d\n\n", pos_func, var_idx, i*2);
             }
             break;
 
@@ -483,31 +526,36 @@ void dump_var_table()
             if (tipo == INT_TYPE)
             {
                 if(get_size(vTable, j) > 0){
-                    printf("    %s: .space %d\n", get_name(vTable, j), get_size(vTable, j));
+                    printf("    var%d%d: .space %d\n", i,j, get_size(vTable, j));
                 }
                 else
                 {
-                    printf("    %s: .word 0\n", get_name(vTable, j));
+                    printf("    var%d%d: .word 0\n",i,j);
                 }
             }
             if (tipo == FLOAT_TYPE)
             {
-                printf("    %s: .float 0.0\n", get_name(vTable, j));
+                printf("    var%d%d: .float 0.0\n", i,j);
             }
             if (tipo == CHAR_TYPE)
             {
                 if(get_size(vTable, j) > 0){
-                    printf("    %s: .space %d\n", get_name(vTable, j), get_size(vTable, j));
+                    printf("    var%d%d: .space %d\n", i,j, get_size(vTable, j));
                 }
                 else
                 {
-                    printf("    %s: .byte '0'\n", get_name(vTable, j));
+                    printf("    var%d%d: .byte '0'\n", i,j);
                 }
             }
         }
     }
 
     printf("\n");
+}
+
+
+void emit_func_decl(){
+    
 }
 
 void write_instruction(int addr)
@@ -646,8 +694,8 @@ void emit_code(AST *ast)
     printf(".data\n");
     dump_str_table();
     dump_var_table();
-    int_regs_count = 8;
-    float_regs_count = 0;
+    int_regs_count = 0;
+    float_regs_count = 2;
     printf(".text\n");
     printf(".globl main\n\n");
     printf("main:\n");

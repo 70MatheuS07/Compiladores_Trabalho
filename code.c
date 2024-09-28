@@ -132,7 +132,7 @@ int emit_write(AST *ast)
         }
     }
 
-    emit("  syscall\n");
+    emit("  syscall\n\n");
 }
 
 int emit_str_val(AST *ast)
@@ -203,17 +203,17 @@ int emit_assign(AST *ast)
     {
     case INT_TYPE:
 
-        emit("  sw %s, %s\n", RegInt[x], get_namevar_in_func(ft, var_idx, pos_func));
+        emit("  sw %s, %s\n\n", RegInt[x], get_namevar_in_func(ft, var_idx, pos_func));
         break;
 
     case FLOAT_TYPE:
 
-        emit("  s.s %s, %s\n", RegFloat[x], get_namevar_in_func(ft, var_idx, pos_func));
+        emit("  s.s %s, %s\n\n", RegFloat[x], get_namevar_in_func(ft, var_idx, pos_func));
         break;
 
     case CHAR_TYPE:
 
-        emit("  sb %s, %s\n", RegInt[x], get_namevar_in_func(ft, var_idx, pos_func));
+        emit("  sb %s, %s\n\n", RegInt[x], get_namevar_in_func(ft, var_idx, pos_func));
         break;
 
     default:
@@ -385,6 +385,56 @@ int emit_return(AST *ast)
 {
     rec_emit_code(get_child(ast, 0));
 }
+
+int emit_array_decl(AST *ast)
+{
+    trace("array_decl");
+
+    // Pega tamanho do vetor
+    AST *child_init = get_child(ast, 1);
+    int size = get_node_size(get_child(ast, 0));
+
+    // Se o tamanho do array não foi definido
+    if (size == 0) {
+        fprintf(stderr, "Erro: Array sem tamanho especificado!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // Obtém o índice da variável e a posição da função
+    int var_idx = get_data(get_child(ast, 0));
+    int pos_func = get_pos_fun(get_child(ast, 0));
+
+    // Obtém o tipo da variável
+    Type var_type = get_typevar_in_func(ft, var_idx, pos_func);
+
+    // Prepara o array para inicialização
+    switch (var_type) {
+        case INT_TYPE:
+            for (int i = 0; i < size; i++) {
+                printf("li $t0, %d\n", get_data(get_child(child_init, i)));
+                printf("sw $t0, %s+%d\n\n", get_namevar_in_func(ft, var_idx, pos_func), i*2);
+            }
+            break;
+
+        case FLOAT_TYPE:
+            for (int i = 0; i < size; i++) {
+                
+            }
+            break;
+
+        case CHAR_TYPE:
+            for (int i = 0; i < size; i++) {
+                
+            }
+            break;
+
+        case NO_TYPE:
+        default:
+            fprintf(stderr, "Invalid type: %s!\n", get_text(var_type));
+            exit(EXIT_FAILURE);
+    }
+}
+
 // ----------------------------------------------------------------------------
 
 // Prints ----------------------------------------------------------------------
@@ -432,7 +482,13 @@ void dump_var_table()
             Type tipo = get_type(vTable, j);
             if (tipo == INT_TYPE)
             {
-                printf("    %s: .word 0\n", get_name(vTable, j));
+                if(get_size(vTable, j) > 0){
+                    printf("    %s: .space %d\n", get_name(vTable, j), get_size(vTable, j));
+                }
+                else
+                {
+                    printf("    %s: .word 0\n", get_name(vTable, j));
+                }
             }
             if (tipo == FLOAT_TYPE)
             {
@@ -440,10 +496,18 @@ void dump_var_table()
             }
             if (tipo == CHAR_TYPE)
             {
-                printf("    %s: .byte '0'\n", get_name(vTable, j));
+                if(get_size(vTable, j) > 0){
+                    printf("    %s: .space %d\n", get_name(vTable, j), get_size(vTable, j));
+                }
+                else
+                {
+                    printf("    %s: .byte '0'\n", get_name(vTable, j));
+                }
             }
         }
     }
+
+    printf("\n");
 }
 
 void write_instruction(int addr)
@@ -564,9 +628,13 @@ int rec_emit_code(AST *ast)
         // case MOD_ASSIGN_NODE: emit_mod_assign(ast); break;
         // case C2I_NODE: emit_c2i(ast); break;
 
-        // default:
-        //  fprintf(stderr, "Invalid kind: %s!\n", kind2str(get_kind(ast)));
-        // exit(EXIT_FAILURE);
+        case ARRAY_DECL_NODE:
+            emit_array_decl(ast);
+            break;
+
+        default:
+            fprintf(stderr, "Invalid kind: %s!\n", kind2str(get_kind(ast)));
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -575,13 +643,13 @@ void emit_code(AST *ast)
     next_instr = 0;
     int_regs_count = 0;
     float_regs_count = 0;
-    printf("    .data\n");
+    printf(".data\n");
     dump_str_table();
     dump_var_table();
     int_regs_count = 8;
     float_regs_count = 0;
-    printf("    .text\n");
-    printf("    .globl main\n\n");
+    printf(".text\n");
+    printf(".globl main\n\n");
     printf("main:\n");
     rec_emit_code(ast);
 }

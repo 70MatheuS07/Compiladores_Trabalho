@@ -117,6 +117,8 @@ void free_table(FuncTable *ft);
 
 VarTable *get_var_table(FuncTable *ft, int i);
 
+int get_size(VarTable *vt, int i);
+
 #endif // TABLES_H
 
 

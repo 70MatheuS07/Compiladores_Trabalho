@@ -38,11 +38,16 @@ int next_instr;
 int int_regs_count;
 int float_regs_count;
 
+int while_count;
+
 #define new_int_reg() \
     int_regs_count++
 
 #define new_float_reg() \
     float_regs_count++
+
+#define new_while() \
+    while_count;
 
 int rec_emit_code(AST *ast);
 // ----------------------------------------------------------------------------
@@ -330,6 +335,10 @@ int emit_over(AST *ast)
     return x; // Retorna o registrador que contém o resultado
 }
 
+int emit_var_decl(AST*ast){
+    return -1;
+}
+
 int emit_var_use(AST *ast)
 {
     int x;
@@ -337,7 +346,6 @@ int emit_var_use(AST *ast)
     int var_idx = get_data(ast);
 
     int pos_func = get_pos_fun(ast);
-
     Type var_type = get_typevar_in_func(ft, var_idx, pos_func);
     switch (var_type)
     {
@@ -466,8 +474,8 @@ int emit_array_decl(AST *ast)
         {
             check_int_registers();
             reg = new_int_reg();
-            printf("li %s, %d\n", RegTempInt[reg], get_data(get_child(child_init, i)));
-            printf("sw %s, var%d%d+%d\n\n", RegTempInt[reg], pos_func, var_idx, i * 4);
+            printf("    li %s, %d\n", RegTempInt[reg], get_data(get_child(child_init, i)));
+            printf("    sw %s, var%d%d+%d\n\n", RegTempInt[reg], pos_func, var_idx, i * 4);
         }
         break;
 
@@ -498,31 +506,109 @@ int emit_if(AST *ast)
     rec_emit_code(get_child(ast, 0));
 }
 
-int emit_greater_than(AST *ast)
+int emit_repeat(AST *ast)
+{
+    int cond_label = new_while(); // Label para verificar a condição
+    int end_label = new_while();  // Label para o fim do loop (quando a condição for falsa)
+
+    // Emitir o label para o início da verificação da condição
+    emit("L%d:\n", cond_label);
+
+    // Emitir código para a condição do while
+    int cond_reg = rec_emit_code(get_child(ast, 0));
+
+    // Se a condição for falsa (igual a zero), salte para o fim do loop
+    emit("  beq %s, $zero, L%d\n", RegTempInt[cond_reg], end_label);
+
+    // Emitir código para o corpo do loop (segundo filho da AST)
+    rec_emit_code(get_child(ast, 1));
+
+    // Saltar de volta para verificar a condição novamente
+    emit("  j L%d\n", cond_label);
+
+    // Label de fim do loop
+    emit("L%d:\n", end_label);
+
+    return -1; // Retorna um vaq
+}
+
+int emit_greather_than(AST *ast)
 {
     trace("emit greater_than");
 
     int x = rec_emit_code(get_child(ast, 0));
     int y = rec_emit_code(get_child(ast, 1));
 
-    int var_idx_x = get_data(x);
-    int pos_func_x = get_pos_fun(x);
+    check_int_registers();
 
-    int var_idx_y = get_data(y);
-    int pos_func_y = get_pos_fun(y);
+    int reg_result = new_int_reg();
+
+    emit("  sle %s, %s, %s", RegTempInt[reg_result], RegTempInt[y], RegTempInt[x]);
+
+    return reg_result;
+}
+
+int emit_less_than(AST *ast)
+{
+    trace("emit less_than");
+
+    int x = rec_emit_code(get_child(ast, 0));
+    int y = rec_emit_code(get_child(ast, 1));
 
     check_int_registers();
-    int reg_x = new_int_reg();
+
+    int reg_result = new_int_reg();
+
+    emit("  sge %s, %s, %s", RegTempInt[reg_result], RegTempInt[y], RegTempInt[x]);
+
+    return reg_result;
+}
+
+int emit_greather_than_or_equal(AST *ast)
+{
+    trace("emit less_than");
+
+    int x = rec_emit_code(get_child(ast, 0));
+    int y = rec_emit_code(get_child(ast, 1));
+
     check_int_registers();
-    int reg_y = new_int_reg();
 
-    emit("  lw %s, var%d%d\n", RegTempInt[reg_x], pos_func_x, var_idx_x);
-    emit("  lw %s, var%d%d\n", RegTempInt[reg_y], pos_func_y, var_idx_y);
+    int reg_result = new_int_reg();
 
-    printf("AQUI ACABOU\n");
+    emit("  sge %s, %s, %s", RegTempInt[reg_result], RegTempInt[x], RegTempInt[y]);
 
-    // emit("  beq , $zero, else%d\n", RegTempInt[x], qtd_if);
+    return reg_result;
+}
 
+int emit_less_than_or_equal(AST *ast)
+{
+    trace("emit greater_than");
+
+    int x = rec_emit_code(get_child(ast, 0));
+    int y = rec_emit_code(get_child(ast, 1));
+
+    check_int_registers();
+
+    int reg_result = new_int_reg();
+
+    emit(" sle %s, %s, %s", RegTempInt[reg_result], RegTempInt[x], RegTempInt[y]);
+
+    return reg_result;
+}
+
+int emit_eq(AST*ast){
+    trace("emit greater_than");
+
+    int x = rec_emit_code(get_child(ast, 0));
+    int y = rec_emit_code(get_child(ast, 1));
+
+    check_int_registers();
+
+    int reg_result = new_int_reg();
+
+    emit(" seq %s, %s, %s", RegTempInt[reg_result], RegTempInt[x], RegTempInt[y]);
+
+    return reg_result;
 }
 
 // ----------------------------------------------------------------------------
@@ -655,10 +741,9 @@ int rec_emit_code(AST *ast)
         emit_assign(ast);
         break;
         // case ASSIGN_NODE:   emit_assign(ast);    break;
-        // case EQUALS_NODE:   emit_eq(ast);        break;
+         case EQUALS_NODE:   emit_eq(ast);        break;
         // case BLOCK_NODE:    emit_block(ast);     break;
         // case BOOL_VAL_NODE: emit_bool_val(ast);  break;
-        // case IF_NODE:       emit_if(ast);        break;
     case INT_VAL_NODE:
         emit_int_val(ast);
         break;
@@ -681,7 +766,7 @@ int rec_emit_code(AST *ast)
     case TIMES_NODE:
         emit_times(ast);
         break;
-    // case VAR_DECL_NODE: emit_var_decl(ast);  break;
+     case VAR_DECL_NODE: emit_var_decl(ast);  break;
     // case VAR_LIST_NODE: emit_var_list(ast);  break;
     case VAR_USE_NODE:
         emit_var_use(ast);
@@ -705,12 +790,20 @@ int rec_emit_code(AST *ast)
     case RETURN_NODE:
         emit_return(ast);
         break;
-    // case ARRAY_DECL_NODE: emit_array_decl(ast); break;
-    // case ARRAY_ACCESS_NODE: emit_array_acess(ast); break;
-    // case GREATER_THAN_NODE: emit_greather_than(ast); break;
-    // case LESS_THAN_NODE: emit_less_than(ast); break;
-    // case GREATER_THAN_OR_EQUAL_NODE: emit_greather_than_or_equal(ast); break;
-    // case LESS_THAN_OR_EQUAL_NODE: emit_less_than_or_equal(ast); break;
+        // case ARRAY_DECL_NODE: emit_array_decl(ast); break;
+        // case ARRAY_ACCESS_NODE: emit_array_acess(ast); break;
+    case GREATER_THAN_NODE:
+        emit_greather_than(ast);
+        break;
+    case LESS_THAN_NODE:
+        emit_less_than(ast);
+        break;
+    case GREATER_THAN_OR_EQUAL_NODE:
+        emit_greather_than_or_equal(ast);
+        break;
+    case LESS_THAN_OR_EQUAL_NODE:
+        emit_less_than_or_equal(ast);
+        break;
     case CHAR_VAL_NODE:
         emit_char_val(ast);
         break;
@@ -731,10 +824,6 @@ int rec_emit_code(AST *ast)
         emit_if(ast);
         break;
 
-    case GREATER_THAN_NODE:
-        emit_greater_than(ast);
-        break;
-
     default:
         fprintf(stderr, "Invalid kind: %s!\n", kind2str(get_kind(ast)));
         exit(EXIT_FAILURE);
@@ -746,6 +835,7 @@ void emit_code(AST *ast)
     next_instr = 0;
     int_regs_count = 0;
     float_regs_count = 0;
+    while_count = 0;
     printf(".data\n");
     dump_str_table();
     dump_var_table();

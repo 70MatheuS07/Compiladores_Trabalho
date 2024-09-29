@@ -1,6 +1,6 @@
 int main ()
 {
-    int x = 1;
+    int x = 3;
     int y = 2;
     char nome[40];
     int vet[4] = {0, 2, 3, 4};
@@ -10,7 +10,7 @@ int main ()
     if(x <= y) printf(4);
     if(x == y) printf(5);
     int i;
-    i= vet[0]+2;
+    //i= vet[0]+2;
     printf(i);
     // else(x != y)
 

@@ -5,6 +5,12 @@
 #include "instruction.h"
 #include "tables.h"
 
+// Globais ------------------------------------------------
+int qtd_if = 0;
+int qtd_returne = 0;
+int qtd_while = 0;
+// --------------------------------------------------------
+
 // #define TRACE
 #ifdef TRACE
 #define trace(msg) printf("TRACE: %s\n", msg)
@@ -35,28 +41,27 @@ int float_regs_count;
 #define new_int_reg() \
     int_regs_count++
 
-
 #define new_float_reg() \
     float_regs_count++
 
 int rec_emit_code(AST *ast);
 // ----------------------------------------------------------------------------
 
-void check_int_registers(){
-    if(int_regs_count==10){
+void check_int_registers()
+{
+    if (int_regs_count == 10)
+    {
         int_regs_count = 0;
     }
 }
-    
 
-void check_float_registers(){
-    if(float_regs_count==25){
+void check_float_registers()
+{
+    if (float_regs_count == 25)
+    {
         int_regs_count = 0;
     }
-        
-
 }
-
 
 void emit(const char *format, ...)
 {
@@ -129,12 +134,12 @@ int emit_write(AST *ast)
         {
         case INT_TYPE:
             emit("  move $a0 %s\n", RegTempInt[x]);
-            emit("  li $v0, %d\n",  1);
+            emit("  li $v0, %d\n", 1);
             ;
             break;
         case FLOAT_TYPE:
             emit("  move $f12 %s\n", RegTempInt[x]);
-            emit("  li $v0, %d\n",  2);
+            emit("  li $v0, %d\n", 2);
             ;
             break;
         case CHAR_TYPE:
@@ -305,24 +310,24 @@ int emit_times(AST *ast)
 int emit_over(AST *ast)
 {
     int x;
-    int y = rec_emit_code(get_child(ast, 0));  // Avalia o primeiro operando
-    int z = rec_emit_code(get_child(ast, 1));  // Avalia o segundo operando
-    
+    int y = rec_emit_code(get_child(ast, 0)); // Avalia o primeiro operando
+    int z = rec_emit_code(get_child(ast, 1)); // Avalia o segundo operando
+
     if (get_node_type(ast) == FLOAT_TYPE)
     {
-        check_float_registers();  // Verifica se há registradores float disponíveis
-        x = new_float_reg();      // Aloca um novo registrador float
-        emit("  div.s %s, %s, %s\n", RegTempFloat[x], RegTempFloat[y], RegTempFloat[z]);  // Emite código para divisão de float
+        check_float_registers();                                                         // Verifica se há registradores float disponíveis
+        x = new_float_reg();                                                             // Aloca um novo registrador float
+        emit("  div.s %s, %s, %s\n", RegTempFloat[x], RegTempFloat[y], RegTempFloat[z]); // Emite código para divisão de float
     }
     else
     {
-        check_int_registers();  // Verifica se há registradores inteiros disponíveis
-        emit("  div %s, %s\n", RegTempInt[y], RegTempInt[z]);  // Realiza a divisão de inteiros (o resultado vai para `lo` e `hi`)
-        x = new_int_reg();      // Aloca um novo registrador inteiro
-        emit("  mflo %s\n", RegTempInt[x]);  // Move o quociente de `lo` para o registrador de destino
+        check_int_registers();                                // Verifica se há registradores inteiros disponíveis
+        emit("  div %s, %s\n", RegTempInt[y], RegTempInt[z]); // Realiza a divisão de inteiros (o resultado vai para `lo` e `hi`)
+        x = new_int_reg();                                    // Aloca um novo registrador inteiro
+        emit("  mflo %s\n", RegTempInt[x]);                   // Move o quociente de `lo` para o registrador de destino
     }
-    
-    return x;  // Retorna o registrador que contém o resultado
+
+    return x; // Retorna o registrador que contém o resultado
 }
 
 int emit_var_use(AST *ast)
@@ -377,7 +382,7 @@ int emit_increment(AST *ast)
     {
 
         emit("  addi %s, %s ,%d\n", RegTempInt[x], RegTempInt[x], 1);
-        emit (" sw %s, var%d%d\n", RegTempInt[x], pos_func, var_idx);
+        emit(" sw %s, var%d%d\n", RegTempInt[x], pos_func, var_idx);
     }
     else
     {
@@ -407,7 +412,7 @@ int emit_decrement(AST *ast)
     {
 
         emit("  subi %s, %s ,%d\n", RegTempInt[x], RegTempInt[x], 1);
-        emit (" sw %s, var%d%d\n", RegTempInt[x], pos_func, var_idx);
+        emit(" sw %s, var%d%d\n", RegTempInt[x], pos_func, var_idx);
     }
     else
     {
@@ -438,7 +443,8 @@ int emit_array_decl(AST *ast)
     int size = get_node_size(get_child(ast, 0));
 
     // Se o tamanho do array não foi definido
-    if (size == 0) {
+    if (size == 0)
+    {
         fprintf(stderr, "Erro: Array sem tamanho especificado!\n");
         exit(EXIT_FAILURE);
     }
@@ -450,32 +456,73 @@ int emit_array_decl(AST *ast)
     // Obtém o tipo da variável
     Type var_type = get_typevar_in_func(ft, var_idx, pos_func);
 
+    int reg = 0;
+
     // Prepara o array para inicialização
-    switch (var_type) {
-        case INT_TYPE:
-            for (int i = 0; i < size; i++) {
-                printf("li $t0, %d\n", get_data(get_child(child_init, i)));
-                printf("sw $t0, var%d%d+%d\n\n", pos_func, var_idx, i*2);
-            }
-            break;
+    switch (var_type)
+    {
+    case INT_TYPE:
+        for (int i = 0; i < size; i++)
+        {
+            check_int_registers();
+            reg = new_int_reg();
+            printf("li %s, %d\n", RegTempInt[reg], get_data(get_child(child_init, i)));
+            printf("sw %s, var%d%d+%d\n\n", RegTempInt[reg], pos_func, var_idx, i * 4);
+        }
+        break;
 
-        case FLOAT_TYPE:
-            for (int i = 0; i < size; i++) {
-                
-            }
-            break;
+    case FLOAT_TYPE:
+        for (int i = 0; i < size; i++)
+        {
+        }
+        break;
 
-        case CHAR_TYPE:
-            for (int i = 0; i < size; i++) {
-                
-            }
-            break;
+    case CHAR_TYPE:
+        for (int i = 0; i < size; i++)
+        {
+        }
+        break;
 
-        case NO_TYPE:
-        default:
-            fprintf(stderr, "Invalid type: %s!\n", get_text(var_type));
-            exit(EXIT_FAILURE);
+    case NO_TYPE:
+    default:
+        fprintf(stderr, "Invalid type: %s!\n", get_text(var_type));
+        exit(EXIT_FAILURE);
     }
+}
+
+int emit_if(AST *ast)
+{
+    trace("emit if");
+    qtd_if++;
+
+    rec_emit_code(get_child(ast, 0));
+}
+
+int emit_greater_than(AST *ast)
+{
+    trace("emit greater_than");
+
+    int x = rec_emit_code(get_child(ast, 0));
+    int y = rec_emit_code(get_child(ast, 1));
+
+    int var_idx_x = get_data(x);
+    int pos_func_x = get_pos_fun(x);
+
+    int var_idx_y = get_data(y);
+    int pos_func_y = get_pos_fun(y);
+
+    check_int_registers();
+    int reg_x = new_int_reg();
+    check_int_registers();
+    int reg_y = new_int_reg();
+
+    emit("  lw %s, var%d%d\n", RegTempInt[reg_x], pos_func_x, var_idx_x);
+    emit("  lw %s, var%d%d\n", RegTempInt[reg_y], pos_func_y, var_idx_y);
+
+    printf("AQUI ACABOU\n");
+
+    // emit("  beq , $zero, else%d\n", RegTempInt[x], qtd_if);
+
 }
 
 // ----------------------------------------------------------------------------
@@ -525,26 +572,28 @@ void dump_var_table()
             Type tipo = get_type(vTable, j);
             if (tipo == INT_TYPE)
             {
-                if(get_size(vTable, j) > 0){
-                    printf("    var%d%d: .space %d\n", i,j, get_size(vTable, j));
+                if (get_size(vTable, j) > 0)
+                {
+                    printf("    var%d%d: .space %d\n", i, j, get_size(vTable, j));
                 }
                 else
                 {
-                    printf("    var%d%d: .word 0\n",i,j);
+                    printf("    var%d%d: .word 0\n", i, j);
                 }
             }
             if (tipo == FLOAT_TYPE)
             {
-                printf("    var%d%d: .float 0.0\n", i,j);
+                printf("    var%d%d: .float 0.0\n", i, j);
             }
             if (tipo == CHAR_TYPE)
             {
-                if(get_size(vTable, j) > 0){
-                    printf("    var%d%d: .space %d\n", i,j, get_size(vTable, j));
+                if (get_size(vTable, j) > 0)
+                {
+                    printf("    var%d%d: .space %d\n", i, j, get_size(vTable, j));
                 }
                 else
                 {
-                    printf("    var%d%d: .byte '0'\n", i,j);
+                    printf("    var%d%d: .byte '0'\n", i, j);
                 }
             }
         }
@@ -553,9 +602,8 @@ void dump_var_table()
     printf("\n");
 }
 
-
-void emit_func_decl(){
-    
+void emit_func_decl()
+{
 }
 
 void write_instruction(int addr)
@@ -582,7 +630,6 @@ int rec_emit_code(AST *ast)
 {
     switch (get_kind(ast))
     {
-        // Essa é a base para o t8.c
     case PROGRAM_NODE:
         emit_program(ast);
         break;
@@ -625,7 +672,7 @@ int rec_emit_code(AST *ast)
     case PLUS_NODE:
         emit_plus(ast);
         break;
-        // case READ_NODE:     emit_read(ast);      break;
+    // case READ_NODE:     emit_read(ast);      break;
     case REAL_VAL_NODE:
         emit_real_val(ast);
         break;
@@ -634,20 +681,20 @@ int rec_emit_code(AST *ast)
     case TIMES_NODE:
         emit_times(ast);
         break;
-        // case VAR_DECL_NODE: emit_var_decl(ast);  break;
-        // case VAR_LIST_NODE: emit_var_list(ast);  break;
+    // case VAR_DECL_NODE: emit_var_decl(ast);  break;
+    // case VAR_LIST_NODE: emit_var_list(ast);  break;
     case VAR_USE_NODE:
         emit_var_use(ast);
         break;
-        // case FUN_DECL_NODE: emit_fun_decl(ast);  break;
-        // case B2I_NODE:      emit_b2i(ast);       break;
-        // case B2R_NODE:      emit_b2r(ast);       break;
-        // case B2S_NODE:      emit_b2s(ast);       break;
-        // case I2F_NODE:      emit_i2r(ast);       break;
-        //  Mudei I2S_NODE para I2C_NODE
-        // case I2C_NODE:      emit_i2s(ast);       break;
-        // case R2S_NODE:      emit_r2s(ast);       break;
-        // case PARAM_LIST_NODE: emit_param_list(ast); break;
+    // case FUN_DECL_NODE: emit_fun_decl(ast);  break;
+    // case B2I_NODE:      emit_b2i(ast);       break;
+    // case B2R_NODE:      emit_b2r(ast);       break;
+    // case B2S_NODE:      emit_b2s(ast);       break;
+    // case I2F_NODE:      emit_i2r(ast);       break;
+    //  Mudei I2S_NODE para I2C_NODE
+    // case I2C_NODE:      emit_i2s(ast);       break;
+    // case R2S_NODE:      emit_r2s(ast);       break;
+    // case PARAM_LIST_NODE: emit_param_list(ast); break;
     case INCREMENT_NODE:
         emit_increment(ast);
         break;
@@ -658,12 +705,12 @@ int rec_emit_code(AST *ast)
     case RETURN_NODE:
         emit_return(ast);
         break;
-        // case ARRAY_DECL_NODE: emit_array_decl(ast); break;
-        // case ARRAY_ACCESS_NODE: emit_array_acess(ast); break;
-        // case GREATER_THAN_NODE: emit_greather_than(ast); break;
-        // case LESS_THAN_NODE: emit_less_than(ast); break;
-        // case GREATER_THAN_OR_EQUAL_NODE: emit_greather_than_or_equal(ast); break;
-        // case LESS_THAN_OR_EQUAL_NODE: emit_less_than_or_equal(ast); break;
+    // case ARRAY_DECL_NODE: emit_array_decl(ast); break;
+    // case ARRAY_ACCESS_NODE: emit_array_acess(ast); break;
+    // case GREATER_THAN_NODE: emit_greather_than(ast); break;
+    // case LESS_THAN_NODE: emit_less_than(ast); break;
+    // case GREATER_THAN_OR_EQUAL_NODE: emit_greather_than_or_equal(ast); break;
+    // case LESS_THAN_OR_EQUAL_NODE: emit_less_than_or_equal(ast); break;
     case CHAR_VAL_NODE:
         emit_char_val(ast);
         break;
@@ -676,12 +723,20 @@ int rec_emit_code(AST *ast)
         // case MOD_ASSIGN_NODE: emit_mod_assign(ast); break;
         // case C2I_NODE: emit_c2i(ast); break;
 
-        case ARRAY_DECL_NODE:
-            emit_array_decl(ast);
-            break;
+    case ARRAY_DECL_NODE:
+        emit_array_decl(ast);
+        break;
 
-        default:
-            fprintf(stderr, "Invalid kind: %s!\n", kind2str(get_kind(ast)));
+    case IF_NODE:
+        emit_if(ast);
+        break;
+
+    case GREATER_THAN_NODE:
+        emit_greater_than(ast);
+        break;
+
+    default:
+        fprintf(stderr, "Invalid kind: %s!\n", kind2str(get_kind(ast)));
         exit(EXIT_FAILURE);
     }
 }

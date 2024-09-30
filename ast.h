@@ -10,6 +10,7 @@ typedef enum {
     MUL_ASSIGN_NODE,
     DIV_ASSIGN_NODE,
     MOD_ASSIGN_NODE,
+    ARGUMENT_LIST_NODE,
     EQ_NODE,
     BLOCK_NODE,
     CHAR_VAL_NODE,

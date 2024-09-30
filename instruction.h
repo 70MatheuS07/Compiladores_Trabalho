@@ -125,6 +125,7 @@ static char* RegTempInt[] = {
     "$t7",    // 15: temporário
     "$t8",    // 24: temporário
     "$t9",    // 25: temporário
+    "$v0"
 };
 
 static char* RegSaveInt[]= {

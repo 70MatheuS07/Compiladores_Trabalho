@@ -325,7 +325,7 @@ cast_expression
 postfix_expression
     : primary_expression { $$=$1; }
 	| ID { $1=check_fun(); strcpy(last_func_call,VarSave); } OPEN_PARENTHESES argument_expression_list CLOSE_PARENTHESES {
-          check_params();
+          check_params();add_child($1, $4);
           $$ = $1;
           QtdParam=0; }
     | lval OPEN_BRACKET expression CLOSE_BRACKET
@@ -339,13 +339,13 @@ postfix_expression
 
 argument_expression_list
     : assignment_expression { check_params_types_sizes(get_node_type($1), get_node_size($1));
-                              QtdParam=1;
-                              $$=$1; 
-                            }
+                              QtdParam=1;}
+                              {$$=new_subtree(ARGUMENT_LIST_NODE, get_node_type($1), 0, 1, $1);}
+                            
     | argument_expression_list COMMA assignment_expression { 
                               check_params_types_sizes(get_node_type($1), get_node_size($1)); } 
-                              { QtdParam++; }
-	| /* empty */ { QtdParam=0; }
+                              { QtdParam++; }{add_child($1, $3);$$=$1;}
+	| /* empty */ { QtdParam=0; }{$$=new_subtree(ARGUMENT_LIST_NODE, NO_TYPE, 0, 0);}
     ;
 
 read-stmt:

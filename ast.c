@@ -117,6 +117,7 @@ char* kind2str(NodeKind kind) {
     switch(kind) {
         case ASSIGN_NODE:               return "=";
         case ADD_ASSIGN_NODE:           return "+=";
+        case ARGUMENT_LIST_NODE:        return "argument_list";
         case SUB_ASSIGN_NODE:           return "-=";
         case MUL_ASSIGN_NODE:           return "*=";
         case DIV_ASSIGN_NODE:           return "/=";

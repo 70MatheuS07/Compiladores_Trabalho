@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <stdarg.h>
 #include "code.h"
 #include "instruction.h"
@@ -38,6 +39,7 @@ int float_regs_count;
 int while_count;
 int if_count;
 int assign_array_left = 0;
+int is_main = 0;
 
 #define new_int_reg() \
     int_regs_count++
@@ -81,14 +83,44 @@ void emit(const char *format, ...)
 int emit_program(AST *ast)
 {
     trace("Emit program");
-    rec_emit_code(get_child(ast, 0));
+    for (int i = get_child_count(ast) - 1; i >= 0; i--)
+    {
+        rec_emit_code(get_child(ast, i));
+    }
 }
 
 int emit_fun_decl(AST *ast)
 {
     trace("Emit fun_decl");
+    emit("%s:\n", get_name_func(ft, get_data(ast)));
+    if (strcmp(get_name_func(ft, get_data(ast)), "main") == 0)
+    {
+        is_main = 1;
+    }
+    else
+    {
+        is_main = 0;
+    }
     rec_emit_code(get_child(ast, 0)); // var_list
     rec_emit_code(get_child(ast, 1)); // block
+}
+
+int emit_fun_use(AST *ast)
+{
+    trace("Emit fun_use");
+    rec_emit_code(get_child(ast, 0));
+    emit("  jal %s\n", get_name_func(ft, get_data(ast)));
+    // retorna $v0
+    return 10;
+}
+
+int emit_argument(AST *ast)
+{
+    for (int i = 0; i < get_child_count(ast); i++)
+    {
+        int x = rec_emit_code(get_child(ast, i));
+        emit("  move $a%d %s\n", i, RegTempInt[x]);
+    }
 }
 
 int emit_param_list(AST *ast)
@@ -101,10 +133,9 @@ int emit_param_list(AST *ast)
     }
     else
     {
-        printf("param_list size: %d\n", size);
         for (int i = 0; i < size; i++)
         {
-            rec_emit_code(get_child(ast, i));
+            emit("  sw $a%d var%d%d\n", i, get_pos_fun(get_child(ast, i)), get_data(get_child(ast, i)));
         }
     }
 }
@@ -162,6 +193,44 @@ int emit_write(AST *ast)
     }
 
     emit("  syscall\n\n");
+}
+
+int emit_read(AST *ast)
+{
+    trace("Emit read");
+    AST *expr = get_child(ast, 0);        // Pega a expressão (variável ou local onde armazenar)
+    int var_idx = get_data(expr);         // Índice da variável
+    int pos_func = get_pos_fun(expr);     // Posição da função
+    Type expr_type = get_node_type(expr); // Tipo da variável que estamos lendo
+
+    switch (expr_type)
+    {
+    case INT_TYPE:
+
+        emit("  li $v0, %d\n", 5);                      // Código de syscall para leitura de inteiro (5)
+        emit("  syscall\n");                            // Executa a syscall
+        emit("  sw $v0, var%d%d\n", pos_func, var_idx); // Armazena o valor em um registrador
+        break;
+
+    case FLOAT_TYPE:
+        emit("  li $v0, %d\n", 6);                       // Código de syscall para leitura de float (6)
+        emit("  syscall\n");                             // Executa a syscall
+        emit("  s.s $f0, var%d%d\n", pos_func, var_idx); // Armazena o valor em registrador de ponto flutuante
+        break;
+
+    case CHAR_TYPE:
+        emit("  li $v0, %d\n", 12);                     // Código de syscall para leitura de caractere (12)
+        emit("  syscall\n");                            // Executa a syscall
+        emit("  sb $v0, var%d%d\n", pos_func, var_idx); // Armazena o caractere lido
+        break;
+
+    case NO_TYPE:
+    default:
+        fprintf(stderr, "Invalid type: %s!\n", get_text(expr_type));
+        exit(EXIT_FAILURE);
+    }
+
+    return var_idx;
 }
 
 int emit_str_val(AST *ast)
@@ -237,7 +306,7 @@ int emit_assign(AST *ast)
         // acessa as posicoes
         int var_idx_arr = get_data(array);
         int pos_func_arr = get_pos_fun(array);
-        Type var_type_arr=get_typevar_in_func(ft, var_idx_arr,pos_func_arr );
+        Type var_type_arr = get_typevar_in_func(ft, var_idx_arr, pos_func_arr);
         switch (var_type_arr)
         {
         case INT_TYPE:
@@ -271,28 +340,29 @@ int emit_assign(AST *ast)
             break;
         }
     }
-    else{
-    switch (var_type)
+    else
     {
-    case INT_TYPE:
+        switch (var_type)
+        {
+        case INT_TYPE:
 
-        emit("  sw %s, var%d%d\n\n", RegTempInt[x], pos_func, var_idx);
-        break;
+            emit("  sw %s, var%d%d\n\n", RegTempInt[x], pos_func, var_idx);
+            break;
 
-    case FLOAT_TYPE:
+        case FLOAT_TYPE:
 
-        emit("  s.s %s, var%d%d\n\n", RegTempFloat[x], pos_func, var_idx);
-        break;
+            emit("  s.s %s, var%d%d\n\n", RegTempFloat[x], pos_func, var_idx);
+            break;
 
-    case CHAR_TYPE:
+        case CHAR_TYPE:
 
-        emit("  sb %s, var%d%d\n\n", RegTempInt[x], pos_func, var_idx);
-        break;
+            emit("  sb %s, var%d%d\n\n", RegTempInt[x], pos_func, var_idx);
+            break;
 
-    default:
-        fprintf(stderr, "Invalid type: %s!\n", pos_func, var_idx);
-        break;
-    }
+        default:
+            fprintf(stderr, "Invalid type: %s!\n", pos_func, var_idx);
+            break;
+        }
     }
 }
 int emit_plus(AST *ast)
@@ -484,7 +554,17 @@ int emit_decrement(AST *ast)
 
 int emit_return(AST *ast)
 {
-    rec_emit_code(get_child(ast, 0));
+    int x = rec_emit_code(get_child(ast, 0));
+    if (is_main == 0)
+    {
+        emit("  move $v0, %s\n", RegTempInt[x]);
+        emit("  jr $ra\n");
+    }
+    else
+    {
+        // encerramento do programa
+        emit("  li   $v0, 10\n  syscall\n\n");
+    }
 }
 
 int emit_array_decl(AST *ast)
@@ -690,9 +770,57 @@ int emit_eq(AST *ast)
 
     int reg_result = new_int_reg();
 
-    emit(" seq %s, %s, %s\n\n", RegTempInt[reg_result], RegTempInt[x], RegTempInt[y]);
+    emit("  seq %s, %s, %s\n\n", RegTempInt[reg_result], RegTempInt[x], RegTempInt[y]);
 
     return reg_result;
+}
+
+int emit_not_equals(AST *ast)
+{
+    trace("emit not equal");
+
+    int x = rec_emit_code(get_child(ast, 0));
+    int y = rec_emit_code(get_child(ast, 1));
+
+    check_int_registers();
+
+    int reg_result = new_int_reg();
+
+    emit("  seq %s, %s, %s\n\n", RegTempInt[reg_result], RegTempInt[x], RegTempInt[y]);
+    emit("  xori %s %s 1\n\n", RegTempInt[reg_result], RegTempInt[reg_result]);
+    return reg_result;
+}
+
+int emit_logical_or(AST*ast){
+    trace("emit logical or");
+
+    int x = rec_emit_code(get_child(ast, 0));
+    int y = rec_emit_code(get_child(ast, 1));
+
+    check_int_registers();
+
+    int reg_result = new_int_reg();
+
+    emit (" or %s, %s, %s\n\n", RegTempInt[reg_result], RegTempInt[x], RegTempInt[y]);
+
+    return reg_result;
+
+}
+
+int emit_logical_and(AST*ast){
+    trace("emit logical and");
+
+    int x = rec_emit_code(get_child(ast, 0));
+    int y = rec_emit_code(get_child(ast, 1));
+
+    check_int_registers();
+
+    int reg_result = new_int_reg();
+
+    emit (" and %s, %s, %s\n\n", RegTempInt[reg_result], RegTempInt[x], RegTempInt[y]);
+
+    return reg_result;
+
 }
 
 int emit_sub_assign(AST *ast)
@@ -917,7 +1045,9 @@ int rec_emit_code(AST *ast)
     case PLUS_NODE:
         emit_plus(ast);
         break;
-    // case READ_NODE:     emit_read(ast);      break;
+    case READ_NODE:
+        emit_read(ast);
+        break;
     case REAL_VAL_NODE:
         emit_real_val(ast);
         break;
@@ -935,7 +1065,12 @@ int rec_emit_code(AST *ast)
     case VAR_USE_NODE:
         emit_var_use(ast);
         break;
-    // case FUN_DECL_NODE: emit_fun_decl(ast);  break;
+    case FUN_USE_NODE:
+        emit_fun_use(ast);
+        break;
+    case ARGUMENT_LIST_NODE:
+        emit_argument(ast);
+        break;
     // case B2I_NODE:      emit_b2i(ast);       break;
     // case B2R_NODE:      emit_b2r(ast);       break;
     // case B2S_NODE:      emit_b2s(ast);       break;
@@ -972,9 +1107,15 @@ int rec_emit_code(AST *ast)
     case CHAR_VAL_NODE:
         emit_char_val(ast);
         break;
-        // case LOGICAL_OR_NODE: emit_logical_or(ast); break;
-        // case NOT_EQUALS_NODE: emit_not_equals(ast); break;
-        // case LOGICAL_AND_NODE: emit_logical_and(ast); break;
+    case LOGICAL_OR_NODE:
+        emit_logical_or(ast);
+        break;
+    case NOT_EQUALS_NODE:
+        emit_not_equals(ast);
+        break;
+    case LOGICAL_AND_NODE:
+        emit_logical_and(ast);
+        break;
     case SUB_ASSIGN_NODE:
         emit_sub_assign(ast);
         break;
@@ -1016,6 +1157,5 @@ void emit_code(AST *ast)
     float_regs_count = 2;
     printf(".text\n");
     printf(".globl main\n\n");
-    printf("main:\n");
     rec_emit_code(ast);
 }

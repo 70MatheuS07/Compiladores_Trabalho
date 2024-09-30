@@ -1,13 +1,36 @@
+
 int main() {
-    int x = 5;  // Suponha que x seja 5
-    int y = 3;  // Suponha que y seja 3
-    int z = 2;  // Suponha que z seja 2
+    // Inicializa o vetor de inteiros
+    int n = 7;
+    int arr[7] = {64, 34, 25, 12, 22, 11, 90};
+    
+    // Bubble Sort usando while
+    int i = 0;
+    while (i < (n-1)) {
+        int j = 0;
+        while (j < (n - i - 1)) {
+            if (arr[j] > arr[j+1]) {
+                // Troca os elementos se estiverem fora de ordem
+                int temp = arr[j];
+                arr[j] = arr[j+1];
+                arr[j+1] = temp;
+            }
+            j++;
+        }
+        i++;
+    }
 
-    // Cálculo 1
-    int result1 = x + z;  // result1 = x + z (equivalente ao 'add $t1, $t0, $t2' no MIPS)
+    int r;
+    // Imprime o vetor ordenado
+    printf("Vetor ordenado\n");
+    
+    i = 0;
+    while (i < n) {
+        r = arr[i];
+        printf(r);  
+        printf("\n");
+        i++;
+    }
 
-    // Cálculo 2
-    x = y + result1;  // x é sobrescrito com y + result1 (equivalente ao 'add $t0, $t9, $t1')
-    printf(x);
     return 0;
 }

@@ -6,12 +6,16 @@ int main ()
     printf(x);
     int novo= y + x;
     printf(novo);
+    printf("\n");
     y -= x;
     printf(y);
+    printf("\n");
     y /= x;
     printf(y);
+    printf("\n");
     y *= x;
     printf(y);
+    printf("\n");
     y %= x;
     printf(y);
 

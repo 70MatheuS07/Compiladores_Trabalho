@@ -6,9 +6,6 @@
 #include "tables.h"
 
 // Globais ------------------------------------------------
-int qtd_if = 0;
-int qtd_returne = 0;
-int qtd_while = 0;
 // --------------------------------------------------------
 
 // #define TRACE
@@ -39,6 +36,8 @@ int int_regs_count;
 int float_regs_count;
 
 int while_count;
+int if_count;
+int assign_array_left = 0;
 
 #define new_int_reg() \
     int_regs_count++
@@ -47,7 +46,10 @@ int while_count;
     float_regs_count++
 
 #define new_while() \
-    while_count;
+    while_count++;
+
+#define new_if() \
+    if_count++;
 
 int rec_emit_code(AST *ast);
 // ----------------------------------------------------------------------------
@@ -143,7 +145,7 @@ int emit_write(AST *ast)
             ;
             break;
         case FLOAT_TYPE:
-            emit("  move $f12 %s\n", RegTempInt[x]);
+            emit("  mov.s $f12 %s\n", RegTempFloat[x]);
             emit("  li $v0, %d\n", 2);
             ;
             break;
@@ -185,14 +187,10 @@ int emit_real_val(AST *ast)
     int x = new_float_reg();
 
     //  Obter o valor de ponto flutuante (imediato) da AST
-    float c = get_data(ast); // `c` agora é um valor float
-
-    // Interpretar o valor float como uma representação binária de 32 bits
-    int int_representation;
-    memcpy(&int_representation, &c, sizeof(int_representation));
+    int c = get_data(ast); // `c` agora é um valor float
 
     //  Carregar a representação binária do float como imediato em um registrador inteiro
-    emit("  li $t0, %d\n", int_representation);
+    emit("  li $t0, %d\n", c);
 
     //  Mover o valor do registrador inteiro para o registrador de ponto flutuante
     emit("  mtc1 $t0, %s\n", RegTempFloat[x]);
@@ -225,10 +223,55 @@ int emit_assign(AST *ast)
     trace("Emit assign");
     AST *rexpr = get_child(ast, 1);
     int x = rec_emit_code(rexpr);
-    int var_idx = get_data(get_child(ast, 0));
-    int pos_func = get_pos_fun(get_child(ast, 0));
+    AST *var = get_child(ast, 0);
+    int var_idx = get_data(var);
+    int pos_func = get_pos_fun(var);
     Type var_type = get_typevar_in_func(ft, var_idx, pos_func);
 
+    if (get_kind(var) == ARRAY_ACCESS_NODE)
+    {
+        // acessa a o indice
+        int acess = rec_emit_code(get_child(var, 1));
+        // acessa o array
+        AST *array = get_child(var, 0);
+        // acessa as posicoes
+        int var_idx_arr = get_data(array);
+        int pos_func_arr = get_pos_fun(array);
+        Type var_type_arr=get_typevar_in_func(ft, var_idx_arr,pos_func_arr );
+        switch (var_type_arr)
+        {
+        case INT_TYPE:
+
+            check_int_registers();
+            int y = new_int_reg();
+
+            emit("  la %s, var%d%d\n", RegTempInt[y], pos_func_arr, var_idx_arr); // Carrega o endereço base da variável
+
+            // Calculamos o deslocamento baseado no índice do array (multiplica por 4 para bytes)
+            emit("  sll %s, %s, 2\n", RegTempInt[acess], RegTempInt[acess]);
+
+            // Soma o deslocamento ao endereço base para obter o endereço do elemento do array
+            emit("  add %s, %s, %s\n", RegTempInt[y], RegTempInt[y], RegTempInt[acess]);
+
+            emit("  sw %s, 0(%s)\n", RegTempInt[x], RegTempInt[y]);
+            break;
+
+        case FLOAT_TYPE:
+
+            emit("  s.s %s, var%d%d\n\n", RegTempFloat[x], pos_func, var_idx);
+            break;
+
+        case CHAR_TYPE:
+
+            emit("  sb %s, var%d%d\n\n", RegTempInt[x], pos_func, var_idx);
+            break;
+
+        default:
+            fprintf(stderr, "Invalid type: %s!\n", pos_func, var_idx);
+            break;
+        }
+    }
+    else{
     switch (var_type)
     {
     case INT_TYPE:
@@ -250,8 +293,8 @@ int emit_assign(AST *ast)
         fprintf(stderr, "Invalid type: %s!\n", pos_func, var_idx);
         break;
     }
+    }
 }
-
 int emit_plus(AST *ast)
 {
     int x;
@@ -335,7 +378,9 @@ int emit_over(AST *ast)
     return x; // Retorna o registrador que contém o resultado
 }
 
-int emit_var_decl(AST*ast){
+int emit_var_decl(AST *ast)
+{
+
     return -1;
 }
 
@@ -358,13 +403,13 @@ int emit_var_use(AST *ast)
     case FLOAT_TYPE:
         check_float_registers();
         x = new_float_reg();
-        emit("  s.s %s, var%d%d\n", RegTempFloat[x], pos_func, var_idx);
+        emit("  l.s %s, var%d%d\n", RegTempFloat[x], pos_func, var_idx);
         break;
 
     case CHAR_TYPE:
         check_int_registers();
         x = new_int_reg();
-        emit("  sb %s, var%d%d\n", RegTempInt[x], pos_func, var_idx);
+        emit("  lb %s, var%d%d\n", RegTempInt[x], pos_func, var_idx);
         break;
 
     default:
@@ -448,8 +493,7 @@ int emit_array_decl(AST *ast)
 
     // Pega tamanho do vetor
     AST *child_init = get_child(ast, 1);
-    int size = get_node_size(get_child(ast, 0));
-
+    int size = get_node_size(ast);
     // Se o tamanho do array não foi definido
     if (size == 0)
     {
@@ -467,10 +511,11 @@ int emit_array_decl(AST *ast)
     int reg = 0;
 
     // Prepara o array para inicialização
+    int child_count = get_child_count(child_init);
     switch (var_type)
     {
     case INT_TYPE:
-        for (int i = 0; i < size; i++)
+        for (int i = 0; i < child_count; i++)
         {
             check_int_registers();
             reg = new_int_reg();
@@ -498,37 +543,75 @@ int emit_array_decl(AST *ast)
     }
 }
 
+int emit_array_acess(AST *ast)
+{
+    // SÓ FIZ PRA INTEIRO ATÈ AGORA
+    AST *var = get_child(ast, 0);
+    int acess = rec_emit_code(get_child(ast, 1));
+
+    // Obtém o índice da variável e a posição da função
+    int var_idx = get_data(get_child(ast, 0));
+    int pos_func = get_pos_fun(get_child(ast, 0));
+
+    check_int_registers();
+    int x = new_int_reg();
+
+    // Carregamos a base do array (posição var_pos_func_var_idx) em um registrador base
+    emit("  la %s, var%d%d\n", RegTempInt[x], pos_func, var_idx); // Carrega o endereço base da variável
+
+    // Calculamos o deslocamento baseado no índice do array (multiplica por 4 para bytes)
+    emit("  sll %s, %s, 2\n", RegTempInt[acess], RegTempInt[acess]);
+
+    // Soma o deslocamento ao endereço base para obter o endereço do elemento do array
+    emit("  add %s, %s, %s\n", RegTempInt[x], RegTempInt[x], RegTempInt[acess]);
+
+    // Carrega o valor do array para o registrador
+    emit("  lw %s, 0(%s)\n", RegTempInt[x], RegTempInt[x]);
+
+    return x;
+}
+
 int emit_if(AST *ast)
 {
     trace("emit if");
-    qtd_if++;
+    int cond_label = new_if();
+    int end_label = new_if();
 
-    rec_emit_code(get_child(ast, 0));
+    int cond_reg = rec_emit_code(get_child(ast, 0));
+    emit("  beq %s, $zero, else%d\n", RegTempInt[cond_reg], cond_label);
+
+    rec_emit_code(get_child(ast, 1));
+
+    emit("  j endElse%d\n", end_label);
+
+    emit("  else%d:\n", cond_label);
+    emit("  endElse%d:\n", end_label);
 }
 
 int emit_repeat(AST *ast)
 {
+
     int cond_label = new_while(); // Label para verificar a condição
     int end_label = new_while();  // Label para o fim do loop (quando a condição for falsa)
 
     // Emitir o label para o início da verificação da condição
-    emit("L%d:\n", cond_label);
+    emit("  loop%d:\n", cond_label);
 
     // Emitir código para a condição do while
-    int cond_reg = rec_emit_code(get_child(ast, 0));
+    int cond_reg = rec_emit_code(get_child(ast, 1));
 
     // Se a condição for falsa (igual a zero), salte para o fim do loop
-    emit("  beq %s, $zero, L%d\n", RegTempInt[cond_reg], end_label);
+    emit("  beq %s, $zero, endLoop%d\n", RegTempInt[cond_reg], end_label);
 
     // Emitir código para o corpo do loop (segundo filho da AST)
-    rec_emit_code(get_child(ast, 1));
+    rec_emit_code(get_child(ast, 0));
 
     // Saltar de volta para verificar a condição novamente
-    emit("  j L%d\n", cond_label);
+    emit("  j loop%d\n", cond_label);
 
     // Label de fim do loop
-    emit("L%d:\n", end_label);
-
+    emit("  endLoop%d:\n", end_label);
+    printf("\n");
     return -1; // Retorna um vaq
 }
 
@@ -543,8 +626,8 @@ int emit_greather_than(AST *ast)
 
     int reg_result = new_int_reg();
 
-    emit("  sle %s, %s, %s", RegTempInt[reg_result], RegTempInt[y], RegTempInt[x]);
-
+    emit("  sle %s, %s, %s\n", RegTempInt[reg_result], RegTempInt[x], RegTempInt[y]);
+    emit("  xori %s %s 1\n\n", RegTempInt[reg_result], RegTempInt[reg_result]);
     return reg_result;
 }
 
@@ -559,14 +642,14 @@ int emit_less_than(AST *ast)
 
     int reg_result = new_int_reg();
 
-    emit("  sge %s, %s, %s", RegTempInt[reg_result], RegTempInt[y], RegTempInt[x]);
-
+    emit("  sge %s, %s, %s\n", RegTempInt[reg_result], RegTempInt[x], RegTempInt[y]);
+    emit("  xori %s %s 1\n\n", RegTempInt[reg_result], RegTempInt[reg_result]);
     return reg_result;
 }
 
 int emit_greather_than_or_equal(AST *ast)
 {
-    trace("emit less_than");
+    trace("emit greather than or equal");
 
     int x = rec_emit_code(get_child(ast, 0));
     int y = rec_emit_code(get_child(ast, 1));
@@ -575,14 +658,14 @@ int emit_greather_than_or_equal(AST *ast)
 
     int reg_result = new_int_reg();
 
-    emit("  sge %s, %s, %s", RegTempInt[reg_result], RegTempInt[x], RegTempInt[y]);
+    emit("  sge %s, %s, %s\n\n", RegTempInt[reg_result], RegTempInt[x], RegTempInt[y]);
 
     return reg_result;
 }
 
 int emit_less_than_or_equal(AST *ast)
 {
-    trace("emit greater_than");
+    trace("emit less than or equal");
 
     int x = rec_emit_code(get_child(ast, 0));
     int y = rec_emit_code(get_child(ast, 1));
@@ -591,13 +674,14 @@ int emit_less_than_or_equal(AST *ast)
 
     int reg_result = new_int_reg();
 
-    emit(" sle %s, %s, %s", RegTempInt[reg_result], RegTempInt[x], RegTempInt[y]);
+    emit(" sle %s, %s, %s\n\n", RegTempInt[reg_result], RegTempInt[x], RegTempInt[y]);
 
     return reg_result;
 }
 
-int emit_eq(AST*ast){
-    trace("emit greater_than");
+int emit_eq(AST *ast)
+{
+    trace("emit equal");
 
     int x = rec_emit_code(get_child(ast, 0));
     int y = rec_emit_code(get_child(ast, 1));
@@ -606,7 +690,81 @@ int emit_eq(AST*ast){
 
     int reg_result = new_int_reg();
 
-    emit(" seq %s, %s, %s", RegTempInt[reg_result], RegTempInt[x], RegTempInt[y]);
+    emit(" seq %s, %s, %s\n\n", RegTempInt[reg_result], RegTempInt[x], RegTempInt[y]);
+
+    return reg_result;
+}
+
+int emit_sub_assign(AST *ast)
+{
+    trace("emit sub_assign");
+
+    int x = rec_emit_code(get_child(ast, 0));
+    int y = rec_emit_code(get_child(ast, 1));
+
+    check_int_registers();
+
+    int reg_result = new_int_reg();
+
+    emit("  sub %s, %s, %s\n", RegTempInt[reg_result], RegTempInt[x], RegTempInt[y]);
+
+    emit("  sw %s, var%d%d\n\n", RegTempInt[reg_result], get_pos_fun(get_child(ast, 0)), get_data(get_child(ast, 0)));
+
+    return reg_result;
+}
+
+int emit_div_assign(AST *ast)
+{
+    trace("emit div_assign");
+
+    int x = rec_emit_code(get_child(ast, 0));
+    int y = rec_emit_code(get_child(ast, 1));
+
+    check_int_registers();
+
+    int reg_result = new_int_reg();
+
+    emit("  div %s, %s\n", RegTempInt[x], RegTempInt[y]);
+    emit("  mflo %s\n", RegTempInt[reg_result]);
+
+    emit("  sw %s, var%d%d\n\n", RegTempInt[reg_result], get_pos_fun(get_child(ast, 0)), get_data(get_child(ast, 0)));
+
+    return reg_result;
+}
+
+int emit_mul_assign(AST *ast)
+{
+    trace("emit mul_assign");
+
+    int x = rec_emit_code(get_child(ast, 0));
+    int y = rec_emit_code(get_child(ast, 1));
+
+    check_int_registers();
+
+    int reg_result = new_int_reg();
+
+    emit("  mul %s, %s, %s\n", RegTempInt[reg_result], RegTempInt[x], RegTempInt[y]);
+
+    emit("  sw %s, var%d%d\n\n", RegTempInt[reg_result], get_pos_fun(get_child(ast, 0)), get_data(get_child(ast, 0)));
+
+    return reg_result;
+}
+
+int emit_mod_assign(AST *ast)
+{
+    trace("emit mod_assign");
+
+    int x = rec_emit_code(get_child(ast, 0));
+    int y = rec_emit_code(get_child(ast, 1));
+
+    check_int_registers();
+
+    int reg_result = new_int_reg();
+
+    emit("  div %s, %s\n", RegTempInt[x], RegTempInt[y]);
+    emit("  mfhi %s\n", RegTempInt[reg_result]);
+
+    emit("  sw %s, var%d%d\n\n", RegTempInt[reg_result], get_pos_fun(get_child(ast, 0)), get_data(get_child(ast, 0)));
 
     return reg_result;
 }
@@ -660,7 +818,7 @@ void dump_var_table()
             {
                 if (get_size(vTable, j) > 0)
                 {
-                    printf("    var%d%d: .space %d\n", i, j, get_size(vTable, j));
+                    printf("    var%d%d: .space %d\n", i, j, get_size(vTable, j) * 4);
                 }
                 else
                 {
@@ -741,7 +899,9 @@ int rec_emit_code(AST *ast)
         emit_assign(ast);
         break;
         // case ASSIGN_NODE:   emit_assign(ast);    break;
-         case EQUALS_NODE:   emit_eq(ast);        break;
+    case EQUALS_NODE:
+        emit_eq(ast);
+        break;
         // case BLOCK_NODE:    emit_block(ast);     break;
         // case BOOL_VAL_NODE: emit_bool_val(ast);  break;
     case INT_VAL_NODE:
@@ -761,12 +921,16 @@ int rec_emit_code(AST *ast)
     case REAL_VAL_NODE:
         emit_real_val(ast);
         break;
-        // case REPEAT_NODE:   emit_repeat(ast);    break;
+    case REPEAT_NODE:
+        emit_repeat(ast);
+        break;
 
     case TIMES_NODE:
         emit_times(ast);
         break;
-     case VAR_DECL_NODE: emit_var_decl(ast);  break;
+    case VAR_DECL_NODE:
+        emit_var_decl(ast);
+        break;
     // case VAR_LIST_NODE: emit_var_list(ast);  break;
     case VAR_USE_NODE:
         emit_var_use(ast);
@@ -790,8 +954,9 @@ int rec_emit_code(AST *ast)
     case RETURN_NODE:
         emit_return(ast);
         break;
-        // case ARRAY_DECL_NODE: emit_array_decl(ast); break;
-        // case ARRAY_ACCESS_NODE: emit_array_acess(ast); break;
+    case ARRAY_ACCESS_NODE:
+        emit_array_acess(ast);
+        break;
     case GREATER_THAN_NODE:
         emit_greather_than(ast);
         break;
@@ -810,10 +975,18 @@ int rec_emit_code(AST *ast)
         // case LOGICAL_OR_NODE: emit_logical_or(ast); break;
         // case NOT_EQUALS_NODE: emit_not_equals(ast); break;
         // case LOGICAL_AND_NODE: emit_logical_and(ast); break;
-        // case SUB_ASSIGN_NODE: emit_sub_assign(ast); break;
-        // case DIV_ASSIGN_NODE: emit_div_assign(ast); break;
-        // case MUL_ASSIGN_NODE: emit_mul_assign(ast); break;
-        // case MOD_ASSIGN_NODE: emit_mod_assign(ast); break;
+    case SUB_ASSIGN_NODE:
+        emit_sub_assign(ast);
+        break;
+    case DIV_ASSIGN_NODE:
+        emit_div_assign(ast);
+        break;
+    case MUL_ASSIGN_NODE:
+        emit_mul_assign(ast);
+        break;
+    case MOD_ASSIGN_NODE:
+        emit_mod_assign(ast);
+        break;
         // case C2I_NODE: emit_c2i(ast); break;
 
     case ARRAY_DECL_NODE:
@@ -837,8 +1010,8 @@ void emit_code(AST *ast)
     float_regs_count = 0;
     while_count = 0;
     printf(".data\n");
-    dump_str_table();
     dump_var_table();
+    dump_str_table();
     int_regs_count = 0;
     float_regs_count = 2;
     printf(".text\n");

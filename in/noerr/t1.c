@@ -1,11 +1,11 @@
 int main ()
 {
     int x=100, i=10, o=0;
-    float t=1.99;
+    float t=0.5;
     int y = 2;
     char n = 'a';
     x++;
-    printf(x);
+    printf(t);
     printf("\n");
     x--;
     printf(x);

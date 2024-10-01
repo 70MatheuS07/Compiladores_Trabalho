@@ -614,7 +614,6 @@ int emit_array_decl(AST *ast)
         }
         break;
 
-
     case CHAR_TYPE:
         for (int i = 0; i < child_count; i++)
         {
@@ -632,7 +631,6 @@ int emit_array_decl(AST *ast)
     }
 }
 
-
 int emit_array_acess(AST *ast)
 {
     // SÓ FIZ PRA INTEIRO ATÈ AGORA
@@ -643,20 +641,70 @@ int emit_array_acess(AST *ast)
     int var_idx = get_data(get_child(ast, 0));
     int pos_func = get_pos_fun(get_child(ast, 0));
 
-    check_int_registers();
-    int x = new_int_reg();
+    // Obtém o tipo da variável
+    Type var_type = get_typevar_in_func(ft, var_idx, pos_func);
 
-    // Carregamos a base do array (posição var_pos_func_var_idx) em um registrador base
-    emit("  la %s, var%d%d\n", RegTempInt[x], pos_func, var_idx); // Carrega o endereço base da variável
+    int x;
+    switch (var_type)
+    {
+    case INT_TYPE:
+        check_int_registers();
 
-    // Calculamos o deslocamento baseado no índice do array (multiplica por 4 para bytes)
-    emit("  sll %s, %s, 2\n", RegTempInt[acess], RegTempInt[acess]);
+        x = new_int_reg();
 
-    // Soma o deslocamento ao endereço base para obter o endereço do elemento do array
-    emit("  add %s, %s, %s\n", RegTempInt[x], RegTempInt[x], RegTempInt[acess]);
+        // Carregamos a base do array (posição var_pos_func_var_idx) em um registrador base
+        emit("  la %s, var%d%d\n", RegTempInt[x], pos_func, var_idx); // Carrega o endereço base da variável
 
-    // Carrega o valor do array para o registrador
-    emit("  lw %s, 0(%s)\n", RegTempInt[x], RegTempInt[x]);
+        // Calculamos o deslocamento baseado no índice do array (multiplica por 4 para bytes)
+        emit("  sll %s, %s, 2\n", RegTempInt[acess], RegTempInt[acess]);
+
+        // Soma o deslocamento ao endereço base para obter o endereço do elemento do array
+        emit("  add %s, %s, %s\n", RegTempInt[x], RegTempInt[x], RegTempInt[acess]);
+
+        // Carrega o valor do array para o registrador
+        emit("  lw %s, 0(%s)\n", RegTempInt[x], RegTempInt[x]);
+        break;
+
+    case FLOAT_TYPE:
+
+        check_int_registers();
+
+        int y = new_int_reg();
+
+        check_float_registers();
+
+        x = new_float_reg();
+
+        // Carregamos a base do array (posição var_pos_func_var_idx) em um registrador base
+        emit("  la %s, var%d%d\n", RegTempInt[y], pos_func, var_idx); // Carrega o endereço base da variável
+        // Calculamos o deslocamento baseado no índice do array (multiplica por 4 para bytes)
+        emit("  sll %s, %s, 2\n", RegTempInt[acess], RegTempInt[acess]);
+        // Soma o deslocamento ao endereço base para obter o endereço do elemento do array
+        emit("  add %s, %s, %s\n", RegTempInt[y], RegTempInt[y], RegTempInt[acess]);
+
+        emit("  l.s %s, 0(%s)\n", RegTempFloat[x], RegTempInt[y]);
+        break;
+
+    case CHAR_TYPE:
+
+        check_int_registers();
+
+        x = new_int_reg();
+
+        // Carregamos a base do array (posição var_pos_func_var_idx) em um registrador base
+        emit("  la %s, var%d%d\n", RegTempInt[x], pos_func, var_idx); // Carrega o endereço base da variável
+
+        // Soma o deslocamento ao endereço base para obter o endereço do elemento do array
+        emit("  add %s, %s, %s\n", RegTempInt[x], RegTempInt[x], RegTempInt[acess]);
+
+        // Carrega o valor do array para o registrador
+        emit("  lb %s, 0(%s)\n", RegTempInt[x], RegTempInt[x]);
+        break;
+    case NO_TYPE:
+    default:
+        fprintf(stderr, "Invalid type: %s!\n", get_text(var_type));
+        exit(EXIT_FAILURE);
+    }
 
     return x;
 }
@@ -801,7 +849,8 @@ int emit_not_equals(AST *ast)
     return reg_result;
 }
 
-int emit_logical_or(AST*ast){
+int emit_logical_or(AST *ast)
+{
     trace("emit logical or");
 
     int x = rec_emit_code(get_child(ast, 0));
@@ -811,13 +860,13 @@ int emit_logical_or(AST*ast){
 
     int reg_result = new_int_reg();
 
-    emit (" or %s, %s, %s\n\n", RegTempInt[reg_result], RegTempInt[x], RegTempInt[y]);
+    emit(" or %s, %s, %s\n\n", RegTempInt[reg_result], RegTempInt[x], RegTempInt[y]);
 
     return reg_result;
-
 }
 
-int emit_logical_and(AST*ast){
+int emit_logical_and(AST *ast)
+{
     trace("emit logical and");
 
     int x = rec_emit_code(get_child(ast, 0));
@@ -827,10 +876,9 @@ int emit_logical_and(AST*ast){
 
     int reg_result = new_int_reg();
 
-    emit (" and %s, %s, %s\n\n", RegTempInt[reg_result], RegTempInt[x], RegTempInt[y]);
+    emit(" and %s, %s, %s\n\n", RegTempInt[reg_result], RegTempInt[x], RegTempInt[y]);
 
     return reg_result;
-
 }
 
 int emit_sub_assign(AST *ast)

@@ -2,8 +2,9 @@ int main ()
 {
     int x = 3;
     int y = 3;
-    char nome[40];
+    char nome[40] = {'a', 'b', 'c', 'd'};
     int vet[4] = {0, 2, 3, 4};
+    float vet_float[4] = {0.0, 2.0, 3.0, 4.0};
     if(x > y) printf(1);
     printf("\n");
     if(x < y) printf(2);

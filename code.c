@@ -605,14 +605,23 @@ int emit_array_decl(AST *ast)
         break;
 
     case FLOAT_TYPE:
-        for (int i = 0; i < size; i++)
+        for (int i = 0; i < child_count; i++)
         {
+            int x = emit_real_val(get_child(child_init, i));
+
+            // Armazena o valor no vetor
+            printf("    s.s %s, var%d%d+%d\n\n", RegTempFloat[x], pos_func, var_idx, i * 4);
         }
         break;
 
+
     case CHAR_TYPE:
-        for (int i = 0; i < size; i++)
+        for (int i = 0; i < child_count; i++)
         {
+            check_int_registers();
+            reg = new_int_reg();
+            printf("    li %s, '%c'\n", RegTempInt[reg], get_data(get_child(child_init, i)));
+            printf("    sb %s, var%d%d+%d\n\n", RegTempInt[reg], pos_func, var_idx, i);
         }
         break;
 
@@ -622,6 +631,7 @@ int emit_array_decl(AST *ast)
         exit(EXIT_FAILURE);
     }
 }
+
 
 int emit_array_acess(AST *ast)
 {
@@ -955,7 +965,14 @@ void dump_var_table()
             }
             if (tipo == FLOAT_TYPE)
             {
-                printf("    var%d%d: .float 0.0\n", i, j);
+                if (get_size(vTable, j) > 0)
+                {
+                    printf("    var%d%d: .space %d\n", i, j, get_size(vTable, j) * 4);
+                }
+                else
+                {
+                    printf("    var%d%d: .float '0'\n", i, j);
+                }
             }
             if (tipo == CHAR_TYPE)
             {
